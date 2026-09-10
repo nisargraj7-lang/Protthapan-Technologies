@@ -424,14 +424,20 @@ async function addMember(){
   const errEl = document.getElementById('mem-error');
   errEl.textContent = '';
   if(!name){ errEl.textContent = 'Name is required.'; return; }
-  if(!db){ errEl.textContent = 'Firebase not configured yet.'; return; }
+  if(!db){ console.log('[addMember] db is not initialized \u2014 Firebase config missing or failed to load'); errEl.textContent = 'Firebase not configured yet.'; return; }
+  const payload = { name, role, email, createdAt: Date.now() };
+  console.log('[addMember] attempting to save payload:', payload);
   try{
-    await db.collection('members').add({ name, role, email, createdAt: Date.now() });
+    const docRef = await db.collection('members').add(payload);
+    console.log('[addMember] SUCCESS \u2014 saved with doc id:', docRef.id);
     document.getElementById('mem-name').value = '';
     document.getElementById('mem-role').value = '';
     document.getElementById('mem-email').value = '';
     showToast('Member added');
-  }catch(e){ errEl.textContent = 'Could not save. Check your Firebase setup.'; }
+  }catch(e){
+    console.log('[addMember] FAILED \u2014 error:', e);
+    errEl.textContent = 'Could not save. Check your Firebase setup.';
+  }
 }
 async function removeMember(id){
   if(!confirm('Remove this member? Their past task updates will stay in the feed.')) return;
@@ -480,10 +486,13 @@ function init(){
   document.getElementById('inv-date').value = todayStr();
 
   if(!firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY"){
+    console.log('[init] firebaseConfig.apiKey missing or placeholder \u2014 showing setup banner');
     document.getElementById('setup-banner').style.display = 'block';
   } else {
+    console.log('[init] initializing Firebase with config:', firebaseConfig);
     firebase.initializeApp(firebaseConfig);
     db = firebase.firestore();
+    console.log('[init] Firestore db object created:', db);
 
     db.collection('members').onSnapshot(snap => {
       members = snap.docs.map(d => ({ id: d.id, ...d.data() }));
