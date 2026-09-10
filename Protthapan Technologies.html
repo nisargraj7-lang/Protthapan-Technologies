@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Protthapan Technologies</title>
+<style>
+  :root{
+    --bg: #F6F5F1; --panel: #FFFFFF; --ink: #1E2321; --ink-soft: #5B6360;
+    --line: #E1DED4; --forest: #29513F; --forest-dark: #1D3A2D;
+    --gold: #B98D3E; --danger: #A6432F; --radius: 3px;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{ background: var(--bg); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5; }
+  .app{ display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+  .sidebar{ background: var(--forest-dark); color: #EFEDE4; padding: 28px 0; display: flex; flex-direction: column; }
+  .brand{ font-family: Georgia, "Times New Roman", serif; font-size: 20px; padding: 0 24px 24px 24px; border-bottom: 1px solid rgba(255,255,255,0.12); margin-bottom: 12px; }
+  .brand span{ color: var(--gold); }
+  .nav-item{ padding: 12px 24px; cursor: pointer; color: #C9CFC8; border-left: 3px solid transparent; font-size: 14px; }
+  .nav-item:hover{ color: #fff; background: rgba(255,255,255,0.04); }
+  .nav-item.active{ color: #fff; border-left-color: var(--gold); background: rgba(255,255,255,0.06); font-weight: 600; }
+  .sidebar-foot{ margin-top: auto; padding: 16px 24px 0 24px; font-size: 12px; color: #8B9490; border-top: 1px solid rgba(255,255,255,0.1); }
+  .main{ padding: 36px 44px; max-width: 980px; }
+  h1{ font-family: Georgia, "Times New Roman", serif; font-weight: 500; font-size: 26px; margin: 0 0 4px 0; }
+  .subtitle{ color: var(--ink-soft); margin: 0 0 28px 0; font-size: 14px; }
+  .panel{ background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 24px; margin-bottom: 20px; }
+  .panel h2{ font-size: 15px; margin: 0 0 16px 0; font-weight: 600; }
+  label{ display:block; font-size: 12.5px; color: var(--ink-soft); margin-bottom: 5px; margin-top: 14px; }
+  label:first-of-type{ margin-top: 0; }
+  input[type=text], input[type=email], input[type=date], select, textarea{ width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: var(--radius); font-size: 14px; font-family: inherit; background: #FDFCFA; color: var(--ink); }
+  textarea{ min-height: 70px; resize: vertical; }
+  input:focus, select:focus, textarea:focus{ outline: 2px solid var(--forest); outline-offset: 0; border-color: var(--forest); }
+  .btn{ display: inline-block; margin-top: 18px; background: var(--forest); color: #fff; border: none; padding: 10px 20px; border-radius: var(--radius); font-size: 14px; font-weight: 600; cursor: pointer; }
+  .btn:hover{ background: var(--forest-dark); }
+  .btn.danger-link{ background: none; border: none; color: var(--danger); font-size: 12.5px; padding: 0; margin: 0; cursor: pointer; text-decoration: underline; }
+  table{ width: 100%; border-collapse: collapse; }
+  th{ text-align: left; font-size: 12px; color: var(--ink-soft); font-weight: 600; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  td{ padding: 10px 10px; border-bottom: 1px solid var(--line); font-size: 14px; vertical-align: top; }
+  tr:last-child td{ border-bottom: none; }
+  .member-tag{ display: inline-block; background: #EEF2EE; color: var(--forest-dark); padding: 2px 9px; border-radius: 20px; font-size: 12.5px; font-weight: 600; }
+  .status-pill{ display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .status-inprogress{ background: #FBF1DE; color: #8A6410; }
+  .status-done{ background: #E5F0E8; color: #29513F; }
+  .status-blocked{ background: #F7E6E2; color: var(--danger); }
+  .empty{ color: var(--ink-soft); font-size: 14px; padding: 18px 0; text-align: center; }
+  .row-2{ display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .row-3{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .task-date{ font-weight: 600; white-space: nowrap; }
+  .toast{ position: fixed; bottom: 24px; right: 24px; background: var(--forest-dark); color: #fff; padding: 10px 18px; border-radius: var(--radius); font-size: 13.5px; opacity: 0; transform: translateY(8px); transition: opacity 0.2s ease, transform 0.2s ease; pointer-events: none; }
+  .toast.show{ opacity: 1; transform: translateY(0); }
+  .filter-bar{ display:flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-bar select{ width: auto; }
+  .setup-banner{ background:#FBF1DE; border:1px solid #E9CFA0; color:#6B4E12; padding:14px 18px; border-radius: var(--radius); margin-bottom:20px; font-size:13.5px; }
+  .setup-banner code{ background:#fff; padding:1px 5px; border-radius:2px; }
+  @media (max-width: 720px){
+    .app{ grid-template-columns: 1fr; }
+    .sidebar{ flex-direction: row; overflow-x: auto; padding: 12px; }
+    .brand{ display:none; }
+    .nav-item{ border-left:none; border-bottom: 3px solid transparent; white-space: nowrap; padding: 10px 16px;}
+    .nav-item.active{ border-left:none; border-bottom-color: var(--gold); }
+    .main{ padding: 22px 18px; }
+    .row-2, .row-3{ grid-template-columns: 1fr; }
+    .sidebar-foot{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="brand">Protthapan<span> Technologies</span></div>
+    <div class="nav-item active" data-view="log">Daily Log</div>
+    <div class="nav-item" data-view="inventory">Inventory</div>
+    <div class="nav-item" data-view="report">Project Report</div>
+    <div class="nav-item" data-view="upcoming">Upcoming Projects</div>
+    <div class="nav-item" data-view="feed">Team Activity</div>
+    <div class="nav-item" data-view="members">Team Members</div>
+    <div class="sidebar-foot">Live-synced across everyone using this site.</div>
+  </div>
+
+  <div class="main">
+    <div id="setup-banner" class="setup-banner" style="display:none;">
+      ⚠️ Firebase isn't configured yet. Open this file, find <code>firebaseConfig</code> near the bottom, and paste in your own Firebase project keys (free — see setup steps).
+    </div>
+
+    <div id="view-log">
+      <h1>Daily Log</h1>
+      <p class="subtitle">Post what you worked on today, or what you're starting.</p>
+      <div class="panel">
+        <h2>New task update</h2>
+        <label for="log-member">Team member</label>
+        <select id="log-member"></select>
+        <div class="row-2">
+          <div><label for="log-date">Date</label><input type="date" id="log-date"></div>
+          <div><label for="log-status">Status</label>
+            <select id="log-status">
+              <option value="inprogress">In progress</option>
+              <option value="done">Completed</option>
+              <option value="blocked">Blocked</option>
+            </select>
+          </div>
+        </div>
+        <label for="log-task">Task / work description</label>
+        <textarea id="log-task" placeholder="e.g. Reviewed client contract drafts, fixed login bug on staging..."></textarea>
+        <button class="btn" id="log-submit">Post update</button>
+        <span id="log-error" style="color:var(--danger); font-size:13px; margin-left:12px;"></span>
+      </div>
+      <div class="panel">
+        <h2>My recent updates</h2>
+        <div id="my-updates"><div class="empty">Loading…</div></div>
+      </div>
+    </div>
+
+    <div id="view-feed" style="display:none;">
+      <h1>Team Activity</h1>
+      <p class="subtitle">Everyone's task updates, most recent first — updates live.</p>
+      <div class="filter-bar">
+        <select id="feed-filter-member"><option value="">All members</option></select>
+        <select id="feed-filter-status">
+          <option value="">All statuses</option>
+          <option value="inprogress">In progress</option>
+          <option value="done">Completed</option>
+          <option value="blocked">Blocked</option>
+        </select>
+      </div>
+      <div class="panel"><div id="feed-list"><div class="empty">Loading…</div></div></div>
+    </div>
+
+    <div id="view-inventory" style="display:none;">
+      <h1>Inventory</h1>
+      <p class="subtitle">Products or supplies the team has bought, with cost.</p>
+      <div class="panel">
+        <h2>Add an item</h2>
+        <div class="row-3">
+          <div><label for="inv-item">Item name</label><input type="text" id="inv-item" placeholder="e.g. Wireless mouse"></div>
+          <div><label for="inv-price">Price</label><input type="text" id="inv-price" placeholder="e.g. 1200"></div>
+          <div><label for="inv-buyer">Bought by</label><select id="inv-buyer"></select></div>
+        </div>
+        <label for="inv-date">Date purchased</label>
+        <input type="date" id="inv-date">
+        <label for="inv-notes">Notes (optional)</label>
+        <textarea id="inv-notes" placeholder="Vendor, purpose, invoice number..."></textarea>
+        <button class="btn" id="inv-submit">Add item</button>
+        <span id="inv-error" style="color:var(--danger); font-size:13px; margin-left:12px;"></span>
+      </div>
+      <div class="panel">
+        <h2>All items <span id="inv-total" style="color:var(--ink-soft); font-weight:400;"></span></h2>
+        <div id="inventory-list"><div class="empty">Loading…</div></div>
+      </div>
+    </div>
+
+    <div id="view-report" style="display:none;">
+      <h1>Project Report</h1>
+      <p class="subtitle">Ongoing projects the team is currently working on.</p>
+      <div class="panel">
+        <h2>Add an ongoing project</h2>
+        <div class="row-2">
+          <div><label for="proj-name">Project name</label><input type="text" id="proj-name" placeholder="e.g. Website redesign"></div>
+          <div><label for="proj-owner">Owner</label><select id="proj-owner"></select></div>
+        </div>
+        <label for="proj-desc">Progress / description</label>
+        <textarea id="proj-desc" placeholder="What's the current status, what's left..."></textarea>
+        <button class="btn" id="proj-submit">Add project</button>
+        <span id="proj-error" style="color:var(--danger); font-size:13px; margin-left:12px;"></span>
+      </div>
+      <div class="panel">
+        <h2>Ongoing projects</h2>
+        <div id="report-list"><div class="empty">Loading…</div></div>
+      </div>
+    </div>
+
+    <div id="view-upcoming" style="display:none;">
+      <h1>Upcoming Projects</h1>
+      <p class="subtitle">Projects planned but not started yet — a pending list.</p>
+      <div class="panel">
+        <h2>Add a planned project</h2>
+        <div class="row-2">
+          <div><label for="up-name">Project name</label><input type="text" id="up-name" placeholder="e.g. Mobile app v2"></div>
+          <div><label for="up-owner">Likely owner (optional)</label><select id="up-owner"><option value="">Unassigned</option></select></div>
+        </div>
+        <label for="up-desc">Notes</label>
+        <textarea id="up-desc" placeholder="Scope, priority, target start date..."></textarea>
+        <button class="btn" id="up-submit">Add to pending list</button>
+        <span id="up-error" style="color:var(--danger); font-size:13px; margin-left:12px;"></span>
+      </div>
+      <div class="panel">
+        <h2>Pending projects</h2>
+        <div id="upcoming-list"><div class="empty">Loading…</div></div>
+      </div>
+    </div>
+
+    <div id="view-members" style="display:none;">
+      <h1>Team Members</h1>
+      <p class="subtitle">Add everyone on your team so they can log their own updates.</p>
+      <div class="panel">
+        <h2>Add a member</h2>
+        <div class="row-3">
+          <div><label for="mem-name">Full name</label><input type="text" id="mem-name" placeholder="Jane Doe"></div>
+          <div><label for="mem-role">Role / department</label><input type="text" id="mem-role" placeholder="Design, Sales, Dev..."></div>
+          <div><label for="mem-email">Email (optional)</label><input type="email" id="mem-email" placeholder="jane@company.com"></div>
+        </div>
+        <button class="btn" id="mem-submit">Add member</button>
+        <span id="mem-error" style="color:var(--danger); font-size:13px; margin-left:12px;"></span>
+      </div>
+      <div class="panel"><h2>All members</h2><div id="member-list"><div class="empty">Loading…</div></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase (free tier) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+// ======= 1. PASTE YOUR OWN FIREBASE CONFIG HERE (see setup guide) =======
+const firebaseConfig = {
+  apiKey: "AIzaSyA_7JPQ8igZXVICTodL0Jv42REhEvuuPTk",
+  authDomain: "my-team-workspace.firebaseapp.com",
+  projectId: "my-team-workspace",
+  storageBucket: "my-team-workspace.firebasestorage.app",
+  messagingSenderId: "78512213378",
+  appId: "1:78512213378:web:4191704a28bdba291e539b"
+};
+// ==========================================================================
+
+let db = null;
+let members = [];
+let tasks = [];
+let inventory = [];
+let projects = [];
+const STATUS_LABEL = { inprogress: "In progress", done: "Completed", blocked: "Blocked" };
+const STATUS_CLASS = { inprogress: "status-inprogress", done: "status-done", blocked: "status-blocked" };
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), 2200);
+}
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function escapeHtml(str){ const div = document.createElement('div'); div.textContent = str == null ? '' : str; return div.innerHTML; }
+function formatDate(dstr){
+  const d = new Date(dstr + 'T00:00:00');
+  if(isNaN(d)) return dstr;
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function renderMemberSelects(){
+  const plainSelects = [document.getElementById('log-member'), document.getElementById('inv-buyer'), document.getElementById('proj-owner')];
+  const filterSelects = [document.getElementById('feed-filter-member')];
+  const optionalSelects = [document.getElementById('up-owner')];
+
+  plainSelects.forEach(sel => {
+    const keepValue = sel.value;
+    sel.innerHTML = members.length === 0 ? '<option value="">Add a team member first</option>' : '';
+    members.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id; opt.textContent = m.name;
+      sel.appendChild(opt);
+    });
+    sel.value = keepValue || '';
+  });
+  filterSelects.forEach(sel => {
+    const keepValue = sel.value;
+    sel.innerHTML = '<option value="">All members</option>';
+    members.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id; opt.textContent = m.name;
+      sel.appendChild(opt);
+    });
+    sel.value = keepValue || '';
+  });
+  optionalSelects.forEach(sel => {
+    const keepValue = sel.value;
+    sel.innerHTML = '<option value="">Unassigned</option>';
+    members.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id; opt.textContent = m.name;
+      sel.appendChild(opt);
+    });
+    sel.value = keepValue || '';
+  });
+}
+function renderMemberList(){
+  const el = document.getElementById('member-list');
+  if(members.length === 0){ el.innerHTML = '<div class="empty">No team members yet. Add the first one above.</div>'; return; }
+  let html = '<table><tr><th>Name</th><th>Role</th><th>Email</th><th></th></tr>';
+  members.forEach(m => {
+    html += `<tr><td><strong>${escapeHtml(m.name)}</strong></td><td>${escapeHtml(m.role||'—')}</td><td>${escapeHtml(m.email||'—')}</td>
+    <td><button class="danger-link" onclick="removeMember('${m.id}')">Remove</button></td></tr>`;
+  });
+  el.innerHTML = html + '</table>';
+}
+function renderTaskTable(list, showMember){
+  let html = '<table><tr><th>Date</th>' + (showMember?'<th>Member</th>':'') + '<th>Task</th><th>Status</th></tr>';
+  list.forEach(t => {
+    html += '<tr>';
+    html += `<td class="task-date">${formatDate(t.date)}</td>`;
+    if(showMember) html += `<td><span class="member-tag">${escapeHtml(t.memberName)}</span></td>`;
+    html += `<td>${escapeHtml(t.task)}</td><td><span class="status-pill ${STATUS_CLASS[t.status]}">${STATUS_LABEL[t.status]}</span></td>`;
+    html += '</tr>';
+  });
+  return html + '</table>';
+}
+function renderMyUpdates(){
+  const el = document.getElementById('my-updates');
+  const selectedId = document.getElementById('log-member').value;
+  if(!selectedId){ el.innerHTML = '<div class="empty">Select your name above to see your recent updates.</div>'; return; }
+  const mine = tasks.filter(t => t.memberId === selectedId).sort((a,b)=> b.timestamp - a.timestamp).slice(0,8);
+  el.innerHTML = mine.length ? renderTaskTable(mine, false) : '<div class="empty">No updates posted yet.</div>';
+}
+function renderFeed(){
+  const el = document.getElementById('feed-list');
+  const memberFilter = document.getElementById('feed-filter-member').value;
+  const statusFilter = document.getElementById('feed-filter-status').value;
+  let filtered = tasks.slice();
+  if(memberFilter) filtered = filtered.filter(t => t.memberId === memberFilter);
+  if(statusFilter) filtered = filtered.filter(t => t.status === statusFilter);
+  filtered.sort((a,b)=> b.timestamp - a.timestamp);
+  el.innerHTML = filtered.length ? renderTaskTable(filtered, true) : '<div class="empty">No updates match this filter yet.</div>';
+}
+
+function renderInventory(){
+  const el = document.getElementById('inventory-list');
+  const totalEl = document.getElementById('inv-total');
+  if(inventory.length === 0){
+    el.innerHTML = '<div class="empty">No items logged yet.</div>';
+    totalEl.textContent = '';
+    return;
+  }
+  const sorted = inventory.slice().sort((a,b)=> b.timestamp - a.timestamp);
+  let total = 0;
+  let html = '<table><tr><th>Date</th><th>Item</th><th>Price</th><th>Bought by</th><th>Notes</th></tr>';
+  sorted.forEach(i => {
+    const num = parseFloat(i.price) || 0;
+    total += num;
+    html += `<tr>
+      <td class="task-date">${formatDate(i.date)}</td>
+      <td>${escapeHtml(i.itemName)}</td>
+      <td>${escapeHtml(i.price)}</td>
+      <td><span class="member-tag">${escapeHtml(i.buyerName)}</span></td>
+      <td>${escapeHtml(i.notes||'—')}</td>
+    </tr>`;
+  });
+  html += '</table>';
+  el.innerHTML = html;
+  totalEl.textContent = '— total spent: ' + total.toLocaleString();
+}
+
+function renderProjectList(elId, status){
+  const el = document.getElementById(elId);
+  const list = projects.filter(p => p.status === status).sort((a,b)=> b.timestamp - a.timestamp);
+  if(list.length === 0){
+    el.innerHTML = `<div class="empty">Nothing here yet.</div>`;
+    return;
+  }
+  let html = '<table><tr><th>Project</th><th>Owner</th><th>Notes</th></tr>';
+  list.forEach(p => {
+    html += `<tr>
+      <td><strong>${escapeHtml(p.name)}</strong></td>
+      <td>${p.ownerName ? `<span class="member-tag">${escapeHtml(p.ownerName)}</span>` : '<span class="empty" style="padding:0;">Unassigned</span>'}</td>
+      <td>${escapeHtml(p.description||'—')}</td>
+    </tr>`;
+  });
+  el.innerHTML = html + '</table>';
+}
+function renderReport(){ renderProjectList('report-list', 'ongoing'); }
+function renderUpcoming(){ renderProjectList('upcoming-list', 'upcoming'); }
+
+async function addInventoryItem(){
+  const itemName = document.getElementById('inv-item').value.trim();
+  const price = document.getElementById('inv-price').value.trim();
+  const buyerId = document.getElementById('inv-buyer').value;
+  const date = document.getElementById('inv-date').value || todayStr();
+  const notes = document.getElementById('inv-notes').value.trim();
+  const errEl = document.getElementById('inv-error');
+  errEl.textContent = '';
+  if(!itemName){ errEl.textContent = 'Item name is required.'; return; }
+  if(!buyerId){ errEl.textContent = 'Select who bought it.'; return; }
+  if(!db){ errEl.textContent = 'Firebase not configured yet.'; return; }
+  const buyer = members.find(m => m.id === buyerId);
+  try{
+    await db.collection('inventory').add({
+      itemName, price, buyerId, buyerName: buyer ? buyer.name : 'Unknown',
+      date, notes, timestamp: Date.now()
+    });
+    document.getElementById('inv-item').value = '';
+    document.getElementById('inv-price').value = '';
+    document.getElementById('inv-notes').value = '';
+    showToast('Item added');
+  }catch(e){ errEl.textContent = 'Could not save. Check your Firebase setup.'; }
+}
+
+async function addProject(status, nameId, ownerId, descId, errId){
+  const name = document.getElementById(nameId).value.trim();
+  const ownerSel = document.getElementById(ownerId).value;
+  const description = document.getElementById(descId).value.trim();
+  const errEl = document.getElementById(errId);
+  errEl.textContent = '';
+  if(!name){ errEl.textContent = 'Project name is required.'; return; }
+  if(status === 'ongoing' && !ownerSel){ errEl.textContent = 'Select an owner.'; return; }
+  if(!db){ errEl.textContent = 'Firebase not configured yet.'; return; }
+  const owner = members.find(m => m.id === ownerSel);
+  try{
+    await db.collection('projects').add({
+      name, description, status,
+      ownerId: ownerSel || null,
+      ownerName: owner ? owner.name : '',
+      timestamp: Date.now()
+    });
+    document.getElementById(nameId).value = '';
+    document.getElementById(descId).value = '';
+    showToast(status === 'ongoing' ? 'Project added to report' : 'Added to pending list');
+  }catch(e){ errEl.textContent = 'Could not save. Check your Firebase setup.'; }
+}
+
+async function addMember(){
+  const name = document.getElementById('mem-name').value.trim();
+  const role = document.getElementById('mem-role').value.trim();
+  const email = document.getElementById('mem-email').value.trim();
+  const errEl = document.getElementById('mem-error');
+  errEl.textContent = '';
+  if(!name){ errEl.textContent = 'Name is required.'; return; }
+  if(!db){ errEl.textContent = 'Firebase not configured yet.'; return; }
+  try{
+    await db.collection('members').add({ name, role, email, createdAt: Date.now() });
+    document.getElementById('mem-name').value = '';
+    document.getElementById('mem-role').value = '';
+    document.getElementById('mem-email').value = '';
+    showToast('Member added');
+  }catch(e){ errEl.textContent = 'Could not save. Check your Firebase setup.'; }
+}
+async function removeMember(id){
+  if(!confirm('Remove this member? Their past task updates will stay in the feed.')) return;
+  try{ await db.collection('members').doc(id).delete(); }catch(e){ showToast('Could not remove member'); }
+}
+window.removeMember = removeMember;
+
+async function submitTask(){
+  const memberId = document.getElementById('log-member').value;
+  const date = document.getElementById('log-date').value || todayStr();
+  const status = document.getElementById('log-status').value;
+  const task = document.getElementById('log-task').value.trim();
+  const errEl = document.getElementById('log-error');
+  errEl.textContent = '';
+  if(!memberId){ errEl.textContent = 'Select a team member first.'; return; }
+  if(!task){ errEl.textContent = 'Describe the task before posting.'; return; }
+  if(!db){ errEl.textContent = 'Firebase not configured yet.'; return; }
+  const member = members.find(m => m.id === memberId);
+  try{
+    await db.collection('tasks').add({
+      memberId, memberName: member ? member.name : 'Unknown',
+      date, status, task, timestamp: Date.now()
+    });
+    document.getElementById('log-task').value = '';
+    showToast('Update posted');
+  }catch(e){ errEl.textContent = 'Could not save. Check your Firebase setup.'; }
+}
+
+function switchView(view){
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === view));
+  document.getElementById('view-log').style.display = view === 'log' ? 'block' : 'none';
+  document.getElementById('view-inventory').style.display = view === 'inventory' ? 'block' : 'none';
+  document.getElementById('view-report').style.display = view === 'report' ? 'block' : 'none';
+  document.getElementById('view-upcoming').style.display = view === 'upcoming' ? 'block' : 'none';
+  document.getElementById('view-feed').style.display = view === 'feed' ? 'block' : 'none';
+  document.getElementById('view-members').style.display = view === 'members' ? 'block' : 'none';
+  if(view === 'feed') renderFeed();
+  if(view === 'log') renderMyUpdates();
+  if(view === 'inventory') renderInventory();
+  if(view === 'report') renderReport();
+  if(view === 'upcoming') renderUpcoming();
+}
+
+function init(){
+  document.getElementById('log-date').value = todayStr();
+  document.getElementById('inv-date').value = todayStr();
+
+  if(!firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY"){
+    document.getElementById('setup-banner').style.display = 'block';
+  } else {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+
+    db.collection('members').onSnapshot(snap => {
+      members = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderMemberSelects(); renderMemberList(); renderMyUpdates();
+    }, () => showToast('Could not load members'));
+
+    db.collection('tasks').onSnapshot(snap => {
+      tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderMyUpdates(); renderFeed();
+    }, () => showToast('Could not load tasks'));
+
+    db.collection('inventory').onSnapshot(snap => {
+      inventory = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderInventory();
+    }, () => showToast('Could not load inventory'));
+
+    db.collection('projects').onSnapshot(snap => {
+      projects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderReport(); renderUpcoming();
+    }, () => showToast('Could not load projects'));
+  }
+
+  document.querySelectorAll('.nav-item').forEach(n => n.addEventListener('click', () => switchView(n.dataset.view)));
+  document.getElementById('mem-submit').addEventListener('click', addMember);
+  document.getElementById('log-submit').addEventListener('click', submitTask);
+  document.getElementById('log-member').addEventListener('change', renderMyUpdates);
+  document.getElementById('feed-filter-member').addEventListener('change', renderFeed);
+  document.getElementById('feed-filter-status').addEventListener('change', renderFeed);
+  document.getElementById('inv-submit').addEventListener('click', addInventoryItem);
+  document.getElementById('proj-submit').addEventListener('click', () => addProject('ongoing', 'proj-name', 'proj-owner', 'proj-desc', 'proj-error'));
+  document.getElementById('up-submit').addEventListener('click', () => addProject('upcoming', 'up-name', 'up-owner', 'up-desc', 'up-error'));
+}
+init();
+</script>
+</body>
+</html>
