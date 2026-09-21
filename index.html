@@ -566,6 +566,16 @@
       t.classList.add('show');
       setTimeout(() => t.classList.remove('show'), 2200);
     }
+    // Asks the server (/api/notify) to send an email. Never blocks the UI if it fails.
+    async function notify(type, id) {
+      try {
+        await fetch('/api/notify', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({type, id})
+        });
+      } catch (e) {console.warn('[notify] email request failed:', e);}
+    }
     function todayStr() {return new Date().toISOString().slice(0, 10);}
     function escapeHtml(str) {const div = document.createElement('div'); div.textContent = str == null ? '' : str; return div.innerHTML;}
     function formatDate(dstr) {
@@ -731,7 +741,7 @@
       if (!db) {errEl.textContent = 'Firebase not configured yet.'; return;}
       const owner = members.find(m => m.id === ownerSel);
       try {
-        await db.collection('projects').add({
+        const projRef = await db.collection('projects').add({
           name, description, status,
           ownerId: ownerSel || null,
           ownerName: owner ? owner.name : '',
@@ -739,6 +749,7 @@
         });
         document.getElementById(nameId).value = '';
         document.getElementById(descId).value = '';
+        if (ownerSel) notify('project', projRef.id);
         showToast(status === 'ongoing' ? 'Project added to report' : 'Added to pending list');
       } catch (e) {errEl.textContent = 'Could not save. Check your Firebase setup.';}
     }
@@ -750,6 +761,7 @@
       const errEl = document.getElementById('mem-error');
       errEl.textContent = '';
       if (!name) {errEl.textContent = 'Name is required.'; return;}
+      if (email && !/^\S+@\S+\.\S+$/.test(email)) {errEl.textContent = 'Enter a valid email address.'; return;}
       if (!db) {console.log('[addMember] db is not initialized \u2014 Firebase config missing or failed to load'); errEl.textContent = 'Firebase not configured yet.'; return;}
       const payload = {name, role, email, createdAt: Date.now()};
       console.log('[addMember] attempting to save payload:', payload);
@@ -758,6 +770,7 @@
         const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT: write took longer than 10s')), 10000));
         const docRef = await Promise.race([savePromise, timeoutPromise]);
         console.log('[addMember] SUCCESS \u2014 saved with doc id:', docRef.id);
+        if (email) notify('welcome', docRef.id);
         document.getElementById('mem-name').value = '';
         document.getElementById('mem-role').value = '';
         document.getElementById('mem-email').value = '';
@@ -785,11 +798,12 @@
       if (!db) {errEl.textContent = 'Firebase not configured yet.'; return;}
       const member = members.find(m => m.id === memberId);
       try {
-        await db.collection('tasks').add({
+        const taskRef = await db.collection('tasks').add({
           memberId, memberName: member ? member.name : 'Unknown',
           date, status, task, timestamp: Date.now()
         });
         document.getElementById('log-task').value = '';
+        notify('task', taskRef.id);
         showToast('Update posted');
       } catch (e) {errEl.textContent = 'Could not save. Check your Firebase setup.';}
     }
