@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Protthapan Technologies</title>
+  <link rel="icon" type="image/png" href="logo.png">
   <style>
     :root {
       --bg: #F6F5F1;
@@ -62,6 +63,15 @@
 
     .brand span {
       color: var(--gold);
+    }
+
+    .brand-logo {
+      display: block;
+      width: 90px;
+      height: 90px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 12px;
     }
 
     .nav-item {
@@ -443,7 +453,7 @@
 
   <div class="app">
     <div class="sidebar">
-      <div class="brand">Protthapan<span> Technologies</span></div>
+      <div class="brand"><img src="logo.png" alt="Protthapan logo" class="brand-logo">Protthapan<span> Technologies</span></div>
       <div class="nav-item active" data-view="log">Daily Log</div>
       <div class="nav-item" data-view="inventory">Inventory</div>
       <div class="nav-item" data-view="report">Project Report</div>
