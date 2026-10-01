@@ -41,6 +41,7 @@
       display: grid;
       grid-template-columns: 220px 1fr;
       min-height: 100vh;
+      animation: appFadeIn 0.4s ease;
     }
 
     .sidebar {
@@ -69,6 +70,7 @@
       color: #C9CFC8;
       border-left: 3px solid transparent;
       font-size: 14px;
+      transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     }
 
     .nav-item:hover {
@@ -115,6 +117,11 @@
       border-radius: var(--radius);
       padding: 22px 24px;
       margin-bottom: 20px;
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .panel:hover {
+      box-shadow: 0 4px 16px rgba(30, 35, 33, 0.06);
     }
 
     .panel h2 {
@@ -174,6 +181,11 @@
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+
+    .btn:active {
+      transform: scale(0.96);
     }
 
     .btn:hover {
@@ -224,6 +236,11 @@
       border-radius: 20px;
       font-size: 12.5px;
       font-weight: 600;
+      transition: transform 0.15s ease;
+    }
+
+    .member-tag:hover {
+      transform: scale(1.06);
     }
 
     .status-pill {
@@ -232,6 +249,11 @@
       border-radius: 20px;
       font-size: 12px;
       font-weight: 600;
+      transition: transform 0.15s ease;
+    }
+
+    .status-pill:hover {
+      transform: scale(1.06);
     }
 
     .status-inprogress {
@@ -341,6 +363,39 @@
       border-radius: 2px;
     }
 
+    /* ======= Animations ======= */
+    @keyframes appFadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+
+    @keyframes fadeSlideIn {
+      from {opacity: 0; transform: translateY(8px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    .view-enter {
+      animation: fadeSlideIn 0.35s ease;
+    }
+
+    @keyframes pulseFade {
+      0%, 100% {opacity: 0.45;}
+      50% {opacity: 1;}
+    }
+
+    .loading-shimmer {
+      animation: pulseFade 1.3s ease-in-out infinite;
+    }
+
+    @keyframes rowIn {
+      from {opacity: 0; transform: translateX(-6px);}
+      to {opacity: 1; transform: translateX(0);}
+    }
+
+    table tr {
+      animation: rowIn 0.25s ease;
+    }
+
     @media (max-width: 720px) {
       .app {
         grid-template-columns: 1fr;
@@ -434,7 +489,7 @@
         <div class="panel">
           <h2>My recent updates</h2>
           <div id="my-updates">
-            <div class="empty">Loading…</div>
+            <div class="empty loading-shimmer">Loading…</div>
           </div>
         </div>
       </div>
@@ -455,7 +510,7 @@
         </div>
         <div class="panel">
           <div id="feed-list">
-            <div class="empty">Loading…</div>
+            <div class="empty loading-shimmer">Loading…</div>
           </div>
         </div>
       </div>
@@ -481,7 +536,7 @@
         <div class="panel">
           <h2>All items <span id="inv-total" style="color:var(--ink-soft); font-weight:400;"></span></h2>
           <div id="inventory-list">
-            <div class="empty">Loading…</div>
+            <div class="empty loading-shimmer">Loading…</div>
           </div>
         </div>
       </div>
@@ -504,7 +559,7 @@
         <div class="panel">
           <h2>Ongoing projects</h2>
           <div id="report-list">
-            <div class="empty">Loading…</div>
+            <div class="empty loading-shimmer">Loading…</div>
           </div>
         </div>
       </div>
@@ -529,7 +584,7 @@
         <div class="panel">
           <h2>Pending projects</h2>
           <div id="upcoming-list">
-            <div class="empty">Loading…</div>
+            <div class="empty loading-shimmer">Loading…</div>
           </div>
         </div>
       </div>
@@ -578,7 +633,7 @@
         <div class="panel">
           <h2>All modules</h2>
           <div id="module-list">
-            <div class="empty">Loading…</div>
+            <div class="empty loading-shimmer">Loading…</div>
           </div>
         </div>
 
@@ -590,7 +645,7 @@
             </select>
           </div>
           <div id="module-updates-list">
-            <div class="empty">Loading…</div>
+            <div class="empty loading-shimmer">Loading…</div>
           </div>
         </div>
       </div>
@@ -627,7 +682,7 @@
         <div class="panel">
           <h2>All materials</h2>
           <div id="material-list">
-            <div class="empty">Loading…</div>
+            <div class="empty loading-shimmer">Loading…</div>
           </div>
         </div>
       </div>
@@ -653,7 +708,7 @@
         <div class="panel">
           <h2>All posts</h2>
           <div id="blog-list">
-            <div class="empty">Loading…</div>
+            <div class="empty loading-shimmer">Loading…</div>
           </div>
         </div>
       </div>
@@ -676,7 +731,7 @@
         <div class="panel">
           <h2>All members</h2>
           <div id="member-list">
-            <div class="empty">Loading…</div>
+            <div class="empty loading-shimmer">Loading…</div>
           </div>
         </div>
       </div>
@@ -1208,6 +1263,13 @@
       if (view === 'modules') {renderModuleList(); renderModuleUpdates();}
       if (view === 'materials') renderMaterialList();
       if (view === 'blog') renderBlogList();
+
+      const shown = document.getElementById('view-' + view);
+      if (shown) {
+        shown.classList.remove('view-enter');
+        void shown.offsetWidth; // force reflow so the animation replays every time
+        shown.classList.add('view-enter');
+      }
     }
 
     function init() {
