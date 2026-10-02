@@ -363,6 +363,268 @@
       border-radius: 2px;
     }
 
+    /* ======= OnGoing Projects: progress chart + sub-projects ======= */
+    .ongoing-layout {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .ongoing-layout>div {
+      min-width: 0;
+    }
+
+    .progress-panel {
+      position: sticky;
+      top: 20px;
+      text-align: center;
+    }
+
+    .progress-title {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 17px;
+      margin: 0 0 14px 0;
+      word-break: break-word;
+    }
+
+    .donut {
+      position: relative;
+      width: 170px;
+      height: 170px;
+      margin: 0 auto 14px auto;
+    }
+
+    .donut svg {
+      transform: rotate(-90deg);
+    }
+
+    .donut-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .donut-pct {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 30px;
+      font-weight: 500;
+      line-height: 1.1;
+    }
+
+    .donut-label {
+      font-size: 12px;
+      color: var(--ink-soft);
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13.5px;
+      padding: 3px 0;
+      text-align: left;
+    }
+
+    .legend-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .legend-row strong {
+      margin-left: auto;
+    }
+
+    .progress-note {
+      font-size: 12.5px;
+      color: var(--ink-soft);
+      margin-top: 10px;
+    }
+
+    .break-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-soft);
+      text-align: left;
+      margin: 16px 0 6px 0;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    .break-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 13px;
+      padding: 2px 0;
+      text-align: left;
+    }
+
+    .proj-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      background: #fff;
+    }
+
+    .proj-card.open {
+      border-color: var(--forest);
+    }
+
+    .proj-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      cursor: pointer;
+      flex-wrap: wrap;
+    }
+
+    .proj-head:hover {
+      background: #FDFCFA;
+    }
+
+    .proj-title {
+      font-weight: 600;
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .proj-chevron {
+      font-size: 11px;
+      color: var(--ink-soft);
+      transition: transform 0.2s ease;
+    }
+
+    .proj-card.open .proj-chevron {
+      transform: rotate(90deg);
+    }
+
+    .proj-body {
+      padding: 4px 16px 16px 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    .proj-note {
+      color: var(--ink-soft);
+      font-size: 13.5px;
+      margin: 12px 0 0 0;
+    }
+
+    .sub-section-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-soft);
+      margin-top: 16px;
+    }
+
+    .sub-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      margin-top: 10px;
+      background: #FDFCFA;
+    }
+
+    .sub-card.add-card {
+      border-style: dashed;
+    }
+
+    .sub-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .sub-name {
+      font-weight: 600;
+      font-size: 14.5px;
+    }
+
+    .sub-meta {
+      margin-left: auto;
+      font-size: 12.5px;
+      color: var(--ink-soft);
+    }
+
+    .bar {
+      height: 6px;
+      background: var(--line);
+      border-radius: 6px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+
+    .bar>div {
+      height: 100%;
+      background: var(--forest);
+      transition: width 0.3s ease;
+    }
+
+    .task-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 4px 0;
+      font-size: 14px;
+    }
+
+    .task-row input[type=checkbox] {
+      margin-top: 4px;
+      accent-color: var(--forest);
+      cursor: pointer;
+    }
+
+    .task-row .task-text {
+      flex: 1;
+    }
+
+    .task-row.done .task-text {
+      text-decoration: line-through;
+      color: var(--ink-soft);
+    }
+
+    .inline-add {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .inline-add input[type=text] {
+      flex: 1;
+      width: auto;
+      min-width: 140px;
+    }
+
+    .inline-add select {
+      flex: 1;
+      width: auto;
+      min-width: 120px;
+    }
+
+    .btn-sm {
+      margin-top: 0;
+      padding: 8px 14px;
+      font-size: 13px;
+    }
+
+    .mini-remove {
+      background: none;
+      border: none;
+      color: var(--danger);
+      font-size: 12.5px;
+      padding: 0 2px;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
     /* ======= Animations ======= */
     @keyframes appFadeIn {
       from {opacity: 0;}
@@ -435,6 +697,14 @@
       .sidebar-foot {
         display: none;
       }
+
+      .ongoing-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .progress-panel {
+        position: static;
+      }
     }
   </style>
 </head>
@@ -447,7 +717,7 @@
       <div class="nav-item active" data-view="log">Daily Log</div>
       <div class="nav-item" data-view="inventory">Inventory</div>
       <div class="nav-item" data-view="report">Project Report</div>
-      <div class="nav-item" data-view="upcoming">Upcoming Projects</div>
+      <div class="nav-item" data-view="upcoming">OnGoing Projects</div>
       <div class="nav-item" data-view="modules">Modules</div>
       <div class="nav-item" data-view="materials">Materials</div>
       <div class="nav-item" data-view="blog">Blog</div>
@@ -565,26 +835,34 @@
       </div>
 
       <div id="view-upcoming" style="display:none;">
-        <h1>Upcoming Projects</h1>
-        <p class="subtitle">Projects planned but not started yet — a pending list.</p>
-        <div class="panel">
-          <h2>Add a planned project</h2>
-          <div class="row-2">
-            <div><label for="up-name">Project name</label><input type="text" id="up-name"
-                placeholder="e.g. Mobile app v2"></div>
-            <div><label for="up-owner">Likely owner (optional)</label><select id="up-owner">
-                <option value="">Unassigned</option>
-              </select></div>
-          </div>
-          <label for="up-desc">Notes</label>
-          <textarea id="up-desc" placeholder="Scope, priority, target start date..."></textarea>
-          <button class="btn" id="up-submit">Add to pending list</button>
-          <span id="up-error" style="color:var(--danger); font-size:13px; margin-left:12px;"></span>
-        </div>
-        <div class="panel">
-          <h2>Pending projects</h2>
-          <div id="upcoming-list">
+        <h1>OnGoing Projects</h1>
+        <p class="subtitle">Projects in progress, split into sub-projects with the member and work list for each.</p>
+        <div class="ongoing-layout">
+          <div class="panel progress-panel" id="progress-panel">
             <div class="empty loading-shimmer">Loading…</div>
+          </div>
+          <div>
+            <div class="panel">
+              <h2>Add a project</h2>
+              <div class="row-2">
+                <div><label for="up-name">Project name</label><input type="text" id="up-name"
+                    placeholder="e.g. Airavat"></div>
+                <div><label for="up-owner">Project lead (optional)</label><select id="up-owner">
+                    <option value="">Unassigned</option>
+                  </select></div>
+              </div>
+              <label for="up-desc">Notes</label>
+              <textarea id="up-desc" placeholder="Scope, priority, target date..."></textarea>
+              <button class="btn" id="up-submit">Add project</button>
+              <span id="up-error" style="color:var(--danger); font-size:13px; margin-left:12px;"></span>
+            </div>
+            <div class="panel">
+              <h2>OnGoing projects <span style="color:var(--ink-soft); font-weight:400;">— click a project to open
+                  it</span></h2>
+              <div id="upcoming-list">
+                <div class="empty loading-shimmer">Loading…</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -770,6 +1048,7 @@
     let moduleUpdates = [];
     let materials = [];
     let blogPosts = [];
+    let openProjectId = null; // which OnGoing project is currently opened
     const STATUS_LABEL = {inprogress: "In progress", done: "Completed", blocked: "Blocked"};
     const STATUS_CLASS = {inprogress: "status-inprogress", done: "status-done", blocked: "status-blocked"};
     const TYPE_LABEL = {feature: "New feature", improvement: "Improvement", fix: "Bug fix", idea: "Idea / planned"};
@@ -921,7 +1200,193 @@
       el.innerHTML = html + '</table>';
     }
     function renderReport() {renderProjectList('report-list', 'ongoing');}
-    function renderUpcoming() {renderProjectList('upcoming-list', 'upcoming');}
+    function renderUpcoming() {renderOngoing();}
+
+    // ---- OnGoing Projects (sub-projects, work lists, progress chart) ----
+    // Sub-projects are stored inside each project document as: subProjects: [{id, name, memberId, memberName, tasks: [{id, text, done}]}]
+    function newId() {return 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);}
+    function subStats(sub) {
+      const t = sub.tasks || [];
+      const done = t.filter(x => x.done).length;
+      return {total: t.length, done, pct: t.length ? Math.round(done / t.length * 100) : 0};
+    }
+    function projectStats(p) {
+      let total = 0, done = 0;
+      (p.subProjects || []).forEach(s => {const st = subStats(s); total += st.total; done += st.done;});
+      return {total, done, pct: total ? Math.round(done / total * 100) : 0};
+    }
+    function getSubs(projectId) {
+      const p = projects.find(x => x.id === projectId);
+      return p ? JSON.parse(JSON.stringify(p.subProjects || [])) : [];
+    }
+    async function saveSubProjects(projectId, subs) {
+      if (!db) {showToast('Firebase not configured yet.'); return;}
+      try {await db.collection('projects').doc(projectId).update({subProjects: subs});}
+      catch (e) {showToast('Could not save. Check your Firebase setup.');}
+    }
+
+    function renderProgressPanel() {
+      const el = document.getElementById('progress-panel');
+      if (!el) return;
+      const list = projects.filter(p => p.status === 'upcoming');
+      const selected = list.find(p => p.id === openProjectId);
+      let total = 0, done = 0, title = 'All projects', breakdown = '';
+      if (selected) {
+        const st = projectStats(selected);
+        total = st.total; done = st.done; title = selected.name;
+        const subs = selected.subProjects || [];
+        if (subs.length) {
+          breakdown = '<div class="break-title">BY SUB-PROJECT</div>';
+          subs.forEach(s => {
+            breakdown += `<div class="break-row"><span>${escapeHtml(s.name)}</span><strong>${subStats(s).pct}%</strong></div>`;
+          });
+        }
+      } else {
+        list.forEach(p => {const st = projectStats(p); total += st.total; done += st.done;});
+      }
+      const pct = total ? Math.round(done / total * 100) : 0;
+      const left = total ? 100 - pct : 0;
+      const r = 70, c = 2 * Math.PI * r;
+      const doneLen = total ? c * done / total : 0;
+      el.innerHTML = `
+        <h2 class="progress-title">${escapeHtml(title)}</h2>
+        <div class="donut">
+          <svg width="170" height="170" viewBox="0 0 170 170">
+            <circle cx="85" cy="85" r="${r}" fill="none" stroke-width="16" style="stroke:var(--line);"></circle>
+            <circle cx="85" cy="85" r="${r}" fill="none" stroke-width="16" style="stroke:var(--forest);" stroke-dasharray="${doneLen} ${c}"></circle>
+          </svg>
+          <div class="donut-center">
+            <div class="donut-pct">${total ? pct + '%' : '—'}</div>
+            <div class="donut-label">${total ? 'done' : 'no work yet'}</div>
+          </div>
+        </div>
+        <div class="legend-row"><span class="legend-dot" style="background:var(--forest);"></span>Work done<strong>${total ? pct + '%' : '—'}</strong></div>
+        <div class="legend-row"><span class="legend-dot" style="background:var(--line);"></span>Work left<strong>${total ? left + '%' : '—'}</strong></div>
+        <div class="progress-note">${total ? done + ' of ' + total + ' work items finished' : 'Add sub-projects and work items to track progress.'}</div>
+        ${selected ? '' : '<div class="progress-note">Open a project to see its own progress.</div>'}
+        ${breakdown}`;
+    }
+
+    function renderProjectBody(p) {
+      const subs = p.subProjects || [];
+      let memberOptions = '<option value="">Unassigned</option>';
+      members.forEach(m => {memberOptions += `<option value="${m.id}">${escapeHtml(m.name)}</option>`;});
+      let h = '<div class="proj-body">';
+      if (p.description) h += `<p class="proj-note">${escapeHtml(p.description)}</p>`;
+      h += '<div class="sub-section-title">SUB-PROJECTS</div>';
+      if (subs.length === 0) h += '<div class="empty" style="padding:10px 0; text-align:left;">No sub-projects yet. Add the first one below.</div>';
+      subs.forEach(s => {
+        const ss = subStats(s);
+        h += `<div class="sub-card">
+          <div class="sub-head">
+            <span class="sub-name">${escapeHtml(s.name)}</span>
+            ${s.memberName ? `<span class="member-tag">${escapeHtml(s.memberName)}</span>` : '<span style="color:var(--ink-soft); font-size:12.5px;">Unassigned</span>'}
+            <span class="sub-meta">${ss.done}/${ss.total} · ${ss.pct}%</span>
+            <button class="mini-remove" onclick="removeSubProject('${p.id}','${s.id}')">Remove</button>
+          </div>
+          <div class="bar"><div style="width:${ss.pct}%"></div></div>`;
+        const ts = s.tasks || [];
+        if (ts.length === 0) h += '<div class="empty" style="padding:6px 0; text-align:left;">No work items yet.</div>';
+        ts.forEach(t => {
+          h += `<div class="task-row ${t.done ? 'done' : ''}">
+            <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleSubTask('${p.id}','${s.id}','${t.id}')">
+            <span class="task-text">${escapeHtml(t.text)}</span>
+            <button class="mini-remove" onclick="removeSubTask('${p.id}','${s.id}','${t.id}')">✕</button>
+          </div>`;
+        });
+        h += `<div class="inline-add">
+            <input type="text" id="st-${s.id}" placeholder="Add a work item..." onkeydown="if(event.key==='Enter')addSubTask('${p.id}','${s.id}')">
+            <button class="btn btn-sm" onclick="addSubTask('${p.id}','${s.id}')">Add</button>
+          </div>
+        </div>`;
+      });
+      h += `<div class="sub-card add-card">
+          <div class="sub-name">Add a sub-project</div>
+          <div class="inline-add">
+            <input type="text" id="sp-name-${p.id}" placeholder="e.g. Mechanical, Avionics, Embedded" onkeydown="if(event.key==='Enter')addSubProject('${p.id}')">
+            <select id="sp-member-${p.id}">${memberOptions}</select>
+            <button class="btn btn-sm" onclick="addSubProject('${p.id}')">Add sub-project</button>
+          </div>
+        </div>
+        <div style="margin-top:14px;"><button class="mini-remove" onclick="removeProject('${p.id}')">Remove this project</button></div>
+      </div>`;
+      return h;
+    }
+
+    function renderOngoing() {
+      const el = document.getElementById('upcoming-list');
+      if (!el) return;
+      const list = projects.filter(p => p.status === 'upcoming').sort((a, b) => b.timestamp - a.timestamp);
+      if (openProjectId && !list.some(p => p.id === openProjectId)) openProjectId = null;
+      if (list.length === 0) {
+        el.innerHTML = '<div class="empty">Nothing here yet.</div>';
+        renderProgressPanel();
+        return;
+      }
+      let html = '';
+      list.forEach(p => {
+        const st = projectStats(p);
+        const open = p.id === openProjectId;
+        html += `<div class="proj-card ${open ? 'open' : ''}">
+          <div class="proj-head" onclick="toggleProject('${p.id}')">
+            <span class="proj-chevron">▶</span>
+            <span class="proj-title">${escapeHtml(p.name)}</span>
+            ${p.ownerName ? `<span class="member-tag">${escapeHtml(p.ownerName)}</span>` : ''}
+            <span class="status-pill status-inprogress">${st.pct}% done</span>
+          </div>
+          ${open ? renderProjectBody(p) : ''}
+        </div>`;
+      });
+      el.innerHTML = html;
+      renderProgressPanel();
+    }
+    function toggleProject(id) {
+      openProjectId = openProjectId === id ? null : id;
+      renderOngoing();
+    }
+    async function removeProject(id) {
+      if (!confirm('Remove this project and all its sub-projects?')) return;
+      try {await db.collection('projects').doc(id).delete();} catch (e) {showToast('Could not remove project');}
+    }
+    function addSubProject(pid) {
+      const name = document.getElementById('sp-name-' + pid).value.trim();
+      const memberId = document.getElementById('sp-member-' + pid).value;
+      if (!name) {showToast('Enter a sub-project name'); return;}
+      const m = members.find(x => x.id === memberId);
+      const subs = getSubs(pid);
+      subs.push({id: newId(), name, memberId: memberId || null, memberName: m ? m.name : '', tasks: []});
+      saveSubProjects(pid, subs);
+    }
+    function removeSubProject(pid, sid) {
+      if (!confirm('Remove this sub-project and its work items?')) return;
+      saveSubProjects(pid, getSubs(pid).filter(s => s.id !== sid));
+    }
+    function addSubTask(pid, sid) {
+      const input = document.getElementById('st-' + sid);
+      const text = input.value.trim();
+      if (!text) {showToast('Write the work item first'); return;}
+      const subs = getSubs(pid);
+      const s = subs.find(x => x.id === sid);
+      if (!s) return;
+      s.tasks = s.tasks || [];
+      s.tasks.push({id: newId(), text, done: false});
+      saveSubProjects(pid, subs);
+    }
+    function toggleSubTask(pid, sid, tid) {
+      const subs = getSubs(pid);
+      const s = subs.find(x => x.id === sid);
+      const t = s && (s.tasks || []).find(x => x.id === tid);
+      if (!t) return;
+      t.done = !t.done;
+      saveSubProjects(pid, subs);
+    }
+    function removeSubTask(pid, sid, tid) {
+      const subs = getSubs(pid);
+      const s = subs.find(x => x.id === sid);
+      if (!s) return;
+      s.tasks = (s.tasks || []).filter(x => x.id !== tid);
+      saveSubProjects(pid, subs);
+    }
 
     // ---- Modules ----
     function renderModuleSelects() {
@@ -1064,7 +1529,7 @@
         document.getElementById(nameId).value = '';
         document.getElementById(descId).value = '';
         if (ownerSel) notify('project', projRef.id);
-        showToast(status === 'ongoing' ? 'Project added to report' : 'Added to pending list');
+        showToast(status === 'ongoing' ? 'Project added to report' : 'Project added');
       } catch (e) {errEl.textContent = 'Could not save. Check your Firebase setup.';}
     }
 
@@ -1212,149 +1677,3 @@
         showToast('Member added');
       } catch (e) {
         console.log('[addMember] FAILED \u2014 error:', e);
-        errEl.textContent = 'Could not save. Check your Firebase setup.';
-      }
-    }
-    async function removeMember(id) {
-      if (!isAdmin) {showToast('Admin only'); return;}
-      if (!confirm('Remove this member? Their past task updates will stay in the feed.')) return;
-      try {await db.collection('members').doc(id).delete();} catch (e) {showToast('Could not remove member');}
-    }
-    window.removeMember = removeMember;
-
-    async function submitTask() {
-      const memberId = document.getElementById('log-member').value;
-      const date = document.getElementById('log-date').value || todayStr();
-      const status = document.getElementById('log-status').value;
-      const task = document.getElementById('log-task').value.trim();
-      const errEl = document.getElementById('log-error');
-      errEl.textContent = '';
-      if (!memberId) {errEl.textContent = 'Select a team member first.'; return;}
-      if (!task) {errEl.textContent = 'Describe the task before posting.'; return;}
-      if (!db) {errEl.textContent = 'Firebase not configured yet.'; return;}
-      const member = members.find(m => m.id === memberId);
-      try {
-        const taskRef = await db.collection('tasks').add({
-          memberId, memberName: member ? member.name : 'Unknown',
-          date, status, task, timestamp: Date.now()
-        });
-        document.getElementById('log-task').value = '';
-        notify('task', taskRef.id);
-        showToast('Update posted');
-      } catch (e) {errEl.textContent = 'Could not save. Check your Firebase setup.';}
-    }
-
-    function switchView(view) {
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === view));
-      document.getElementById('view-log').style.display = view === 'log' ? 'block' : 'none';
-      document.getElementById('view-inventory').style.display = view === 'inventory' ? 'block' : 'none';
-      document.getElementById('view-report').style.display = view === 'report' ? 'block' : 'none';
-      document.getElementById('view-upcoming').style.display = view === 'upcoming' ? 'block' : 'none';
-      document.getElementById('view-modules').style.display = view === 'modules' ? 'block' : 'none';
-      document.getElementById('view-materials').style.display = view === 'materials' ? 'block' : 'none';
-      document.getElementById('view-blog').style.display = view === 'blog' ? 'block' : 'none';
-      document.getElementById('view-feed').style.display = view === 'feed' ? 'block' : 'none';
-      document.getElementById('view-members').style.display = view === 'members' ? 'block' : 'none';
-      if (view === 'feed') renderFeed();
-      if (view === 'log') renderMyUpdates();
-      if (view === 'inventory') renderInventory();
-      if (view === 'report') renderReport();
-      if (view === 'upcoming') renderUpcoming();
-      if (view === 'modules') {renderModuleList(); renderModuleUpdates();}
-      if (view === 'materials') renderMaterialList();
-      if (view === 'blog') renderBlogList();
-
-      const shown = document.getElementById('view-' + view);
-      if (shown) {
-        shown.classList.remove('view-enter');
-        void shown.offsetWidth; // force reflow so the animation replays every time
-        shown.classList.add('view-enter');
-      }
-    }
-
-    function init() {
-      document.getElementById('log-date').value = todayStr();
-      document.getElementById('inv-date').value = todayStr();
-      document.getElementById('up2-date').value = todayStr();
-      document.getElementById('blog-date').value = todayStr();
-
-      if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY") {
-        console.log('[init] firebaseConfig.apiKey missing or placeholder \u2014 showing setup banner');
-        document.getElementById('setup-banner').style.display = 'block';
-      } else {
-        console.log('[init] initializing Firebase with config:', firebaseConfig);
-        firebase.initializeApp(firebaseConfig);
-        db = firebase.firestore();
-        db.settings({experimentalForceLongPolling: true, useFetchStreams: false});
-        console.log('[init] Firestore db object created with forced long-polling:', db);
-
-        db.collection('members').onSnapshot(snap => {
-          members = snap.docs.map(d => ({id: d.id, ...d.data()}));
-          renderMemberSelects(); renderMemberList(); renderMyUpdates();
-        }, () => showToast('Could not load members'));
-
-        db.collection('tasks').onSnapshot(snap => {
-          tasks = snap.docs.map(d => ({id: d.id, ...d.data()}));
-          renderMyUpdates(); renderFeed();
-        }, () => showToast('Could not load tasks'));
-
-        db.collection('inventory').onSnapshot(snap => {
-          inventory = snap.docs.map(d => ({id: d.id, ...d.data()}));
-          renderInventory();
-        }, () => showToast('Could not load inventory'));
-
-        db.collection('projects').onSnapshot(snap => {
-          projects = snap.docs.map(d => ({id: d.id, ...d.data()}));
-          renderReport(); renderUpcoming();
-        }, () => showToast('Could not load projects'));
-
-        db.collection('modules').onSnapshot(snap => {
-          modules = snap.docs.map(d => ({id: d.id, ...d.data()}));
-          renderModuleSelects(); renderModuleList(); renderModuleUpdates();
-        }, () => showToast('Could not load modules'));
-
-        db.collection('moduleUpdates').onSnapshot(snap => {
-          moduleUpdates = snap.docs.map(d => ({id: d.id, ...d.data()}));
-          renderModuleList(); renderModuleUpdates();
-        }, () => showToast('Could not load module upgrades'));
-
-        db.collection('materials').onSnapshot(snap => {
-          materials = snap.docs.map(d => ({id: d.id, ...d.data()}));
-          renderMaterialList();
-        }, () => showToast('Could not load materials'));
-
-        db.collection('blogPosts').onSnapshot(snap => {
-          blogPosts = snap.docs.map(d => ({id: d.id, ...d.data()}));
-          renderBlogList();
-        }, () => showToast('Could not load blog posts'));
-      }
-
-      isAdmin = sessionStorage.getItem('ptAdmin') === '1';
-      updateAdminUI();
-
-      document.querySelectorAll('.nav-item').forEach(n => {
-        if (n.id === 'admin-toggle') {
-          n.addEventListener('click', () => isAdmin ? adminLogout() : promptAdminLogin());
-        } else {
-          n.addEventListener('click', () => switchView(n.dataset.view));
-        }
-      });
-      document.getElementById('mem-submit').addEventListener('click', addMember);
-      document.getElementById('log-submit').addEventListener('click', submitTask);
-      document.getElementById('log-member').addEventListener('change', renderMyUpdates);
-      document.getElementById('feed-filter-member').addEventListener('change', renderFeed);
-      document.getElementById('feed-filter-status').addEventListener('change', renderFeed);
-      document.getElementById('inv-submit').addEventListener('click', addInventoryItem);
-      document.getElementById('proj-submit').addEventListener('click', () => addProject('ongoing', 'proj-name', 'proj-owner', 'proj-desc', 'proj-error'));
-      document.getElementById('up-submit').addEventListener('click', () => addProject('upcoming', 'up-name', 'up-owner', 'up-desc', 'up-error'));
-      document.getElementById('mod-submit').addEventListener('click', addModule);
-      document.getElementById('up2-submit').addEventListener('click', addModuleUpdate);
-      document.getElementById('mod-filter').addEventListener('change', renderModuleUpdates);
-      document.getElementById('mat-submit').addEventListener('click', addMaterial);
-      document.getElementById('blog-submit').addEventListener('click', addBlogPost);
-    }
-    init();
-  </script>
-</body>
-
-</html>
