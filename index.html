@@ -400,7 +400,7 @@
       border-radius: var(--radius);
       padding: 32px 30px;
       width: 100%;
-      max-width: 360px;
+      max-width: 380px;
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
     }
 
@@ -417,7 +417,35 @@
     .lock-sub {
       color: var(--ink-soft);
       font-size: 13.5px;
-      margin-bottom: 22px;
+      margin-bottom: 18px;
+    }
+
+    .lock-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 20px;
+      background: #EEF2EE;
+      padding: 4px;
+      border-radius: var(--radius);
+    }
+
+    .lock-tab {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 9px 8px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--ink-soft);
+      cursor: pointer;
+      border-radius: var(--radius);
+      font-family: inherit;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .lock-tab.active {
+      background: var(--forest);
+      color: #fff;
     }
 
     #lock-screen input {
@@ -856,15 +884,29 @@
 
 <body class="locked">
 
-  <!-- Login screen: nothing else is visible until a valid admin / team member logs in -->
+  <!-- Login screen: nothing else is visible until the Admin lock or the Member lock is opened -->
   <div id="lock-screen">
     <div class="lock-card">
       <div class="lock-brand">Protthapan<span> Technologies</span></div>
-      <div class="lock-sub">🔒 Team login — admin and team members only</div>
-      <label for="lock-user">Username</label>
-      <input type="text" id="lock-user" autocomplete="username" autocapitalize="none" spellcheck="false">
-      <label for="lock-pass">Password</label>
-      <input type="password" id="lock-pass" autocomplete="current-password">
+      <div class="lock-sub">🔒 Choose your lock to continue</div>
+
+      <div class="lock-tabs">
+        <button type="button" class="lock-tab active" id="tab-admin">Admin lock</button>
+        <button type="button" class="lock-tab" id="tab-member">Member lock</button>
+      </div>
+
+      <div id="lock-admin-fields">
+        <label for="lock-user">Admin name</label>
+        <input type="text" id="lock-user" autocomplete="username" autocapitalize="none" spellcheck="false">
+        <label for="lock-pass">Admin password</label>
+        <input type="password" id="lock-pass" autocomplete="current-password">
+      </div>
+
+      <div id="lock-member-fields" style="display:none;">
+        <label for="lock-member-pass">Member password</label>
+        <input type="password" id="lock-member-pass" autocomplete="current-password">
+      </div>
+
       <button class="btn lock-btn" id="lock-submit">Log in</button>
       <div id="lock-error"></div>
     </div>
@@ -1157,19 +1199,13 @@
 
       <div id="view-members" style="display:none;">
         <h1>Team Members</h1>
-        <p class="subtitle" id="members-subtitle">Everyone who has access to this site.</p>
+        <p class="subtitle" id="members-subtitle">Everyone on the team.</p>
         <div class="admin-note" id="members-note" style="display:none;">🔒 Only the admin can add or remove team
           members.</div>
         <div class="panel" id="mem-add-panel" style="display:none;">
           <h2>Add a member</h2>
           <div class="row-3">
             <div><label for="mem-name">Full name</label><input type="text" id="mem-name" placeholder="Jane Doe"></div>
-            <div><label for="mem-username">Login username</label><input type="text" id="mem-username"
-                placeholder="e.g. jane" autocapitalize="none" autocomplete="off" spellcheck="false"></div>
-            <div><label for="mem-password">Login password</label><input type="text" id="mem-password"
-                placeholder="min 6 characters" autocomplete="off"></div>
-          </div>
-          <div class="row-2" style="margin-top:14px;">
             <div><label for="mem-role">Role / department</label><input type="text" id="mem-role"
                 placeholder="Design, Sales, Dev..."></div>
             <div><label for="mem-email">Email (optional)</label><input type="email" id="mem-email"
@@ -1177,8 +1213,6 @@
           </div>
           <button class="btn" id="mem-submit">Add member</button>
           <span id="mem-error" style="color:var(--danger); font-size:13px; margin-left:12px;"></span>
-          <div style="font-size:12.5px; color:var(--ink-soft); margin-top:10px;">Share the username and password with
-            the member yourself. Removing a member blocks their access immediately.</div>
         </div>
         <div class="panel">
           <h2>All members</h2>
@@ -1209,17 +1243,23 @@
     };
     // ==========================================================================
 
-    // ======= Login (Firebase Authentication) =======
-    // Usernames are turned into an email like  jane@protthapan.team  (it does not need to be a real inbox).
-    // The admin account is the one with username "protthapan" (create it in Firebase Console, see setup steps).
-    const AUTH_DOMAIN = "protthapan.team";
-    const ADMIN_EMAIL = "protthapan@" + AUTH_DOMAIN;
+    // ======= Two locks: Admin lock + Member lock =======
+    // Only SHA-256 hashes of the passwords are stored here (not the passwords themselves).
+    // Admin  : name "protthapan"  + password protthapan@007
+    // Member : password protthapantec@123
+    const ADMIN_USER_HASH = "81413bdf307e771569c0f1591789b0d11a224be2d25cd90e9d37d7b5738eade1";
+    const ADMIN_PASS_HASH = "fd7ad762233aa533ccd1775439c70350b4c702c0f8a4a665a2da5e62b963dd56";
+    const MEMBER_PASS_HASH = "a7c794fd4f59b786d31c06e8e04430d3320ee8cf9c72a2f794046f8ff16d2c48";
+    // Two fixed Firebase logins are used behind the scenes (created automatically on first correct login).
+    const ADMIN_EMAIL = "protthapan@protthapan.team";
+    const MEMBER_EMAIL = "member@protthapan.team";
     let isAdmin = false;
-    let currentUid = null;
     let currentName = '';
+    let lockRole = 'admin';
+    let failedAttempts = 0;
     let auth = null;
     let appStarted = false;
-    // ===============================================
+    // ===================================================
 
     let db = null;
     let members = [];
@@ -1300,10 +1340,10 @@
     function renderMemberList() {
       const el = document.getElementById('member-list');
       if (members.length === 0) {el.innerHTML = '<div class="empty">No team members yet.' + (isAdmin ? ' Add the first one above.' : '') + '</div>'; return;}
-      let html = '<table><tr><th>Name</th><th>Username</th><th>Role</th><th>Email</th><th></th></tr>';
+      let html = '<table><tr><th>Name</th><th>Role</th><th>Email</th><th></th></tr>';
       members.forEach(m => {
         const removeBtn = isAdmin ? `<button class="danger-link" onclick="removeMember('${m.id}')">Remove</button>` : '';
-        html += `<tr><td><strong>${escapeHtml(m.name)}</strong></td><td>${escapeHtml(m.username || '—')}</td><td>${escapeHtml(m.role || '—')}</td><td>${escapeHtml(m.email || '—')}</td>
+        html += `<tr><td><strong>${escapeHtml(m.name)}</strong></td><td>${escapeHtml(m.role || '—')}</td><td>${escapeHtml(m.email || '—')}</td>
     <td>${removeBtn}</td></tr>`;
       });
       el.innerHTML = html + '</table>';
@@ -1876,13 +1916,13 @@
     }
     window.removeBlogPost = removeBlogPost;
 
-    // ---- Login / roles ----
+    // ---- Locks / roles ----
     function updateAdminUI() {
       document.getElementById('mem-add-panel').style.display = isAdmin ? 'block' : 'none';
       document.getElementById('members-note').style.display = isAdmin ? 'none' : 'block';
       document.getElementById('members-subtitle').textContent = isAdmin
-        ? 'Add everyone on your team and give each person a login.'
-        : 'Everyone who has access to this site.';
+        ? 'Add everyone on your team so they can log their own updates.'
+        : 'Everyone on the team.';
       document.getElementById('admin-nav-label').textContent = '🔓 Logout (' + (currentName || 'user') + ')';
       renderMemberList();
     }
@@ -1892,56 +1932,126 @@
     }
 
     function setLockError(msg) {document.getElementById('lock-error').textContent = msg || '';}
-    function usernameToEmail(u) {return u.includes('@') ? u : u + '@' + AUTH_DOMAIN;}
+    function setLockRole(role) {
+      lockRole = role;
+      document.getElementById('tab-admin').classList.toggle('active', role === 'admin');
+      document.getElementById('tab-member').classList.toggle('active', role === 'member');
+      document.getElementById('lock-admin-fields').style.display = role === 'admin' ? 'block' : 'none';
+      document.getElementById('lock-member-fields').style.display = role === 'member' ? 'block' : 'none';
+      setLockError('');
+      document.getElementById(role === 'admin' ? 'lock-user' : 'lock-member-pass').focus();
+    }
+
+    async function sha256(text) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    function authErrorMessage(e) {
+      const code = (e && e.code) || '';
+      if (code === 'auth/operation-not-allowed') return 'Email/Password sign-in is not enabled in Firebase (Authentication → Sign-in method).';
+      if (code === 'auth/configuration-not-found') return 'Authentication is not set up in Firebase yet (Build → Authentication → Get started).';
+      if (code === 'auth/too-many-requests') return 'Too many attempts. Wait a few minutes and try again.';
+      if (code === 'auth/network-request-failed') return 'No internet connection. Try again.';
+      if (code === 'auth/api-key-not-valid.-please-pass-a-valid-api-key.' || code === 'auth/invalid-api-key') return 'The Firebase API key in index.html is not valid.';
+      return 'Could not log in (' + (code || (e && e.message) || 'unknown error') + ').';
+    }
 
     async function tryLogin() {
       const btn = document.getElementById('lock-submit');
-      const username = document.getElementById('lock-user').value.trim().toLowerCase();
-      const pass = document.getElementById('lock-pass').value;
       setLockError('');
-      if (!username || !pass) {setLockError('Enter your username and password.'); return;}
       if (!auth) {setLockError('Firebase is not configured yet.'); return;}
+      if (!window.crypto || !crypto.subtle) {setLockError('Secure login needs https. Open the site using its https link.'); return;}
+
+      let email, pass;
+      if (lockRole === 'admin') {
+        const user = document.getElementById('lock-user').value.trim().toLowerCase();
+        pass = document.getElementById('lock-pass').value;
+        if (!user || !pass) {setLockError('Enter the admin name and password.'); return;}
+        const [uh, ph] = await Promise.all([sha256(user), sha256(pass)]);
+        if (uh !== ADMIN_USER_HASH || ph !== ADMIN_PASS_HASH) return loginFailed('Wrong admin name or password.', 'lock-pass');
+        email = ADMIN_EMAIL;
+      } else {
+        pass = document.getElementById('lock-member-pass').value;
+        if (!pass) {setLockError('Enter the member password.'); return;}
+        if (await sha256(pass) !== MEMBER_PASS_HASH) return loginFailed('Wrong member password.', 'lock-member-pass');
+        email = MEMBER_EMAIL;
+      }
+
       btn.disabled = true;
       try {
-        await auth.signInWithEmailAndPassword(usernameToEmail(username), pass);
+        try {
+          await auth.signInWithEmailAndPassword(email, pass);
+        } catch (e) {
+          const c = e && e.code;
+          // First time ever: the Firebase login does not exist yet, so create it (password was already verified above)
+          if (c === 'auth/user-not-found' || c === 'auth/invalid-credential' || c === 'auth/invalid-login-credentials') {
+            try {
+              await auth.createUserWithEmailAndPassword(email, pass);
+            } catch (e2) {
+              if (e2 && e2.code === 'auth/email-already-in-use') {
+                setLockError('This lock already exists in Firebase with a different password. In Firebase Console → Authentication → Users, delete "' + email + '" and log in again.');
+                btn.disabled = false;
+                return;
+              }
+              throw e2;
+            }
+          } else {
+            throw e;
+          }
+        }
+        failedAttempts = 0;
         document.getElementById('lock-pass').value = '';
+        document.getElementById('lock-member-pass').value = '';
         // handleAuthChange() takes over from here
       } catch (e) {
-        const code = e && e.code;
-        if (code === 'auth/too-many-requests') setLockError('Too many attempts. Wait a few minutes and try again.');
-        else if (code === 'auth/operation-not-allowed') setLockError('Email/Password sign-in is not enabled in Firebase yet.');
-        else if (code === 'auth/network-request-failed') setLockError('No internet connection. Try again.');
-        else if (code === 'auth/invalid-credential' || code === 'auth/user-not-found' || code === 'auth/wrong-password' || code === 'auth/invalid-email') setLockError('Wrong username or password.');
-        else setLockError('Could not log in. Try again.');
-        document.getElementById('lock-pass').value = '';
+        setLockError(authErrorMessage(e));
+        console.log('[login] FAILED:', e);
       }
       btn.disabled = false;
     }
+    function loginFailed(msg, passFieldId) {
+      document.getElementById(passFieldId).value = '';
+      failedAttempts++;
+      if (failedAttempts >= 5) {
+        const btn = document.getElementById('lock-submit');
+        btn.disabled = true;
+        let secs = 30;
+        setLockError('Too many attempts. Try again in ' + secs + 's.');
+        const timer = setInterval(() => {
+          secs--;
+          if (secs <= 0) {
+            clearInterval(timer);
+            btn.disabled = false;
+            failedAttempts = 0;
+            setLockError('');
+          } else {
+            setLockError('Too many attempts. Try again in ' + secs + 's.');
+          }
+        }, 1000);
+      } else {
+        setLockError(msg);
+      }
+    }
 
     // Runs whenever someone signs in or out
-    async function handleAuthChange(user) {
+    function handleAuthChange(user) {
       if (!user) {
         document.body.classList.add('locked');
         return;
       }
-      currentUid = user.uid;
-      if ((user.email || '').toLowerCase() === ADMIN_EMAIL) {
+      const email = (user.email || '').toLowerCase();
+      if (email === ADMIN_EMAIL) {
         isAdmin = true;
         currentName = 'Admin';
         unlockApp();
-        return;
-      }
-      // Everyone else must be an active team member (a member document with their id must exist)
-      try {
-        const snap = await db.collection('members').doc(user.uid).get();
-        if (!snap.exists) throw new Error('not-a-member');
+      } else if (email === MEMBER_EMAIL) {
         isAdmin = false;
-        currentName = snap.data().name || 'Member';
+        currentName = 'Member';
         unlockApp();
-      } catch (e) {
-        try {await auth.signOut();} catch (e2) {}
+      } else {
+        auth.signOut();
         document.body.classList.add('locked');
-        setLockError('Access denied. Ask the admin to add you as a team member.');
+        setLockError('Access denied.');
       }
     }
     function unlockApp() {
@@ -1955,44 +2065,33 @@
       }
     }
 
-    // Admin only: creates the member's login + the member record (the record id = the login id)
+    // Admin only (the database rules also block everyone else from changing the members list)
     async function addMember() {
       if (!isAdmin) {showToast('Admin only'); return;}
       const name = document.getElementById('mem-name').value.trim();
-      const username = document.getElementById('mem-username').value.trim().toLowerCase();
-      const password = document.getElementById('mem-password').value;
       const role = document.getElementById('mem-role').value.trim();
       const email = document.getElementById('mem-email').value.trim();
       const errEl = document.getElementById('mem-error');
       errEl.textContent = '';
       if (!name) {errEl.textContent = 'Name is required.'; return;}
-      if (!/^[a-z0-9._-]{3,30}$/.test(username)) {errEl.textContent = 'Username: 3-30 letters, numbers, dot, dash or underscore.'; return;}
-      if (password.length < 6) {errEl.textContent = 'Password must be at least 6 characters.'; return;}
       if (email && !/^\S+@\S+\.\S+$/.test(email)) {errEl.textContent = 'Enter a valid email address.'; return;}
       if (!db) {errEl.textContent = 'Firebase not configured yet.'; return;}
-      const authEmail = username + '@' + AUTH_DOMAIN;
+      const payload = {name, role, email, createdAt: Date.now()};
       try {
-        // A second app instance creates the login, so the admin stays signed in
-        const secondary = firebase.apps.find(a => a.name === 'secondary') || firebase.initializeApp(firebaseConfig, 'secondary');
-        const cred = await secondary.auth().createUserWithEmailAndPassword(authEmail, password);
-        const uid = cred.user.uid;
-        await secondary.auth().signOut();
-        await db.collection('members').doc(uid).set({name, role, email, username, authEmail, createdAt: Date.now()});
-        if (email) notify('welcome', uid);
-        ['mem-name', 'mem-username', 'mem-password', 'mem-role', 'mem-email'].forEach(id => {document.getElementById(id).value = '';});
+        const docRef = await db.collection('members').add(payload);
+        if (email) notify('welcome', docRef.id);
+        document.getElementById('mem-name').value = '';
+        document.getElementById('mem-role').value = '';
+        document.getElementById('mem-email').value = '';
         showToast('Member added');
       } catch (e) {
-        const code = e && e.code;
-        if (code === 'auth/email-already-in-use') errEl.textContent = 'That username is already taken.';
-        else if (code === 'auth/weak-password') errEl.textContent = 'Password is too weak.';
-        else if (code === 'auth/operation-not-allowed') errEl.textContent = 'Enable Email/Password sign-in in Firebase first.';
-        else errEl.textContent = 'Could not save. Check your Firebase setup.';
-        console.log('[addMember] FAILED:', e);
+        console.log('[addMember] FAILED \u2014 error:', e);
+        errEl.textContent = 'Could not save. Check your Firebase setup.';
       }
     }
     async function removeMember(id) {
       if (!isAdmin) {showToast('Admin only'); return;}
-      if (!confirm('Remove this member? They will lose access immediately. Their past task updates will stay in the feed.')) return;
+      if (!confirm('Remove this member? Their past task updates will stay in the feed.')) return;
       try {await db.collection('members').doc(id).delete();} catch (e) {showToast('Could not remove member');}
     }
     window.removeMember = removeMember;
@@ -2047,7 +2146,7 @@
       }
     }
 
-    // Starts the app and live data. Only runs AFTER a valid login.
+    // Starts the app and live data. Only runs AFTER a lock has been opened.
     function init() {
       document.getElementById('log-date').value = todayStr();
       document.getElementById('inv-date').value = todayStr();
@@ -2119,9 +2218,11 @@
       document.getElementById('blog-submit').addEventListener('click', addBlogPost);
     }
 
-    // ---- Start: only the login screen is shown; the app and data load after a valid login ----
+    // ---- Start: only the lock screen is shown; the app and data load after a valid login ----
     document.getElementById('lock-submit').addEventListener('click', tryLogin);
-    ['lock-user', 'lock-pass'].forEach(id => {
+    document.getElementById('tab-admin').addEventListener('click', () => setLockRole('admin'));
+    document.getElementById('tab-member').addEventListener('click', () => setLockRole('member'));
+    ['lock-user', 'lock-pass', 'lock-member-pass'].forEach(id => {
       document.getElementById(id).addEventListener('keydown', e => {if (e.key === 'Enter') tryLogin();});
     });
     if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY") {
