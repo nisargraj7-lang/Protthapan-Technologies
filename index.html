@@ -1677,3 +1677,149 @@
         showToast('Member added');
       } catch (e) {
         console.log('[addMember] FAILED \u2014 error:', e);
+        errEl.textContent = 'Could not save. Check your Firebase setup.';
+      }
+    }
+    async function removeMember(id) {
+      if (!isAdmin) {showToast('Admin only'); return;}
+      if (!confirm('Remove this member? Their past task updates will stay in the feed.')) return;
+      try {await db.collection('members').doc(id).delete();} catch (e) {showToast('Could not remove member');}
+    }
+    window.removeMember = removeMember;
+
+    async function submitTask() {
+      const memberId = document.getElementById('log-member').value;
+      const date = document.getElementById('log-date').value || todayStr();
+      const status = document.getElementById('log-status').value;
+      const task = document.getElementById('log-task').value.trim();
+      const errEl = document.getElementById('log-error');
+      errEl.textContent = '';
+      if (!memberId) {errEl.textContent = 'Select a team member first.'; return;}
+      if (!task) {errEl.textContent = 'Describe the task before posting.'; return;}
+      if (!db) {errEl.textContent = 'Firebase not configured yet.'; return;}
+      const member = members.find(m => m.id === memberId);
+      try {
+        const taskRef = await db.collection('tasks').add({
+          memberId, memberName: member ? member.name : 'Unknown',
+          date, status, task, timestamp: Date.now()
+        });
+        document.getElementById('log-task').value = '';
+        notify('task', taskRef.id);
+        showToast('Update posted');
+      } catch (e) {errEl.textContent = 'Could not save. Check your Firebase setup.';}
+    }
+
+    function switchView(view) {
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === view));
+      document.getElementById('view-log').style.display = view === 'log' ? 'block' : 'none';
+      document.getElementById('view-inventory').style.display = view === 'inventory' ? 'block' : 'none';
+      document.getElementById('view-report').style.display = view === 'report' ? 'block' : 'none';
+      document.getElementById('view-upcoming').style.display = view === 'upcoming' ? 'block' : 'none';
+      document.getElementById('view-modules').style.display = view === 'modules' ? 'block' : 'none';
+      document.getElementById('view-materials').style.display = view === 'materials' ? 'block' : 'none';
+      document.getElementById('view-blog').style.display = view === 'blog' ? 'block' : 'none';
+      document.getElementById('view-feed').style.display = view === 'feed' ? 'block' : 'none';
+      document.getElementById('view-members').style.display = view === 'members' ? 'block' : 'none';
+      if (view === 'feed') renderFeed();
+      if (view === 'log') renderMyUpdates();
+      if (view === 'inventory') renderInventory();
+      if (view === 'report') renderReport();
+      if (view === 'upcoming') renderUpcoming();
+      if (view === 'modules') {renderModuleList(); renderModuleUpdates();}
+      if (view === 'materials') renderMaterialList();
+      if (view === 'blog') renderBlogList();
+
+      const shown = document.getElementById('view-' + view);
+      if (shown) {
+        shown.classList.remove('view-enter');
+        void shown.offsetWidth; // force reflow so the animation replays every time
+        shown.classList.add('view-enter');
+      }
+    }
+
+    function init() {
+      document.getElementById('log-date').value = todayStr();
+      document.getElementById('inv-date').value = todayStr();
+      document.getElementById('up2-date').value = todayStr();
+      document.getElementById('blog-date').value = todayStr();
+
+      if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY") {
+        console.log('[init] firebaseConfig.apiKey missing or placeholder \u2014 showing setup banner');
+        document.getElementById('setup-banner').style.display = 'block';
+      } else {
+        console.log('[init] initializing Firebase with config:', firebaseConfig);
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+        db.settings({experimentalForceLongPolling: true, useFetchStreams: false});
+        console.log('[init] Firestore db object created with forced long-polling:', db);
+
+        db.collection('members').onSnapshot(snap => {
+          members = snap.docs.map(d => ({id: d.id, ...d.data()}));
+          renderMemberSelects(); renderMemberList(); renderMyUpdates(); renderUpcoming();
+        }, () => showToast('Could not load members'));
+
+        db.collection('tasks').onSnapshot(snap => {
+          tasks = snap.docs.map(d => ({id: d.id, ...d.data()}));
+          renderMyUpdates(); renderFeed();
+        }, () => showToast('Could not load tasks'));
+
+        db.collection('inventory').onSnapshot(snap => {
+          inventory = snap.docs.map(d => ({id: d.id, ...d.data()}));
+          renderInventory();
+        }, () => showToast('Could not load inventory'));
+
+        db.collection('projects').onSnapshot(snap => {
+          projects = snap.docs.map(d => ({id: d.id, ...d.data()}));
+          renderReport(); renderUpcoming();
+        }, () => showToast('Could not load projects'));
+
+        db.collection('modules').onSnapshot(snap => {
+          modules = snap.docs.map(d => ({id: d.id, ...d.data()}));
+          renderModuleSelects(); renderModuleList(); renderModuleUpdates();
+        }, () => showToast('Could not load modules'));
+
+        db.collection('moduleUpdates').onSnapshot(snap => {
+          moduleUpdates = snap.docs.map(d => ({id: d.id, ...d.data()}));
+          renderModuleList(); renderModuleUpdates();
+        }, () => showToast('Could not load module upgrades'));
+
+        db.collection('materials').onSnapshot(snap => {
+          materials = snap.docs.map(d => ({id: d.id, ...d.data()}));
+          renderMaterialList();
+        }, () => showToast('Could not load materials'));
+
+        db.collection('blogPosts').onSnapshot(snap => {
+          blogPosts = snap.docs.map(d => ({id: d.id, ...d.data()}));
+          renderBlogList();
+        }, () => showToast('Could not load blog posts'));
+      }
+
+      isAdmin = sessionStorage.getItem('ptAdmin') === '1';
+      updateAdminUI();
+
+      document.querySelectorAll('.nav-item').forEach(n => {
+        if (n.id === 'admin-toggle') {
+          n.addEventListener('click', () => isAdmin ? adminLogout() : promptAdminLogin());
+        } else {
+          n.addEventListener('click', () => switchView(n.dataset.view));
+        }
+      });
+      document.getElementById('mem-submit').addEventListener('click', addMember);
+      document.getElementById('log-submit').addEventListener('click', submitTask);
+      document.getElementById('log-member').addEventListener('change', renderMyUpdates);
+      document.getElementById('feed-filter-member').addEventListener('change', renderFeed);
+      document.getElementById('feed-filter-status').addEventListener('change', renderFeed);
+      document.getElementById('inv-submit').addEventListener('click', addInventoryItem);
+      document.getElementById('proj-submit').addEventListener('click', () => addProject('ongoing', 'proj-name', 'proj-owner', 'proj-desc', 'proj-error'));
+      document.getElementById('up-submit').addEventListener('click', () => addProject('upcoming', 'up-name', 'up-owner', 'up-desc', 'up-error'));
+      document.getElementById('mod-submit').addEventListener('click', addModule);
+      document.getElementById('up2-submit').addEventListener('click', addModuleUpdate);
+      document.getElementById('mod-filter').addEventListener('change', renderModuleUpdates);
+      document.getElementById('mat-submit').addEventListener('click', addMaterial);
+      document.getElementById('blog-submit').addEventListener('click', addBlogPost);
+    }
+    init();
+  </script>
+</body>
+
+</html>
