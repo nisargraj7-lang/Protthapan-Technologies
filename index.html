@@ -145,6 +145,7 @@
     input[type=text],
     input[type=email],
     input[type=date],
+    input[type=number],
     select,
     textarea {
       width: 100%;
@@ -788,6 +789,16 @@
       font-size: 13px;
     }
 
+    .btn-ghost {
+      background: #fff;
+      color: var(--forest);
+      border: 1px solid var(--forest);
+    }
+
+    .btn-ghost:hover {
+      background: #EEF2EE;
+    }
+
     .mini-remove {
       background: none;
       border: none;
@@ -796,6 +807,231 @@
       padding: 0 2px;
       cursor: pointer;
       text-decoration: underline;
+    }
+
+    /* ======= Material List (tracking) ======= */
+    .ml-stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .ml-stat {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px 18px;
+      font-size: 12.5px;
+      color: var(--ink-soft);
+      min-width: 130px;
+    }
+
+    .ml-stat strong {
+      display: block;
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 500;
+      font-size: 22px;
+      color: var(--ink);
+    }
+
+    .ml-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .ml-grid>.panel {
+      margin-bottom: 0;
+      min-width: 0;
+    }
+
+    .chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #F3F6F3;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 4px 6px 4px 12px;
+      font-size: 13px;
+    }
+
+    .chip .add {
+      background: var(--forest);
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .chip .x {
+      background: none;
+      border: none;
+      color: var(--danger);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 0 4px;
+    }
+
+    .qty-ctl {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .qty-btn {
+      width: 24px;
+      height: 24px;
+      border: 1px solid var(--line);
+      background: #FDFCFA;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      color: var(--forest-dark);
+      padding: 0;
+    }
+
+    .qty-btn:hover {
+      background: #EEF2EE;
+    }
+
+    /* ======= Module progress circles ======= */
+    .mod-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 14px;
+    }
+
+    .mod-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px 14px;
+      text-align: center;
+      background: #FDFCFA;
+    }
+
+    .mod-card-name {
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 500;
+      font-size: 16px;
+      margin: 0 0 10px 0;
+      word-break: break-word;
+    }
+
+    .mini-donut {
+      position: relative;
+      margin: 0 auto 10px auto;
+    }
+
+    .mini-donut svg {
+      transform: rotate(-90deg);
+    }
+
+    .mini-donut-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mini-donut-pct {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 22px;
+      line-height: 1.1;
+    }
+
+    .mini-donut-label {
+      font-size: 11px;
+      color: var(--ink-soft);
+    }
+
+    /* ======= In / Out Pass ======= */
+    .ps-item-row {
+      display: grid;
+      grid-template-columns: 28px 1fr 90px 1fr 28px;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .ps-no {
+      color: var(--ink-soft);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .ps-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .trip-info {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px 16px;
+      font-size: 13.5px;
+      margin: 14px 0 4px 0;
+    }
+
+    .trip-info span {
+      display: block;
+      color: var(--ink-soft);
+      font-size: 11.5px;
+    }
+
+    input.ret-input {
+      width: 84px;
+    }
+
+    .sum-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 8px;
+    }
+
+    .sum-box {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      background: #FDFCFA;
+    }
+
+    .sum-box.ok {
+      border-left: 3px solid var(--forest);
+    }
+
+    .sum-box.bad {
+      border-left: 3px solid var(--danger);
+    }
+
+    .sum-box h4 {
+      margin: 0 0 6px 0;
+      font-size: 12px;
+      letter-spacing: 0.3px;
+    }
+
+    .sum-box ul {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 13.5px;
     }
 
     /* ======= Animations ======= */
@@ -878,6 +1114,21 @@
       .progress-panel {
         position: static;
       }
+
+      .ml-grid,
+      .sum-cols,
+      .trip-info {
+        grid-template-columns: 1fr;
+      }
+
+      .ps-item-row {
+        grid-template-columns: 1fr 80px 28px;
+      }
+
+      .ps-item-row .ps-no,
+      .ps-item-row input[placeholder^="Remarks"] {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -920,6 +1171,8 @@
       <div class="nav-item" data-view="report">Project Report</div>
       <div class="nav-item" data-view="upcoming">OnGoing Projects</div>
       <div class="nav-item" data-view="modules">Modules</div>
+      <div class="nav-item" data-view="matlist">Material List</div>
+      <div class="nav-item" data-view="pass">In / Out Pass</div>
       <div class="nav-item" data-view="materials">Materials</div>
       <div class="nav-item" data-view="blog">Blog</div>
       <div class="nav-item" data-view="feed">Team Activity</div>
@@ -1105,13 +1358,26 @@
               </select>
             </div>
             <div><label for="up2-date">Date</label><input type="date" id="up2-date"></div>
-            <div></div>
+            <div><label for="up2-status">Status</label>
+              <select id="up2-status">
+                <option value="done">Done</option>
+                <option value="planned">Planned / pending</option>
+              </select>
+            </div>
           </div>
           <label for="up2-desc">What changed / what to build</label>
           <textarea id="up2-desc"
             placeholder="e.g. Added obstacle-avoidance to the flight physics engine..."></textarea>
           <button class="btn" id="up2-submit">Log upgrade</button>
           <span id="up2-error" style="color:var(--danger); font-size:13px; margin-left:12px;"></span>
+        </div>
+
+        <div class="panel">
+          <h2>Module progress <span style="color:var(--ink-soft); font-weight:400;">— % of logged upgrades marked
+              done</span></h2>
+          <div id="module-progress-grid" class="mod-grid">
+            <div class="empty loading-shimmer">Loading…</div>
+          </div>
         </div>
 
         <div class="panel">
@@ -1129,6 +1395,117 @@
             </select>
           </div>
           <div id="module-updates-list">
+            <div class="empty loading-shimmer">Loading…</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="view-matlist" style="display:none;">
+        <h1>Material List</h1>
+        <p class="subtitle">Materials required for each project. Add or remove items and see what is in the list and
+          what is not. (The "Materials" tab is for articles and links.)</p>
+
+        <div class="panel">
+          <h2>Project</h2>
+          <select id="ml-project">
+            <option value="">Select an ongoing project</option>
+          </select>
+        </div>
+
+        <div class="panel">
+          <h2>Add a material to the project list</h2>
+          <div class="row-3">
+            <div><label for="ml-material">Material (scroll the list)</label>
+              <select id="ml-material">
+                <option value="">Select a material…</option>
+              </select>
+            </div>
+            <div><label for="ml-qty">Quantity</label><input type="number" id="ml-qty" min="1" step="1" value="1"></div>
+            <div style="display:flex; align-items:flex-end;">
+              <button class="btn btn-sm" id="ml-add" style="width:100%; padding:10px 14px;">Add to list</button>
+            </div>
+          </div>
+          <span id="ml-error" style="color:var(--danger); font-size:13px;"></span>
+          <div style="border-top:1px solid var(--line); margin-top:18px; padding-top:14px;">
+            <label for="ml-new">Material not in the dropdown? Add it to the dropdown</label>
+            <div class="inline-add">
+              <input type="text" id="ml-new" placeholder="e.g. Copper wire 2.5mm">
+              <button class="btn btn-sm" id="ml-new-btn">Add to dropdown</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="ml-tracking"></div>
+      </div>
+
+      <div id="view-pass" style="display:none;">
+        <h1>In / Out Pass</h1>
+        <p class="subtitle">Create an out pass for a trip with the items you are carrying. When you are back, enter
+          what came back — the checklist shows what is safely with you and what is not. Passes are generated
+          automatically for printing.</p>
+
+        <div class="panel">
+          <h2>New trip / out pass</h2>
+          <div class="row-3">
+            <div><label for="ps-date">Date of exit</label><input type="date" id="ps-date"></div>
+            <div><label for="ps-project">Link to ongoing project (optional)</label>
+              <select id="ps-project">
+                <option value="">No linked project</option>
+              </select>
+            </div>
+            <div><label for="ps-projname">Project name</label><input type="text" id="ps-projname"
+                placeholder="Shown on the pass"></div>
+          </div>
+          <div class="row-3" style="margin-top:14px;">
+            <div><label for="ps-main">Company name: main contractor</label><input type="text" id="ps-main"></div>
+            <div><label for="ps-sub">Company name: subcontractor</label><input type="text" id="ps-sub"></div>
+            <div><label for="ps-trans">Transporter company name</label><input type="text" id="ps-trans"></div>
+          </div>
+          <div class="row-3" style="margin-top:14px;">
+            <div><label for="ps-plot">Plot #</label><input type="text" id="ps-plot"></div>
+            <div><label for="ps-driver">Driver's name</label><input type="text" id="ps-driver"></div>
+            <div><label for="ps-vehicle">Vehicle plate #</label><input type="text" id="ps-vehicle"></div>
+          </div>
+          <div class="row-3" style="margin-top:14px;">
+            <div><label for="ps-invoice">Delivery note / invoice #</label><input type="text" id="ps-invoice"></div>
+            <div><label for="ps-from">Destination from</label><input type="text" id="ps-from"></div>
+            <div><label for="ps-to">Destination to</label><input type="text" id="ps-to"></div>
+          </div>
+
+          <label style="margin-top:20px;">Items we are carrying (description · quantity · remarks)</label>
+          <div id="ps-items"></div>
+          <div class="ps-actions">
+            <button type="button" class="btn btn-sm btn-ghost" id="ps-add-item">+ Add item</button>
+            <button type="button" class="btn btn-sm btn-ghost" id="ps-load">Load from project material list</button>
+          </div>
+
+          <div class="row-2" style="margin-top:20px;">
+            <div><label for="ps-filled-name">Filled by (contractor): name</label><input type="text"
+                id="ps-filled-name"></div>
+            <div><label for="ps-filled-des">Designation</label><input type="text" id="ps-filled-des"></div>
+          </div>
+          <div class="row-2" style="margin-top:14px;">
+            <div><label for="ps-appr-name">Approved by (pass office): name</label><input type="text"
+                id="ps-appr-name"></div>
+            <div><label for="ps-appr-des">Designation</label><input type="text" id="ps-appr-des"></div>
+          </div>
+
+          <button class="btn" id="ps-submit">Create out pass</button>
+          <span id="ps-error" style="color:var(--danger); font-size:13px; margin-left:12px;"></span>
+        </div>
+
+        <div class="panel">
+          <h2>All trips <span style="color:var(--ink-soft); font-weight:400;">— click a trip to open its return
+              checklist</span></h2>
+          <div class="filter-bar">
+            <select id="pass-filter">
+              <option value="">All trips</option>
+              <option value="out">Out on trip</option>
+              <option value="safe">Closed — all safe</option>
+              <option value="missing">Closed — items missing</option>
+            </select>
+          </div>
+          <div id="pass-list">
             <div class="empty loading-shimmer">Loading…</div>
           </div>
         </div>
@@ -1270,7 +1647,12 @@
     let moduleUpdates = [];
     let materials = [];
     let blogPosts = [];
+    let catalog = [];   // dropdown list of materials (Material List)
+    let trips = [];     // In / Out passes
     let openProjectId = null; // which OnGoing project is currently opened
+    let openTripId = null;    // which trip is currently opened
+    let retDraft = {};        // unsaved return-check values, so a live refresh never wipes what you typed
+    let psDraftItems = [{id: 'd0', desc: '', qty: '', remarks: ''}];
     const STATUS_LABEL = {inprogress: "In progress", done: "Completed", blocked: "Blocked"};
     const STATUS_CLASS = {inprogress: "status-inprogress", done: "status-done", blocked: "status-blocked"};
     const TYPE_LABEL = {feature: "New feature", improvement: "Improvement", fix: "Bug fix", idea: "Idea / planned"};
@@ -1295,6 +1677,8 @@
     }
     function todayStr() {return new Date().toISOString().slice(0, 10);}
     function escapeHtml(str) {const div = document.createElement('div'); div.textContent = str == null ? '' : str; return div.innerHTML;}
+    function escapeAttr(str) {return escapeHtml(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');}
+    function fmtNum(n) {return Math.round(Number(n) * 100) / 100;}
     function formatDate(dstr) {
       const d = new Date(dstr + 'T00:00:00');
       if (isNaN(d)) return dstr;
@@ -1700,6 +2084,51 @@
       });
       el.innerHTML = html + '</table>';
     }
+
+    // An upgrade counts as "done" if it was marked done. Older upgrades (no status saved) count as done unless they were an idea.
+    function isUpgradeDone(u) {return u.done !== undefined ? !!u.done : u.type !== 'idea';}
+    function moduleStats(m) {
+      const ups = moduleUpdates.filter(u => u.moduleId === m.id);
+      const done = ups.filter(isUpgradeDone).length;
+      return {total: ups.length, done, pct: ups.length ? Math.round(done / ups.length * 100) : 0};
+    }
+    function donutSvg(done, total, size) {
+      const stroke = Math.round(size * 0.094);
+      const r = (size - stroke) / 2;
+      const c = 2 * Math.PI * r;
+      const len = total ? c * done / total : 0;
+      const mid = size / 2;
+      return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+        <circle cx="${mid}" cy="${mid}" r="${r}" fill="none" stroke-width="${stroke}" style="stroke:var(--line);"></circle>
+        <circle cx="${mid}" cy="${mid}" r="${r}" fill="none" stroke-width="${stroke}" style="stroke:var(--forest);" stroke-dasharray="${len} ${c}"></circle>
+      </svg>`;
+    }
+    function renderModuleProgress() {
+      const el = document.getElementById('module-progress-grid');
+      if (!el) return;
+      if (modules.length === 0) {el.innerHTML = '<div class="empty" style="grid-column:1/-1;">No modules yet. Add one above.</div>'; return;}
+      let html = '';
+      modules.slice().sort((a, b) => b.timestamp - a.timestamp).forEach(m => {
+        const st = moduleStats(m);
+        const left = st.total ? 100 - st.pct : 0;
+        html += `<div class="mod-card">
+          <h3 class="mod-card-name">${escapeHtml(m.name)}</h3>
+          <div class="mini-donut" style="width:110px;height:110px;">
+            ${donutSvg(st.done, st.total, 110)}
+            <div class="mini-donut-center">
+              <div class="mini-donut-pct">${st.total ? st.pct + '%' : '—'}</div>
+              <div class="mini-donut-label">${st.total ? 'done' : 'no upgrades'}</div>
+            </div>
+          </div>
+          <div class="legend-row"><span class="legend-dot" style="background:var(--forest);"></span>Done<strong>${st.total ? st.pct + '%' : '—'}</strong></div>
+          <div class="legend-row"><span class="legend-dot" style="background:var(--line);"></span>Left<strong>${st.total ? left + '%' : '—'}</strong></div>
+          <div class="progress-note">${st.total ? st.done + ' of ' + st.total + ' upgrades done' : 'Log upgrades to track progress.'}</div>
+          ${m.ownerName ? `<div style="margin-top:8px;"><span class="member-tag">${escapeHtml(m.ownerName)}</span></div>` : ''}
+          ${m.parentProjectName ? `<div class="mod-team-note">Project: ${escapeHtml(m.parentProjectName)}</div>` : ''}
+        </div>`;
+      });
+      el.innerHTML = html;
+    }
     function renderModuleUpdates() {
       const el = document.getElementById('module-updates-list');
       const filter = document.getElementById('mod-filter').value;
@@ -1707,16 +2136,23 @@
       if (filter) list = list.filter(u => u.moduleId === filter);
       list.sort((a, b) => b.timestamp - a.timestamp);
       if (list.length === 0) {el.innerHTML = '<div class="empty">No upgrades logged yet.</div>'; return;}
-      let html = '<table><tr><th>Date</th><th>Module</th><th>Type</th><th>What changed</th></tr>';
+      let html = '<table><tr><th>Date</th><th>Module</th><th>Type</th><th>What changed</th><th>Done</th></tr>';
       list.forEach(u => {
         html += `<tr>
       <td class="task-date">${formatDate(u.date)}</td>
       <td><span class="member-tag">${escapeHtml(u.moduleName)}</span></td>
       <td><span class="status-pill ${TYPE_CLASS[u.type] || 'type-idea'}">${escapeHtml(TYPE_LABEL[u.type] || u.type)}</span></td>
       <td>${escapeHtml(u.description)}</td>
+      <td><input type="checkbox" ${isUpgradeDone(u) ? 'checked' : ''} onchange="toggleUpgradeDone('${u.id}')" style="accent-color:var(--forest); cursor:pointer;"></td>
     </tr>`;
       });
       el.innerHTML = html + '</table>';
+    }
+    async function toggleUpgradeDone(id) {
+      const u = moduleUpdates.find(x => x.id === id);
+      if (!u) return;
+      try {await db.collection('moduleUpdates').doc(id).update({done: !isUpgradeDone(u)});}
+      catch (e) {showToast('Could not update. Check your Firebase setup.');}
     }
 
     async function addModule() {
@@ -1756,6 +2192,7 @@
       const moduleId = document.getElementById('up2-module').value;
       const type = document.getElementById('up2-type').value;
       const date = document.getElementById('up2-date').value || todayStr();
+      const status = document.getElementById('up2-status').value;
       const description = document.getElementById('up2-desc').value.trim();
       const errEl = document.getElementById('up2-error');
       errEl.textContent = '';
@@ -1766,11 +2203,490 @@
       try {
         await db.collection('moduleUpdates').add({
           moduleId, moduleName: mod ? mod.name : 'Unknown',
-          type, date, description, timestamp: Date.now()
+          type, date, description, done: status === 'done', timestamp: Date.now()
         });
         document.getElementById('up2-desc').value = '';
         showToast('Upgrade logged');
       } catch (e) {errEl.textContent = 'Could not save. Check your Firebase setup.';}
+    }
+
+    // ---- Material List (required materials per project, with tracking) ----
+    function renderProjectPickers() {
+      const mlSel = document.getElementById('ml-project');
+      const psSel = document.getElementById('ps-project');
+      if (!mlSel || !psSel) return;
+      const keepA = mlSel.value, keepB = psSel.value;
+      mlSel.innerHTML = '<option value="">Select an ongoing project</option>';
+      psSel.innerHTML = '<option value="">No linked project</option>';
+      projects.filter(p => p.status === 'upcoming').sort((a, b) => b.timestamp - a.timestamp).forEach(p => {
+        const o1 = document.createElement('option'); o1.value = p.id; o1.textContent = p.name; mlSel.appendChild(o1);
+        const o2 = document.createElement('option'); o2.value = p.id; o2.textContent = p.name; psSel.appendChild(o2);
+      });
+      mlSel.value = keepA || '';
+      psSel.value = keepB || '';
+    }
+    function renderCatalogSelect() {
+      const sel = document.getElementById('ml-material');
+      if (!sel) return;
+      const keep = sel.value;
+      sel.innerHTML = '<option value="">Select a material…</option>';
+      catalog.slice().sort((a, b) => a.name.localeCompare(b.name)).forEach(c => {
+        const o = document.createElement('option'); o.value = c.id; o.textContent = c.name; sel.appendChild(o);
+      });
+      sel.value = keep || '';
+    }
+    function getMats(pid) {
+      const p = projects.find(x => x.id === pid);
+      return p ? JSON.parse(JSON.stringify(p.materialList || [])) : [];
+    }
+    async function saveMats(pid, list) {
+      if (!db) {showToast('Firebase not configured yet.'); return false;}
+      try {await db.collection('projects').doc(pid).update({materialList: list}); return true;}
+      catch (e) {showToast('Could not save. Check your Firebase setup.'); return false;}
+    }
+    async function addMaterialByName(pid, name, qty) {
+      const list = getMats(pid);
+      const ex = list.find(m => m.name.toLowerCase() === name.toLowerCase());
+      if (ex) ex.qty = fmtNum(Number(ex.qty) + qty);
+      else list.push({id: newId(), name, qty});
+      if (await saveMats(pid, list)) showToast(name + ' added to the list');
+    }
+    function addMaterialToList() {
+      const errEl = document.getElementById('ml-error');
+      errEl.textContent = '';
+      const pid = document.getElementById('ml-project').value;
+      const cat = catalog.find(c => c.id === document.getElementById('ml-material').value);
+      const qty = Number(document.getElementById('ml-qty').value);
+      if (!pid) {errEl.textContent = 'Select a project first.'; return;}
+      if (!cat) {errEl.textContent = 'Select a material from the dropdown.'; return;}
+      if (!(qty > 0)) {errEl.textContent = 'Enter a quantity greater than 0.'; return;}
+      addMaterialByName(pid, cat.name, qty);
+    }
+    function quickAddMaterial(cid) {
+      const pid = document.getElementById('ml-project').value;
+      const cat = catalog.find(c => c.id === cid);
+      if (!pid || !cat) return;
+      const qty = Number(document.getElementById('ml-qty').value) || 1;
+      addMaterialByName(pid, cat.name, qty > 0 ? qty : 1);
+    }
+    async function changeMatQty(pid, mid, delta) {
+      const list = getMats(pid);
+      const m = list.find(x => x.id === mid);
+      if (!m) return;
+      m.qty = fmtNum(Number(m.qty) + delta);
+      await saveMats(pid, m.qty <= 0 ? list.filter(x => x.id !== mid) : list);
+    }
+    async function removeMat(pid, mid) {
+      if (!confirm('Remove this material from the project list?')) return;
+      await saveMats(pid, getMats(pid).filter(x => x.id !== mid));
+    }
+    async function addNewCatalogMaterial() {
+      const input = document.getElementById('ml-new');
+      const name = input.value.trim();
+      if (!name) {showToast('Type the material name first'); return;}
+      if (catalog.some(c => c.name.toLowerCase() === name.toLowerCase())) {showToast('That material is already in the dropdown'); return;}
+      if (!db) {showToast('Firebase not configured yet.'); return;}
+      try {
+        await db.collection('materialCatalog').add({name, timestamp: Date.now()});
+        input.value = '';
+        showToast('Added to the dropdown');
+      } catch (e) {showToast('Could not save. Check your Firebase setup.');}
+    }
+    async function removeCatalogItem(id) {
+      if (!confirm('Remove this material from the dropdown? Projects that already have it keep it.')) return;
+      try {await db.collection('materialCatalog').doc(id).delete();} catch (e) {showToast('Could not remove');}
+    }
+    function renderMaterialTracking() {
+      const el = document.getElementById('ml-tracking');
+      if (!el) return;
+      const p = projects.find(x => x.id === document.getElementById('ml-project').value);
+      if (!p) {
+        el.innerHTML = '<div class="panel"><div class="empty">Select a project above to see its material list.</div></div>';
+        return;
+      }
+      const list = p.materialList || [];
+      const inNames = new Set(list.map(m => m.name.toLowerCase()));
+      const notIn = catalog.filter(c => !inNames.has(c.name.toLowerCase())).sort((a, b) => a.name.localeCompare(b.name));
+      const totalQty = list.reduce((s, m) => s + Number(m.qty || 0), 0);
+
+      let h = `<div class="ml-stats">
+        <div class="ml-stat"><strong>${list.length}</strong>In the list</div>
+        <div class="ml-stat"><strong>${notIn.length}</strong>Not in the list</div>
+        <div class="ml-stat"><strong>${fmtNum(totalQty)}</strong>Total quantity</div>
+      </div>
+      <div class="ml-grid">
+        <div class="panel">
+          <h2>✓ In the list — ${escapeHtml(p.name)}</h2>`;
+      if (list.length === 0) {
+        h += '<div class="empty">Nothing in the list yet. Add a material above.</div>';
+      } else {
+        h += '<table><tr><th>Material</th><th>Quantity</th><th></th></tr>';
+        list.forEach(m => {
+          h += `<tr>
+            <td><strong>${escapeHtml(m.name)}</strong></td>
+            <td><span class="qty-ctl">
+              <button class="qty-btn" title="Remove one" onclick="changeMatQty('${p.id}','${m.id}',-1)">−</button>
+              <strong>${fmtNum(m.qty)}</strong>
+              <button class="qty-btn" title="Add one" onclick="changeMatQty('${p.id}','${m.id}',1)">+</button>
+            </span></td>
+            <td><button class="mini-remove" onclick="removeMat('${p.id}','${m.id}')">Remove</button></td>
+          </tr>`;
+        });
+        h += '</table>';
+      }
+      h += `</div>
+        <div class="panel">
+          <h2>✗ Not in the list (${notIn.length})</h2>`;
+      if (catalog.length === 0) {
+        h += '<div class="empty">No materials in the dropdown yet. Add one with "Add to dropdown" above.</div>';
+      } else if (notIn.length === 0) {
+        h += '<div class="empty">Every material in the dropdown is already in this list.</div>';
+      } else {
+        h += '<div class="chip-list">';
+        notIn.forEach(c => {
+          h += `<span class="chip">${escapeHtml(c.name)}
+            <button class="add" title="Add to this project list" onclick="quickAddMaterial('${c.id}')">+ Add</button>
+            <button class="x" title="Remove from dropdown" onclick="removeCatalogItem('${c.id}')">✕</button></span>`;
+        });
+        h += '</div><div class="progress-note">"+ Add" uses the quantity typed above (1 if empty).</div>';
+      }
+      h += '</div></div>';
+      el.innerHTML = h;
+    }
+
+    // ---- In / Out Pass ----
+    function renderDraftItems() {
+      const el = document.getElementById('ps-items');
+      if (!el) return;
+      el.innerHTML = psDraftItems.map((it, i) => `
+        <div class="ps-item-row">
+          <span class="ps-no">${i + 1}</span>
+          <input type="text" value="${escapeAttr(it.desc)}" placeholder="Description of material / equipment" oninput="psDraftInput(${i},'desc',this.value)">
+          <input type="number" min="0" step="any" value="${escapeAttr(it.qty)}" placeholder="Qty" oninput="psDraftInput(${i},'qty',this.value)">
+          <input type="text" value="${escapeAttr(it.remarks)}" placeholder="Remarks (optional)" oninput="psDraftInput(${i},'remarks',this.value)">
+          <button type="button" class="mini-remove" onclick="psDraftRemove(${i})">✕</button>
+        </div>`).join('');
+    }
+    function psDraftInput(i, field, val) {if (psDraftItems[i]) psDraftItems[i][field] = val;}
+    function psDraftAdd() {
+      psDraftItems.push({id: newId(), desc: '', qty: '', remarks: ''});
+      renderDraftItems();
+    }
+    function psDraftRemove(i) {
+      if (psDraftItems.length === 1) psDraftItems = [{id: newId(), desc: '', qty: '', remarks: ''}];
+      else psDraftItems.splice(i, 1);
+      renderDraftItems();
+    }
+    function loadDraftFromProject() {
+      const p = projects.find(x => x.id === document.getElementById('ps-project').value);
+      if (!p) {showToast('Link an ongoing project first'); return;}
+      const mats = p.materialList || [];
+      if (mats.length === 0) {showToast('That project has no materials in its list yet'); return;}
+      const kept = psDraftItems.filter(it => it.desc.trim());
+      mats.forEach(m => {
+        if (!kept.some(it => it.desc.trim().toLowerCase() === m.name.toLowerCase())) {
+          kept.push({id: newId(), desc: m.name, qty: m.qty, remarks: ''});
+        }
+      });
+      psDraftItems = kept;
+      renderDraftItems();
+      showToast('Loaded from the project material list');
+    }
+
+    async function createTrip() {
+      const errEl = document.getElementById('ps-error');
+      errEl.textContent = '';
+      const items = psDraftItems
+        .filter(it => it.desc.trim() && Number(it.qty) > 0)
+        .map(it => ({id: newId(), desc: it.desc.trim(), qty: Number(it.qty), remarks: (it.remarks || '').trim(), returnedQty: null, reason: ''}));
+      if (!items.length) {errEl.textContent = 'Add at least one item with a description and a quantity.'; return;}
+      if (!db) {errEl.textContent = 'Firebase not configured yet.'; return;}
+      const v = id => document.getElementById(id).value.trim();
+      const date = document.getElementById('ps-date').value || todayStr();
+      const proj = projects.find(p => p.id === document.getElementById('ps-project').value);
+      const refNo = 'OUT-' + date.replace(/-/g, '') + '-' + (Math.floor(Math.random() * 900) + 100);
+      try {
+        await db.collection('passes').add({
+          refNo, date,
+          projectId: proj ? proj.id : null,
+          projectName: v('ps-projname') || (proj ? proj.name : ''),
+          mainContractor: v('ps-main'), subContractor: v('ps-sub'), transporter: v('ps-trans'),
+          plot: v('ps-plot'), driver: v('ps-driver'), vehicle: v('ps-vehicle'),
+          invoice: v('ps-invoice'), from: v('ps-from'), to: v('ps-to'),
+          filledName: v('ps-filled-name'), filledDesignation: v('ps-filled-des'),
+          approvedName: v('ps-appr-name'), approvedDesignation: v('ps-appr-des'),
+          items, createdBy: currentName, closedDate: null, timestamp: Date.now()
+        });
+        ['ps-projname', 'ps-main', 'ps-sub', 'ps-trans', 'ps-plot', 'ps-driver', 'ps-vehicle', 'ps-invoice', 'ps-from', 'ps-to',
+          'ps-filled-name', 'ps-filled-des', 'ps-appr-name', 'ps-appr-des'].forEach(id => {document.getElementById(id).value = '';});
+        document.getElementById('ps-project').value = '';
+        psDraftItems = [{id: newId(), desc: '', qty: '', remarks: ''}];
+        renderDraftItems();
+        showToast('Out pass ' + refNo + ' created');
+      } catch (e) {
+        console.log('[createTrip] FAILED:', e);
+        errEl.textContent = 'Could not save. Check your Firebase setup.';
+      }
+    }
+
+    // Status of one item: how much we carried vs how much came back
+    function itemStatus(out, ret) {
+      if (ret === null || ret === undefined || String(ret).trim() === '' || isNaN(Number(ret))) {
+        return {key: 'pending', label: 'Not checked yet', cls: 'status-inprogress'};
+      }
+      const r = Number(ret);
+      if (r >= out) return {key: 'safe', label: r > out ? 'Safe (+' + fmtNum(r - out) + ' extra)' : 'Safe ✓', cls: 'status-done'};
+      return {key: 'short', label: r === 0 ? 'Not with us' : 'Short by ' + fmtNum(out - r), cls: 'status-blocked'};
+    }
+    function tripState(t) {
+      const items = t.items || [];
+      let pending = 0, short = 0, safe = 0;
+      items.forEach(it => {
+        const s = itemStatus(it.qty, it.returnedQty);
+        if (s.key === 'pending') pending++; else if (s.key === 'short') short++; else safe++;
+      });
+      if (pending) return {key: 'out', label: 'Out on trip', cls: 'status-inprogress', pending, short, safe, total: items.length};
+      if (short) return {key: 'missing', label: 'Closed — items missing', cls: 'status-blocked', pending, short, safe, total: items.length};
+      return {key: 'safe', label: 'Closed — all safe', cls: 'status-done', pending, short, safe, total: items.length};
+    }
+    function tripSummaryHtml(vals) {
+      const safe = [], missing = [], pending = [];
+      vals.forEach(x => {
+        const s = itemStatus(x.qty, x.ret);
+        if (s.key === 'safe') safe.push(x); else if (s.key === 'short') missing.push(x); else pending.push(x);
+      });
+      const total = vals.length;
+      const pct = total ? Math.round(safe.length / total * 100) : 0;
+      let h = `<div class="bar" style="margin-top:16px;"><div style="width:${pct}%"></div></div>
+        <div class="progress-note" style="margin:0 0 6px 0;">${safe.length} of ${total} items confirmed safely back${pending.length ? ' · ' + pending.length + ' not checked yet' : ''}</div>
+        <div class="sum-cols">
+          <div class="sum-box ok"><h4>✓ SAFELY CARRIED BACK (${safe.length})</h4>`;
+      h += safe.length
+        ? '<ul>' + safe.map(x => `<li>${escapeHtml(x.desc)} — ${fmtNum(x.ret)} of ${fmtNum(x.qty)}</li>`).join('') + '</ul>'
+        : '<div class="mod-team-note">None yet.</div>';
+      h += `</div><div class="sum-box bad"><h4>✗ NOT WITH US (${missing.length})</h4>`;
+      h += missing.length
+        ? '<ul>' + missing.map(x => `<li>${escapeHtml(x.desc)} — back ${fmtNum(x.ret)} of ${fmtNum(x.qty)}${x.reason
+          ? `<div class="mod-team-note">Reason: ${escapeHtml(x.reason)}</div>`
+          : '<div class="mod-team-note" style="color:var(--danger);">Reason needed</div>'}</li>`).join('') + '</ul>'
+        : '<div class="mod-team-note">Nothing missing.</div>';
+      h += '</div></div>';
+      return h;
+    }
+    // Live update while typing in the return check (no save yet)
+    function refreshTripCheck(tripId) {
+      const t = trips.find(x => x.id === tripId);
+      if (!t) return;
+      const vals = (t.items || []).map(it => {
+        const r = document.getElementById(`ret-${tripId}-${it.id}`);
+        const s = document.getElementById(`rs-${tripId}-${it.id}`);
+        const ret = r ? r.value : '';
+        const reason = s ? s.value : '';
+        retDraft[tripId + ':' + it.id] = {ret, reason};
+        const st = itemStatus(it.qty, ret);
+        const cell = document.getElementById(`ts-${tripId}-${it.id}`);
+        if (cell) cell.innerHTML = `<span class="status-pill ${st.cls}">${st.label}</span>`;
+        return {desc: it.desc, qty: it.qty, ret, reason};
+      });
+      const box = document.getElementById('trip-sum-' + tripId);
+      if (box) box.innerHTML = tripSummaryHtml(vals);
+    }
+    function markAllReturned(tripId) {
+      const t = trips.find(x => x.id === tripId);
+      if (!t) return;
+      (t.items || []).forEach(it => {
+        const r = document.getElementById(`ret-${tripId}-${it.id}`);
+        if (r) r.value = it.qty;
+      });
+      refreshTripCheck(tripId);
+    }
+    async function saveReturnCheck(tripId) {
+      const t = trips.find(x => x.id === tripId);
+      if (!t) return;
+      const errEl = document.getElementById('ps-err-' + tripId);
+      errEl.textContent = '';
+      const items = (t.items || []).map(it => {
+        const rv = document.getElementById(`ret-${tripId}-${it.id}`).value.trim();
+        const rs = document.getElementById(`rs-${tripId}-${it.id}`).value.trim();
+        return {...it, returnedQty: rv === '' ? null : Number(rv), reason: rs};
+      });
+      for (const it of items) {
+        if (it.returnedQty !== null && (isNaN(it.returnedQty) || it.returnedQty < 0)) {
+          errEl.textContent = 'Check the quantity for "' + it.desc + '".'; return;
+        }
+        if (it.returnedQty !== null && it.returnedQty < it.qty && !it.reason) {
+          errEl.textContent = 'Write a reason for "' + it.desc + '" (it did not all come back).'; return;
+        }
+      }
+      const allChecked = items.every(it => it.returnedQty !== null);
+      try {
+        await db.collection('passes').doc(tripId).update({
+          items, checkedBy: currentName, lastChecked: Date.now(), closedDate: allChecked ? todayStr() : null
+        });
+        Object.keys(retDraft).forEach(k => {if (k.indexOf(tripId + ':') === 0) delete retDraft[k];});
+        showToast(allChecked ? 'Return check saved — trip closed' : 'Return check saved');
+      } catch (e) {
+        console.log('[saveReturnCheck] FAILED:', e);
+        errEl.textContent = 'Could not save. Check your Firebase setup.';
+      }
+    }
+    async function deleteTrip(id) {
+      if (!confirm('Delete this trip and its pass records?')) return;
+      try {await db.collection('passes').doc(id).delete();} catch (e) {showToast('Could not delete trip');}
+    }
+    function toggleTrip(id) {
+      openTripId = openTripId === id ? null : id;
+      renderPassList();
+    }
+    function tripBody(t) {
+      const items = t.items || [];
+      const ic = (l, v) => `<div><span>${l}</span>${escapeHtml(v || '—')}</div>`;
+      const val = it => {
+        const d = retDraft[t.id + ':' + it.id];
+        return d ? d : {ret: it.returnedQty == null ? '' : it.returnedQty, reason: it.reason || ''};
+      };
+      let h = '<div class="proj-body">';
+      h += '<div class="trip-info">'
+        + ic('Date of exit', formatDate(t.date)) + ic('Project', t.projectName) + ic('Plot #', t.plot)
+        + ic('Main contractor', t.mainContractor) + ic('Subcontractor', t.subContractor) + ic('Transporter', t.transporter)
+        + ic("Driver's name", t.driver) + ic('Vehicle plate #', t.vehicle) + ic('Delivery note / invoice #', t.invoice)
+        + ic('Destination from', t.from) + ic('Destination to', t.to)
+        + ic('Back on', t.closedDate ? formatDate(t.closedDate) : 'Not closed yet')
+        + '</div>';
+      h += '<div class="sub-section-title">ITEMS &amp; RETURN CHECK</div>';
+      h += '<table><tr><th>#</th><th>Item</th><th>Carried</th><th>Came back</th><th>Status</th><th>Reason if not back</th></tr>';
+      const vals = [];
+      items.forEach((it, i) => {
+        const d = val(it);
+        const s = itemStatus(it.qty, d.ret);
+        vals.push({desc: it.desc, qty: it.qty, ret: d.ret, reason: d.reason});
+        h += `<tr>
+          <td>${i + 1}</td>
+          <td>${escapeHtml(it.desc)}${it.remarks ? `<div class="mod-team-note">${escapeHtml(it.remarks)}</div>` : ''}</td>
+          <td>${fmtNum(it.qty)}</td>
+          <td><input type="number" min="0" step="any" class="ret-input" id="ret-${t.id}-${it.id}" value="${escapeAttr(d.ret)}" oninput="refreshTripCheck('${t.id}')"></td>
+          <td id="ts-${t.id}-${it.id}"><span class="status-pill ${s.cls}">${s.label}</span></td>
+          <td><input type="text" id="rs-${t.id}-${it.id}" value="${escapeAttr(d.reason)}" placeholder="e.g. kept at site for tomorrow's work" oninput="refreshTripCheck('${t.id}')"></td>
+        </tr>`;
+      });
+      h += '</table>';
+      h += `<div class="ps-actions">
+          <button class="btn btn-sm" onclick="saveReturnCheck('${t.id}')">Save return check</button>
+          <button class="btn btn-sm btn-ghost" onclick="markAllReturned('${t.id}')">Mark all as returned</button>
+          <button class="btn btn-sm btn-ghost" onclick="printPass('${t.id}','out')">Print out pass</button>
+          <button class="btn btn-sm btn-ghost" onclick="printPass('${t.id}','in')">Print in pass</button>
+          <button class="mini-remove" onclick="deleteTrip('${t.id}')">Delete trip</button>
+          <span id="ps-err-${t.id}" style="color:var(--danger); font-size:13px;"></span>
+        </div>`;
+      h += `<div id="trip-sum-${t.id}">${tripSummaryHtml(vals)}</div>`;
+      h += '</div>';
+      return h;
+    }
+    function renderPassList() {
+      const el = document.getElementById('pass-list');
+      if (!el) return;
+      const f = document.getElementById('pass-filter').value;
+      let list = trips.slice().sort((a, b) => b.timestamp - a.timestamp);
+      if (f) list = list.filter(t => tripState(t).key === f);
+      if (openTripId && !trips.some(t => t.id === openTripId)) openTripId = null;
+      if (list.length === 0) {
+        el.innerHTML = '<div class="empty">' + (trips.length ? 'No trips match this filter.' : 'No trips yet. Create the first out pass above.') + '</div>';
+        return;
+      }
+      el.innerHTML = list.map(t => {
+        const st = tripState(t);
+        const open = t.id === openTripId;
+        return `<div class="proj-card ${open ? 'open' : ''}">
+          <div class="proj-head" onclick="toggleTrip('${t.id}')">
+            <span class="proj-chevron">▶</span>
+            <span class="proj-title">${escapeHtml(t.refNo)} <span style="color:var(--ink-soft); font-weight:400;">· ${formatDate(t.date)}${t.to ? ' · to ' + escapeHtml(t.to) : ''}</span></span>
+            ${t.projectName ? `<span class="member-tag">${escapeHtml(t.projectName)}</span>` : ''}
+            <span style="font-size:12.5px; color:var(--ink-soft);">${st.safe}/${st.total} back</span>
+            <span class="status-pill ${st.cls}">${st.label}</span>
+          </div>
+          ${open ? tripBody(t) : ''}
+        </div>`;
+      }).join('');
+    }
+
+    // Auto-generated printable pass (Out pass = EXIT, In pass = ENTRY)
+    function passDocHtml(t, kind) {
+      const isIn = kind === 'in';
+      const e = escapeHtml;
+      const items = t.items || [];
+      const rows = [];
+      const notBack = [];
+      if (!isIn) {
+        items.forEach(it => rows.push({desc: it.desc, qty: fmtNum(it.qty), remarks: it.remarks || ''}));
+      } else {
+        items.forEach(it => {
+          const r = it.returnedQty == null ? null : Number(it.returnedQty);
+          if (r !== null && r > 0) {
+            rows.push({desc: it.desc, qty: fmtNum(r), remarks: (it.remarks || '') + (r < it.qty ? (it.remarks ? ' · ' : '') + 'Short by ' + fmtNum(it.qty - r) : '')});
+          }
+          if (r === null || r < it.qty) {
+            notBack.push({desc: it.desc, carried: fmtNum(it.qty), back: r === null ? 'not checked' : fmtNum(r), reason: it.reason || ''});
+          }
+        });
+      }
+      while (rows.length < 5) rows.push({desc: '', qty: '', remarks: ''});
+      const date = isIn ? (t.closedDate || todayStr()) : t.date;
+      const from = isIn ? t.to : t.from;
+      const to = isIn ? t.from : t.to;
+      const cell = (label, v) => `<td><span class="lbl">${label}</span><div class="val">${e(v)}</div></td>`;
+      return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${e(t.refNo)} - ${isIn ? 'In' : 'Out'} pass</title>
+<style>
+body{font-family:Arial,Helvetica,sans-serif;color:#1E2321;margin:24px;font-size:12px;}
+h1{font-size:18px;margin:2px 0;color:#1D3A2D;}
+.org{font-size:12px;color:#B98D3E;font-weight:bold;letter-spacing:.6px;}
+.top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.ref{text-align:right;font-size:12px;}
+.checks{margin:8px 0 12px;font-size:13px;font-weight:bold;color:#1D3A2D;}
+.cb{display:inline-block;width:16px;height:16px;border:2px solid #1D3A2D;text-align:center;line-height:14px;font-size:13px;margin:0 6px 0 18px;vertical-align:middle;}
+table{width:100%;border-collapse:collapse;margin-bottom:10px;}
+td,th{border:1px solid #29513F;padding:6px 8px;text-align:left;vertical-align:top;font-size:11.5px;}
+th{background:#EEF2EE;}
+.lbl{color:#5B6360;font-size:10.5px;display:block;margin-bottom:3px;}
+.val{min-height:20px;font-size:12.5px;}
+.sec th{text-align:center;}
+.sign td{height:48px;}
+.notes{font-size:10.5px;color:#29513F;margin-top:12px;}
+.bad th{color:#A6432F;text-align:center;}
+@media print{body{margin:10mm;}}
+</style></head><body>
+<div class="top"><div><div class="org">PROTTHAPAN TECHNOLOGIES</div><h1>ENTRY / EXIT PASS FOR MATERIAL OR EQUIPMENT</h1><div>(CONSTRUCTION GATE)</div></div>
+<div class="ref"><b>Ref: ${e(t.refNo)}</b><br>${isIn ? 'IN PASS (return)' : 'OUT PASS'}</div></div>
+<div class="checks"><span class="cb">${isIn ? '&#10004;' : ''}</span>ENTRY <span class="cb">${!isIn ? '&#10004;' : ''}</span>EXIT</div>
+<table><tr>${cell('Date of Entry / Exit:', formatDate(date))}</tr></table>
+<table><tr>${cell('Company Name: Main Contractor', t.mainContractor)}${cell('Company Name: Subcontractor', t.subContractor)}${cell('Transporter Company Name', t.transporter)}</tr></table>
+<table><tr>${cell('Plot #:', t.plot)}${cell('Project Name:', t.projectName)}${cell("Driver's Name:", t.driver)}</tr></table>
+<table><tr>${cell('Delivery Note / Invoice # (for entry):', t.invoice)}${cell('Vehicle Plate #:', t.vehicle)}${cell('Destination From:', from)}${cell('Destination To:', to)}</tr></table>
+<table><tr><th style="width:36px;">No.</th><th>Description of Material / Equipment</th><th style="width:90px;">Quantity</th><th style="width:30%;">Remarks</th></tr>
+${rows.map((r, i) => `<tr><td>${r.desc ? i + 1 : '&nbsp;'}</td><td>${e(r.desc)}</td><td>${e(r.qty)}</td><td>${e(r.remarks)}</td></tr>`).join('')}
+</table>
+${isIn && notBack.length ? `<table class="bad"><tr><th colspan="4">ITEMS NOT BROUGHT BACK / KEPT AT SITE</th></tr>
+<tr><th>Item</th><th style="width:80px;">Carried</th><th style="width:90px;">Came back</th><th>Reason</th></tr>
+${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.back)}</td><td>${e(n.reason)}</td></tr>`).join('')}</table>` : ''}
+<table class="sec"><tr><th style="width:50%;">FILLED BY CONTRACTOR</th><th>APPROVED BY PASS OFFICE</th></tr>
+<tr><td>Name: ${e(t.filledName)}</td><td>Name: ${e(t.approvedName)}</td></tr>
+<tr><td>Designation: ${e(t.filledDesignation)}</td><td>Designation: ${e(t.approvedDesignation)}</td></tr>
+<tr class="sign"><td>Signature &amp; Stamp:</td><td>Signature &amp; Stamp:</td></tr></table>
+<div class="notes"><b>Notes:</b><ul><li>Hand written forms will not be accepted</li><li>Each pass is valid for one time entry / exit valid for one day</li></ul></div>
+</body></html>`;
+    }
+    function printPass(tripId, kind) {
+      const t = trips.find(x => x.id === tripId);
+      if (!t) return;
+      if (kind === 'in' && !(t.items || []).some(it => it.returnedQty != null)) {
+        showToast('Do the return check first, then print the in pass');
+        return;
+      }
+      const w = window.open('', '_blank');
+      if (!w) {showToast('Please allow pop-ups to print the pass'); return;}
+      w.document.write(passDocHtml(t, kind));
+      w.document.close();
+      w.focus();
+      setTimeout(() => w.print(), 400);
     }
 
     async function addInventoryItem() {
@@ -2125,6 +3041,8 @@
       document.getElementById('view-report').style.display = view === 'report' ? 'block' : 'none';
       document.getElementById('view-upcoming').style.display = view === 'upcoming' ? 'block' : 'none';
       document.getElementById('view-modules').style.display = view === 'modules' ? 'block' : 'none';
+      document.getElementById('view-matlist').style.display = view === 'matlist' ? 'block' : 'none';
+      document.getElementById('view-pass').style.display = view === 'pass' ? 'block' : 'none';
       document.getElementById('view-materials').style.display = view === 'materials' ? 'block' : 'none';
       document.getElementById('view-blog').style.display = view === 'blog' ? 'block' : 'none';
       document.getElementById('view-feed').style.display = view === 'feed' ? 'block' : 'none';
@@ -2134,7 +3052,9 @@
       if (view === 'inventory') renderInventory();
       if (view === 'report') renderReport();
       if (view === 'upcoming') renderUpcoming();
-      if (view === 'modules') {renderModuleParent(); renderModuleList(); renderModuleUpdates();}
+      if (view === 'modules') {renderModuleParent(); renderModuleProgress(); renderModuleList(); renderModuleUpdates();}
+      if (view === 'matlist') {renderProjectPickers(); renderCatalogSelect(); renderMaterialTracking();}
+      if (view === 'pass') {renderProjectPickers(); renderDraftItems(); renderPassList();}
       if (view === 'materials') renderMaterialList();
       if (view === 'blog') renderBlogList();
 
@@ -2152,6 +3072,7 @@
       document.getElementById('inv-date').value = todayStr();
       document.getElementById('up2-date').value = todayStr();
       document.getElementById('blog-date').value = todayStr();
+      document.getElementById('ps-date').value = todayStr();
 
       db.collection('members').onSnapshot(snap => {
         members = snap.docs.map(d => ({id: d.id, ...d.data()}));
@@ -2171,17 +3092,28 @@
       db.collection('projects').onSnapshot(snap => {
         projects = snap.docs.map(d => ({id: d.id, ...d.data()}));
         renderReport(); renderUpcoming(); renderModuleParent(); renderModuleList();
+        renderProjectPickers(); renderMaterialTracking();
       }, () => showToast('Could not load projects'));
 
       db.collection('modules').onSnapshot(snap => {
         modules = snap.docs.map(d => ({id: d.id, ...d.data()}));
-        renderModuleSelects(); renderModuleList(); renderModuleUpdates();
+        renderModuleSelects(); renderModuleList(); renderModuleUpdates(); renderModuleProgress();
       }, () => showToast('Could not load modules'));
 
       db.collection('moduleUpdates').onSnapshot(snap => {
         moduleUpdates = snap.docs.map(d => ({id: d.id, ...d.data()}));
-        renderModuleList(); renderModuleUpdates();
+        renderModuleList(); renderModuleUpdates(); renderModuleProgress();
       }, () => showToast('Could not load module upgrades'));
+
+      db.collection('materialCatalog').onSnapshot(snap => {
+        catalog = snap.docs.map(d => ({id: d.id, ...d.data()}));
+        renderCatalogSelect(); renderMaterialTracking();
+      }, () => showToast('Could not load the material dropdown'));
+
+      db.collection('passes').onSnapshot(snap => {
+        trips = snap.docs.map(d => ({id: d.id, ...d.data()}));
+        renderPassList();
+      }, () => showToast('Could not load passes'));
 
       db.collection('materials').onSnapshot(snap => {
         materials = snap.docs.map(d => ({id: d.id, ...d.data()}));
@@ -2194,6 +3126,7 @@
       }, () => showToast('Could not load blog posts'));
 
       updateAdminUI();
+      renderDraftItems();
 
       document.querySelectorAll('.nav-item').forEach(n => {
         if (n.id === 'admin-toggle') {
@@ -2213,7 +3146,22 @@
       document.getElementById('mod-submit').addEventListener('click', addModule);
       document.getElementById('mod-parent').addEventListener('change', renderModuleParentInfo);
       document.getElementById('up2-submit').addEventListener('click', addModuleUpdate);
+      document.getElementById('up2-type').addEventListener('change', e => {
+        document.getElementById('up2-status').value = e.target.value === 'idea' ? 'planned' : 'done';
+      });
       document.getElementById('mod-filter').addEventListener('change', renderModuleUpdates);
+      document.getElementById('ml-project').addEventListener('change', renderMaterialTracking);
+      document.getElementById('ml-add').addEventListener('click', addMaterialToList);
+      document.getElementById('ml-new-btn').addEventListener('click', addNewCatalogMaterial);
+      document.getElementById('ml-new').addEventListener('keydown', e => {if (e.key === 'Enter') addNewCatalogMaterial();});
+      document.getElementById('ps-project').addEventListener('change', () => {
+        const p = projects.find(x => x.id === document.getElementById('ps-project').value);
+        if (p) document.getElementById('ps-projname').value = p.name;
+      });
+      document.getElementById('ps-add-item').addEventListener('click', psDraftAdd);
+      document.getElementById('ps-load').addEventListener('click', loadDraftFromProject);
+      document.getElementById('ps-submit').addEventListener('click', createTrip);
+      document.getElementById('pass-filter').addEventListener('change', renderPassList);
       document.getElementById('mat-submit').addEventListener('click', addMaterial);
       document.getElementById('blog-submit').addEventListener('click', addBlogPost);
     }
