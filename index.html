@@ -1550,6 +1550,41 @@
         font-size: 36px;
       }
     }
+  
+/* ===== Purchase Desk premium motion layer ===== */
+.inventory-hero{position:relative;overflow:hidden;border:1px solid rgba(185,141,62,.22);background:radial-gradient(circle at 85% 15%,rgba(185,141,62,.18),transparent 28%),linear-gradient(135deg,#17372a 0%,#29513f 52%,#355f4b 100%);box-shadow:0 24px 60px rgba(29,58,45,.18);transform:translateZ(0)}
+.inventory-hero:before,.inventory-hero:after{content:"";position:absolute;border-radius:999px;pointer-events:none;filter:blur(2px);animation:purchaseOrb 9s ease-in-out infinite}
+.inventory-hero:before{width:190px;height:190px;right:-60px;top:-80px;background:rgba(255,255,255,.09)}
+.inventory-hero:after{width:120px;height:120px;left:42%;bottom:-70px;background:rgba(185,141,62,.12);animation-delay:-3s}
+.inv-kicker{letter-spacing:.22em;text-transform:uppercase;font-weight:800;font-size:11px;color:#f0d69e}
+.inv-hero-title{font-size:clamp(32px,4vw,52px);line-height:1.02;font-weight:850;color:#fff;letter-spacing:-.04em;animation:purchaseTitle .7s ease both}
+.inv-hero-copy{max-width:760px;color:rgba(255,255,255,.78);font-size:15px}
+.purchase-card{transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease;animation:purchaseCardIn .55s ease both}
+.purchase-card:hover{transform:translateY(-3px);box-shadow:0 18px 40px rgba(31,42,36,.10);border-color:rgba(185,141,62,.35)}
+.catalog-item{position:relative;overflow:hidden;transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;background:linear-gradient(180deg,#fff,#fbfaf6)}
+.catalog-item:after{content:"";position:absolute;inset:auto -30% -65% -30%;height:100px;background:radial-gradient(ellipse,rgba(185,141,62,.12),transparent 65%);opacity:0;transition:opacity .25s}
+.catalog-item:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(41,81,63,.10)}
+.catalog-item:hover:after,.catalog-item.selected:after{opacity:1}
+.catalog-item.selected{border-color:var(--gold);box-shadow:0 0 0 2px rgba(185,141,62,.12),0 14px 30px rgba(185,141,62,.10);animation:selectedPulse 1.8s ease-in-out infinite}
+.channel-btn{position:relative;overflow:hidden;transition:transform .2s ease,box-shadow .2s ease,background .2s ease}
+.channel-btn:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(29,58,45,.13)}
+.channel-btn:active{transform:scale(.98)}
+.channel-btn.primary{background:linear-gradient(135deg,#29513f,#1d3a2d);box-shadow:0 8px 20px rgba(29,58,45,.18)}
+.channel-btn.sending{pointer-events:none;opacity:.9}
+.channel-btn.sending:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);transform:translateX(-100%);animation:sendShimmer 1.1s infinite}
+.email-preview{position:relative;overflow:hidden;border:1px solid rgba(185,141,62,.25);box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
+.email-preview:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(#b98d3e,#29513f);animation:previewGlow 2.2s ease-in-out infinite}
+.purchase-success{display:flex;align-items:center;gap:10px;margin-top:12px;padding:11px 13px;border-radius:12px;background:#edf8f0;color:#22613a;border:1px solid #bfe2c8;animation:successIn .35s ease both}
+.purchase-error{display:flex;align-items:center;gap:10px;margin-top:12px;padding:11px 13px;border-radius:12px;background:#fff1ef;color:#8f3022;border:1px solid #efc3bc;animation:successIn .35s ease both}
+@keyframes purchaseOrb{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(-18px,16px,0) scale(1.08)}}
+@keyframes purchaseTitle{from{opacity:0;transform:translateY(10px);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}
+@keyframes purchaseCardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes selectedPulse{0%,100%{box-shadow:0 0 0 2px rgba(185,141,62,.10),0 14px 30px rgba(185,141,62,.08)}50%{box-shadow:0 0 0 4px rgba(185,141,62,.06),0 16px 34px rgba(185,141,62,.12)}}
+@keyframes sendShimmer{to{transform:translateX(100%)}}
+@keyframes previewGlow{0%,100%{opacity:.55}50%{opacity:1}}
+@keyframes successIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+@media(max-width:700px){.inv-hero-title{font-size:34px}.channel-grid{grid-template-columns:1fr}.purchase-layout{grid-template-columns:1fr}.inv-stat-row{grid-template-columns:1fr}}
+
   </style>
 </head>
 
@@ -1782,6 +1817,7 @@
                 <button class="channel-btn" id="send-purchase-whatsapp">💬 WhatsApp</button>
                 <button class="channel-btn" id="send-purchase-sms">📱 SMS</button>
               </div>
+              <div id="purchase-send-status" style="display:none;"></div>
               <div class="saved-note" id="purchase-settings-note"></div>
               <div class="email-preview">
                 <div class="email-head"><strong>MESSAGE PREVIEW</strong> · updates live as you select items</div>
@@ -3933,7 +3969,8 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       }).join('');
     }
     function togglePurchaseItem(id) {
-      const item=purchaseCatalog.find(x=>x.id===id); if(!item)return;
+      const source=purchaseCatalog.length?purchaseCatalog:catalog.map(x=>({id:'cat-'+x.id,name:x.name,unit:x.unit||'unit'}));
+      const item=source.find(x=>x.id===id); if(!item)return;
       if(purchaseSelection[id]) delete purchaseSelection[id];
       else purchaseSelection[id]={id,itemName:item.name,unit:item.unit||'unit',qty:1};
       renderPurchaseCatalog(); renderPurchaseRequest();
@@ -4006,13 +4043,35 @@ Protthapan Technologies`;
         <div class="inv-stat"><strong>${inventory.length}</strong><span>Purchased records</span></div>
         <div class="inv-stat"><strong>₹${total.toLocaleString('en-IN')}</strong><span>Total recorded spend</span></div>`;
     }
-    function sendPurchaseEmail() {
-      const items=purchaseItems(); if(!items.length){showToast('Select at least one item');return;}
+    async function sendPurchaseEmail() {
+      const items=purchaseItems();
+      if(!items.length){showToast('Select at least one item');return;}
       savePurchasePrefs();
       const email=document.getElementById('purchase-email').value.trim();
       if(!email){showToast('Enter the Purchase Department email');return;}
-      const subject=encodeURIComponent('Purchase Request — Protthapan Technologies');
-      location.href=`mailto:${encodeURIComponent(email)}?subject=${subject}&body=${encodeURIComponent(purchaseMessage())}`;
+      const btn=document.getElementById('send-purchase-email');
+      const status=document.getElementById('purchase-send-status');
+      const requester=document.getElementById('purchase-requester')?.value.trim()||currentName||'Team';
+      const project=document.getElementById('purchase-project')?.value.trim()||'General requirement';
+      const note=document.getElementById('purchase-note')?.value.trim()||'No additional note.';
+      btn.disabled=true; btn.classList.add('sending'); btn.textContent='⏳ Sending securely…';
+      status.style.display='none'; status.className=''; status.textContent='';
+      try {
+        const response=await fetch('/api/send-purchase-email',{
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({to:email,subject:'Purchase Request — Protthapan Technologies',message:purchaseMessage(),requester,project,note,items})
+        });
+        const data=await response.json().catch(()=>({}));
+        if(!response.ok) throw new Error(data.error||'Email service is unavailable.');
+        status.className='purchase-success'; status.innerHTML='✓ <strong>Purchase request sent successfully.</strong> The Purchase Department has received the email.'; status.style.display='flex';
+        showToast('Purchase request emailed successfully');
+      } catch(e) {
+        console.error('[purchase-email]',e);
+        status.className='purchase-error'; status.innerHTML='⚠ <strong>Email could not be sent.</strong> '+escapeHtml(e.message||'Please try again.'); status.style.display='flex';
+        showToast('Could not send purchase email');
+      } finally {
+        btn.disabled=false; btn.classList.remove('sending'); btn.textContent='✉ Send Email';
+      }
     }
     function sendPurchaseWhatsApp() {
       const items=purchaseItems(); if(!items.length){showToast('Select at least one item');return;}
