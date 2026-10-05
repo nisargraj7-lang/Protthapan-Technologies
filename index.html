@@ -146,6 +146,9 @@
     input[type=email],
     input[type=date],
     input[type=number],
+    input[type=password],
+    input[type=month],
+    input[type=time],
     select,
     textarea {
       width: 100%;
@@ -191,6 +194,11 @@
 
     .btn:hover {
       background: var(--forest-dark);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
 
     .btn.danger-link {
@@ -272,6 +280,11 @@
       color: var(--danger);
     }
 
+    .pill-neutral {
+      background: #EEEDE6;
+      color: #7B817E;
+    }
+
     /* Module upgrade-type pills (reuse the status-pill shape) */
     .type-feature {
       background: #E5F0E8;
@@ -345,6 +358,10 @@
     }
 
     .filter-bar select {
+      width: auto;
+    }
+
+    .filter-bar input[type=month] {
       width: auto;
     }
 
@@ -1034,6 +1051,336 @@
       font-size: 13.5px;
     }
 
+    /* ======= Attendance (Daily Log page) ======= */
+    .att-hero {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      align-items: center;
+      background: linear-gradient(135deg, var(--forest-dark) 0%, var(--forest) 100%);
+      color: #EFEDE4;
+      border-radius: var(--radius);
+      padding: 26px 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 6px 24px rgba(29, 58, 45, 0.18);
+    }
+
+    .att-kicker {
+      font-size: 11.5px;
+      letter-spacing: 1.6px;
+      color: var(--gold);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .att-clock {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 46px;
+      line-height: 1.1;
+      letter-spacing: 1px;
+      color: #fff;
+    }
+
+    .att-date {
+      color: #C9CFC8;
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    .att-hero label {
+      color: #C9CFC8;
+    }
+
+    .att-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .att-btn {
+      flex: 1;
+      padding: 14px 10px;
+      border-radius: var(--radius);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      border: 2px solid transparent;
+      transition: transform 0.1s ease, opacity 0.15s ease, background-color 0.15s ease;
+    }
+
+    .att-btn:active:not(:disabled) {
+      transform: scale(0.96);
+    }
+
+    .att-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .att-btn-in {
+      background: var(--gold);
+      color: #1D3A2D;
+    }
+
+    .att-btn-in:hover:not(:disabled) {
+      background: #CBA04C;
+    }
+
+    .att-btn-out {
+      background: transparent;
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.7);
+    }
+
+    .att-btn-out:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .att-status-line {
+      margin-top: 14px;
+      font-size: 13.5px;
+      color: #E6E9E4;
+      min-height: 22px;
+    }
+
+    .att-status-line strong {
+      color: #fff;
+    }
+
+    .att-dot {
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #7BE0A3;
+      margin-right: 6px;
+      animation: pulseFade 1.3s ease-in-out infinite;
+    }
+
+    .att-board {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .att-card {
+      display: flex;
+      gap: 12px;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      background: #FDFCFA;
+    }
+
+    .att-card.work {
+      border-left-color: var(--gold);
+    }
+
+    .att-card.done {
+      border-left-color: var(--forest);
+    }
+
+    .att-card.none {
+      opacity: 0.8;
+    }
+
+    .att-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--forest-dark);
+      color: var(--gold);
+      font-weight: 700;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .att-card.none .att-avatar {
+      background: #D9D7CD;
+      color: #7B817E;
+    }
+
+    .att-card-body {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .att-card-name {
+      font-weight: 600;
+      font-size: 14.5px;
+      line-height: 1.2;
+      word-break: break-word;
+    }
+
+    .att-card-role {
+      font-size: 12px;
+      color: var(--ink-soft);
+      margin-bottom: 6px;
+    }
+
+    .att-times {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      font-size: 12.5px;
+    }
+
+    .att-times span {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 0.8px;
+      color: var(--ink-soft);
+    }
+
+    .hm-wrap {
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-top: 8px;
+    }
+
+    table.hm {
+      width: auto;
+      border-collapse: separate;
+      border-spacing: 3px;
+    }
+
+    .hm th,
+    .hm td {
+      padding: 0;
+      border: none;
+    }
+
+    .hm th.hm-name {
+      text-align: left;
+      font-size: 12.5px;
+      color: var(--ink);
+      font-weight: 600;
+      padding-right: 12px;
+      white-space: nowrap;
+      position: sticky;
+      left: 0;
+      background: var(--panel);
+    }
+
+    .hm th.hm-d {
+      font-size: 10.5px;
+      color: var(--ink-soft);
+      width: 24px;
+      min-width: 24px;
+      text-align: center;
+    }
+
+    .hm th.hm-d.today {
+      color: var(--gold);
+    }
+
+    .hm th.hm-w {
+      font-size: 9.5px;
+      color: #9AA09C;
+      font-weight: 400;
+      text-align: center;
+    }
+
+    .hm td.hc {
+      width: 24px;
+      min-width: 24px;
+      height: 24px;
+      border-radius: 5px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 24px;
+    }
+
+    .hm td.hc-present {
+      background: var(--forest);
+      color: #fff;
+    }
+
+    .hm td.hc-working {
+      background: var(--gold);
+      color: #fff;
+    }
+
+    .hm td.hc-noout {
+      background: #FBF1DE;
+      color: #8A6410;
+    }
+
+    .hm td.hc-absent {
+      background: #F7E6E2;
+      color: var(--danger);
+    }
+
+    .hm td.hc-off {
+      background: #EEEDE6;
+      color: #A8ADA9;
+    }
+
+    .hm td.hc-pending {
+      background: #fff;
+      border: 1px dashed var(--gold);
+      color: var(--gold);
+    }
+
+    .hm td.hc-future {
+      background: #FAF9F5;
+      color: #D0D3CF;
+    }
+
+    .hm td.hc-today {
+      outline: 2px solid var(--gold);
+      outline-offset: 1px;
+    }
+
+    .hm-legend {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: var(--ink-soft);
+      margin-top: 10px;
+    }
+
+    .hm-legend span.sw {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      vertical-align: -3px;
+      margin-right: 5px;
+    }
+
+    .att-days-line {
+      font-size: 13.5px;
+      margin: 6px 0;
+    }
+
+    .att-days-line b {
+      display: inline-block;
+      min-width: 92px;
+      color: var(--ink-soft);
+      font-weight: 600;
+      font-size: 12.5px;
+    }
+
+    tr.att-sel td {
+      background: #F3F6F3;
+    }
+
+    .att-edit-row td {
+      background: #FBF8F0;
+    }
+
+    .att-edit-row input[type=time] {
+      width: 130px;
+    }
+
     /* ======= Animations ======= */
     @keyframes appFadeIn {
       from {opacity: 0;}
@@ -1129,6 +1476,16 @@
       .ps-item-row input[placeholder^="Remarks"] {
         display: none;
       }
+
+      .att-hero {
+        grid-template-columns: 1fr;
+        padding: 20px;
+        gap: 18px;
+      }
+
+      .att-clock {
+        font-size: 36px;
+      }
     }
   </style>
 </head>
@@ -1177,6 +1534,7 @@
       <div class="nav-item" data-view="blog">Blog</div>
       <div class="nav-item" data-view="feed">Team Activity</div>
       <div class="nav-item" data-view="members">Team Members</div>
+      <div class="nav-item" data-view="sheets">Google Sheets</div>
       <div class="nav-item" id="admin-toggle"><span id="admin-nav-label">🔓 Logout</span></div>
       <div class="sidebar-foot">Live-synced across everyone using this site.</div>
     </div>
@@ -1189,7 +1547,71 @@
 
       <div id="view-log">
         <h1>Daily Log</h1>
-        <p class="subtitle">Post what you worked on today, or what you're starting.</p>
+        <p class="subtitle">Mark your attendance, then post what you worked on today.</p>
+
+        <div class="att-hero">
+          <div>
+            <div class="att-kicker">ATTENDANCE · TODAY</div>
+            <div class="att-clock" id="att-clock">--:--:--</div>
+            <div class="att-date" id="att-date"></div>
+          </div>
+          <div>
+            <label for="att-member">Who are you?</label>
+            <select id="att-member">
+              <option value="">Select your name…</option>
+            </select>
+            <div class="att-buttons">
+              <button type="button" class="att-btn att-btn-in" id="att-in">Check in</button>
+              <button type="button" class="att-btn att-btn-out" id="att-out">Check out</button>
+            </div>
+            <div class="att-status-line" id="att-status">Select your name, then press Check in when you arrive.</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Today's attendance board</h2>
+          <div class="ml-stats" id="att-stats"></div>
+          <div class="att-board" id="att-today">
+            <div class="empty loading-shimmer">Loading…</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Monthly attendance <span style="color:var(--ink-soft); font-weight:400;">— days present, days absent
+              and total hours</span></h2>
+          <div class="filter-bar">
+            <input type="month" id="att-month" title="Month">
+            <select id="att-weekoff" title="Weekly off days">
+              <option value="sun">Week off: Sunday</option>
+              <option value="satsun">Week off: Saturday &amp; Sunday</option>
+              <option value="none">No week off</option>
+            </select>
+          </div>
+          <div class="ml-stats" id="att-month-stats"></div>
+          <div id="att-summary">
+            <div class="empty loading-shimmer">Loading…</div>
+          </div>
+          <div class="sub-section-title">DAY-BY-DAY MAP</div>
+          <div class="hm-wrap" id="att-grid"></div>
+          <div class="hm-legend">
+            <span><span class="sw" style="background:var(--forest);"></span>Present</span>
+            <span><span class="sw" style="background:var(--gold);"></span>Working now</span>
+            <span><span class="sw" style="background:#FBF1DE; border:1px solid #E9CFA0;"></span>No check-out</span>
+            <span><span class="sw" style="background:#F7E6E2;"></span>Absent</span>
+            <span><span class="sw" style="background:#EEEDE6;"></span>Week off</span>
+            <span><span class="sw" style="background:#fff; border:1px dashed var(--gold);"></span>Not in yet (today)</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Member attendance details <span style="color:var(--ink-soft); font-weight:400;">— pick a member to see
+              every day</span></h2>
+          <div class="filter-bar">
+            <select id="att-detail-member"></select>
+          </div>
+          <div id="att-detail"></div>
+        </div>
+
         <div class="panel">
           <h2>New task update</h2>
           <label for="log-member">Team member</label>
@@ -1598,6 +2020,46 @@
           </div>
         </div>
       </div>
+
+      <div id="view-sheets" style="display:none;">
+        <h1>Google Sheets</h1>
+        <p class="subtitle">Download any list as a CSV file for Google Sheets, or send new entries to a Google Sheet
+          automatically.</p>
+
+        <div class="panel">
+          <h2>Download as CSV <span style="color:var(--ink-soft); font-weight:400;">— open the file in Google Sheets
+              with File → Import → Upload</span></h2>
+          <div id="sheet-downloads">
+            <div class="empty loading-shimmer">Loading…</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Automatic sync to a Google Sheet</h2>
+          <div id="sheet-status"></div>
+          <div class="admin-note" id="sheet-member-note" style="display:none;">🔒 Only the admin can change the Google
+            Sheet connection.</div>
+          <div id="sheet-admin-form" style="display:none;">
+            <label for="sh-url">Web app URL (from your Google Apps Script)</label>
+            <input type="text" id="sh-url" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off"
+              spellcheck="false">
+            <label for="sh-key">Secret key (the same one you put in the script)</label>
+            <input type="password" id="sh-key" autocomplete="new-password">
+            <label style="display:flex; align-items:center; gap:8px; margin-top:14px; cursor:pointer;">
+              <input type="checkbox" id="sh-enabled" style="accent-color:var(--forest);">
+              Send new entries to the sheet automatically
+            </label>
+            <div class="ps-actions">
+              <button class="btn btn-sm" id="sh-save">Save settings</button>
+              <button class="btn btn-sm btn-ghost" id="sh-test">Send test row</button>
+              <button class="btn btn-sm btn-ghost" id="sh-sendall">Send all data now</button>
+            </div>
+            <div id="sh-msg" style="font-size:13px; margin-top:10px; min-height:18px;"></div>
+            <div class="progress-note">"Send all data now" rewrites every tab in the sheet with the current data. New
+              entries after that are added as new rows.</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1649,6 +2111,11 @@
     let blogPosts = [];
     let catalog = [];   // dropdown list of materials (Material List)
     let trips = [];     // In / Out passes
+    let attendance = [];      // attendance records (one per member per day)
+    let attDetailId = '';     // member shown in the attendance details panel
+    let attEdit = null;       // admin editing a day: {mid, ds, inV, outV}
+    let attLastDay = '';      // used to refresh the board when the date changes at midnight
+    let sheetCfg = {url: '', key: '', enabled: false}; // Google Sheet connection (stored in Firestore: settings/sheets)
     let openProjectId = null; // which OnGoing project is currently opened
     let openTripId = null;    // which trip is currently opened
     let retDraft = {};        // unsaved return-check values, so a live refresh never wipes what you typed
@@ -2206,6 +2673,7 @@
           type, date, description, done: status === 'done', timestamp: Date.now()
         });
         document.getElementById('up2-desc').value = '';
+        liveSync('Module Upgrades', SHEET_HEAD.upg, [[date, mod ? mod.name : 'Unknown', TYPE_LABEL[type] || type, description, status === 'done' ? 'Yes' : 'No']]);
         showToast('Upgrade logged');
       } catch (e) {errEl.textContent = 'Could not save. Check your Firebase setup.';}
     }
@@ -2404,12 +2872,13 @@
       const v = id => document.getElementById(id).value.trim();
       const date = document.getElementById('ps-date').value || todayStr();
       const proj = projects.find(p => p.id === document.getElementById('ps-project').value);
+      const projName = v('ps-projname') || (proj ? proj.name : '');
       const refNo = 'OUT-' + date.replace(/-/g, '') + '-' + (Math.floor(Math.random() * 900) + 100);
       try {
         await db.collection('passes').add({
           refNo, date,
           projectId: proj ? proj.id : null,
-          projectName: v('ps-projname') || (proj ? proj.name : ''),
+          projectName: projName,
           mainContractor: v('ps-main'), subContractor: v('ps-sub'), transporter: v('ps-trans'),
           plot: v('ps-plot'), driver: v('ps-driver'), vehicle: v('ps-vehicle'),
           invoice: v('ps-invoice'), from: v('ps-from'), to: v('ps-to'),
@@ -2417,6 +2886,7 @@
           approvedName: v('ps-appr-name'), approvedDesignation: v('ps-appr-des'),
           items, createdBy: currentName, closedDate: null, timestamp: Date.now()
         });
+        liveSync('Out Passes', SHEET_HEAD.out, items.map(it => [refNo, date, projName, v('ps-from'), v('ps-to'), v('ps-vehicle'), v('ps-driver'), it.desc, it.qty, it.remarks]));
         ['ps-projname', 'ps-main', 'ps-sub', 'ps-trans', 'ps-plot', 'ps-driver', 'ps-vehicle', 'ps-invoice', 'ps-from', 'ps-to',
           'ps-filled-name', 'ps-filled-des', 'ps-appr-name', 'ps-appr-des'].forEach(id => {document.getElementById(id).value = '';});
         document.getElementById('ps-project').value = '';
@@ -2524,6 +2994,9 @@
           items, checkedBy: currentName, lastChecked: Date.now(), closedDate: allChecked ? todayStr() : null
         });
         Object.keys(retDraft).forEach(k => {if (k.indexOf(tripId + ':') === 0) delete retDraft[k];});
+        if (allChecked && !t.closedDate) {
+          liveSync('Return Checks', SHEET_HEAD.ret, items.map(it => [t.refNo, t.date, todayStr(), t.projectName || '', it.desc, it.qty, it.returnedQty, itemStatusPlain(it.qty, it.returnedQty), it.reason || '']));
+        }
         showToast(allChecked ? 'Return check saved — trip closed' : 'Return check saved');
       } catch (e) {
         console.log('[saveReturnCheck] FAILED:', e);
@@ -2689,6 +3162,619 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       setTimeout(() => w.print(), 400);
     }
 
+    // ---- Attendance (Daily Log page): check-in / check-out, today board, monthly report ----
+    // One record per member per day, stored in "attendance" with the id  memberId_YYYY-MM-DD.
+    // Check-in / check-out times come from the Firebase server clock (not the device clock).
+    function toMs(v) {
+      if (v === null || v === undefined) return null;
+      if (typeof v === 'number') return v;
+      if (typeof v.toMillis === 'function') return v.toMillis();
+      return null;
+    }
+    // Local date (YYYY-MM-DD) in the viewer's own timezone
+    function localDate(d) {
+      d = d || new Date();
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    function attKey(mid, ds) {return mid + '_' + ds;}
+    function attMap() {
+      const m = {};
+      attendance.forEach(a => {m[a.memberId + '|' + a.date] = a;});
+      return m;
+    }
+    function fmtTime(ms) {
+      return ms ? new Date(ms).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : '—';
+    }
+    function hhmm(ms) {
+      const d = new Date(ms);
+      return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    }
+    function fmtDur(ms) {
+      if (ms === null || ms === undefined || isNaN(ms)) return '—';
+      const m = Math.max(0, Math.floor(ms / 60000));
+      return Math.floor(m / 60) + 'h ' + String(m % 60).padStart(2, '0') + 'm';
+    }
+    function initials(name) {
+      const p = String(name || '?').trim().split(/\s+/);
+      return ((p[0] || '?')[0] + (p.length > 1 ? p[p.length - 1][0] : '')).toUpperCase();
+    }
+    function sortedMembers() {return members.slice().sort((a, b) => a.name.localeCompare(b.name));}
+
+    function renderAttMemberSelect() {
+      const sel = document.getElementById('att-member');
+      if (!sel) return;
+      let keep = sel.value;
+      if (!keep) {try {keep = localStorage.getItem('ptAttMember') || '';} catch (e) {}}
+      sel.innerHTML = '<option value="">Select your name…</option>';
+      sortedMembers().forEach(m => {
+        const o = document.createElement('option'); o.value = m.id; o.textContent = m.name; sel.appendChild(o);
+      });
+      sel.value = members.some(m => m.id === keep) ? keep : '';
+      renderAttHero();
+    }
+    function renderAttHero() {
+      const sel = document.getElementById('att-member');
+      const st = document.getElementById('att-status');
+      if (!sel || !st) return;
+      const bin = document.getElementById('att-in'), bout = document.getElementById('att-out');
+      bin.disabled = true; bout.disabled = true;
+      const id = sel.value;
+      if (!id) {st.innerHTML = 'Select your name, then press <strong>Check in</strong> when you arrive.'; return;}
+      const map = attMap();
+      const today = localDate();
+      const yest = localDate(new Date(Date.now() - 86400000));
+      const rec = map[id + '|' + today];
+      const yrec = map[id + '|' + yest];
+      if (!rec) {
+        if (yrec && !yrec.outTime) {
+          st.innerHTML = `<span class="att-dot"></span> Still checked in since yesterday <strong>${fmtTime(yrec.inTime)}</strong> — press <strong>Check out</strong> when you leave.`;
+          bout.disabled = false;
+        } else {
+          st.textContent = 'You have not checked in today.';
+          bin.disabled = false;
+        }
+      } else if (!rec.outTime) {
+        st.innerHTML = `<span class="att-dot"></span> Checked in at <strong>${fmtTime(rec.inTime)}</strong> · working <strong data-live-start="${rec.inTime}">${fmtDur(Date.now() - rec.inTime)}</strong>`;
+        bout.disabled = false;
+      } else {
+        st.innerHTML = `Checked in <strong>${fmtTime(rec.inTime)}</strong> · Checked out <strong>${fmtTime(rec.outTime)}</strong> · Worked <strong>${fmtDur(rec.outTime - rec.inTime)}</strong> ✓`;
+      }
+    }
+    async function attCheckIn() {
+      const id = document.getElementById('att-member').value;
+      const m = members.find(x => x.id === id);
+      if (!m) {showToast('Select your name first'); return;}
+      if (!db) {showToast('Firebase not configured yet.'); return;}
+      const date = localDate();
+      const ref = db.collection('attendance').doc(attKey(id, date));
+      document.getElementById('att-in').disabled = true;
+      try {
+        await db.runTransaction(async tx => {
+          const snap = await tx.get(ref);
+          if (snap.exists) throw new Error('exists');
+          tx.set(ref, {
+            memberId: id, memberName: m.name, date,
+            inTime: firebase.firestore.FieldValue.serverTimestamp(),
+            outTime: null, inBy: currentName, outBy: ''
+          });
+        });
+        showToast(m.name + ' checked in');
+      } catch (e) {
+        if (e && e.message === 'exists') showToast(m.name + ' has already checked in today');
+        else {console.log('[attCheckIn] FAILED:', e); showToast('Could not save. Check the Firestore rules (see setup steps).');}
+      }
+      renderAttHero();
+    }
+    async function attCheckOut() {
+      const id = document.getElementById('att-member').value;
+      const m = members.find(x => x.id === id);
+      if (!m) {showToast('Select your name first'); return;}
+      if (!db) {showToast('Firebase not configured yet.'); return;}
+      const map = attMap();
+      const today = localDate();
+      const yest = localDate(new Date(Date.now() - 86400000));
+      let rec = map[id + '|' + today];
+      if (rec && rec.outTime) {showToast(m.name + ' has already checked out today'); return;}
+      if (!rec) rec = map[id + '|' + yest];          // night shift: checking out after midnight
+      if (!rec || rec.outTime) {showToast('No open check-in found. Check in first.'); return;}
+      document.getElementById('att-out').disabled = true;
+      try {
+        await db.collection('attendance').doc(rec.id).update({
+          outTime: firebase.firestore.FieldValue.serverTimestamp(), outBy: currentName
+        });
+        const outMs = Date.now();
+        liveSync('Attendance', SHEET_HEAD.att, [[rec.date, rec.memberName, fmtTime(rec.inTime), fmtTime(outMs), Math.round((outMs - rec.inTime) / 36000) / 100, 'Present']]);
+        showToast(m.name + ' checked out');
+      } catch (e) {
+        console.log('[attCheckOut] FAILED:', e);
+        showToast('Could not save. Check the Firestore rules (see setup steps).');
+      }
+      renderAttHero();
+    }
+
+    function renderAttToday() {
+      const el = document.getElementById('att-today');
+      const stats = document.getElementById('att-stats');
+      if (!el) return;
+      if (members.length === 0) {
+        el.innerHTML = '<div class="empty" style="grid-column:1/-1;">No team members yet.</div>';
+        stats.innerHTML = '';
+        return;
+      }
+      const today = localDate();
+      const map = attMap();
+      let working = 0, left = 0, notIn = 0;
+      const rows = sortedMembers().map(m => {
+        const rec = map[m.id + '|' + today];
+        let state = 'none';
+        if (rec) state = rec.outTime ? 'done' : 'work';
+        if (state === 'work') working++; else if (state === 'done') left++; else notIn++;
+        return {m, rec, state};
+      });
+      const order = {work: 0, done: 1, none: 2};
+      rows.sort((a, b) => (order[a.state] - order[b.state]) || ((a.rec ? a.rec.inTime : 0) - (b.rec ? b.rec.inTime : 0)));
+      stats.innerHTML = `
+        <div class="ml-stat"><strong>${working + left} / ${members.length}</strong>Present today</div>
+        <div class="ml-stat"><strong>${working}</strong>Working now</div>
+        <div class="ml-stat"><strong>${left}</strong>Checked out</div>
+        <div class="ml-stat"><strong>${notIn}</strong>Not in yet</div>`;
+      el.innerHTML = rows.map(({m, rec, state}) => {
+        const pill = state === 'work' ? '<span class="status-pill status-inprogress">Working</span>'
+          : state === 'done' ? '<span class="status-pill status-done">Left</span>'
+          : '<span class="status-pill pill-neutral">Not in yet</span>';
+        const dur = state === 'work' ? `<span data-live-start="${rec.inTime}">${fmtDur(Date.now() - rec.inTime)}</span>`
+          : state === 'done' ? fmtDur(rec.outTime - rec.inTime) : '—';
+        return `<div class="att-card ${state}">
+          <div class="att-avatar">${escapeHtml(initials(m.name))}</div>
+          <div class="att-card-body">
+            <div class="att-card-name">${escapeHtml(m.name)}</div>
+            <div class="att-card-role">${escapeHtml(m.role || '')}</div>
+            ${pill}
+            <div class="att-times">
+              <div><span>IN</span>${rec ? fmtTime(rec.inTime) : '—'}</div>
+              <div><span>OUT</span>${rec && rec.outTime ? fmtTime(rec.outTime) : '—'}</div>
+              <div><span>TIME</span>${dur}</div>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    // ---- Monthly report ----
+    function attReportCtx() {
+      let month = document.getElementById('att-month').value;
+      if (!/^\d{4}-\d{2}$/.test(month)) month = localDate().slice(0, 7);
+      const y = Number(month.slice(0, 4)), mo = Number(month.slice(5, 7));
+      const dim = new Date(y, mo, 0).getDate();
+      const weekoff = document.getElementById('att-weekoff').value;
+      const today = localDate();
+      const days = [];
+      for (let d = 1; d <= dim; d++) {
+        const dt = new Date(y, mo - 1, d);
+        const ds = localDate(dt);
+        const dow = dt.getDay();
+        const off = weekoff === 'sun' ? dow === 0 : weekoff === 'satsun' ? (dow === 0 || dow === 6) : false;
+        days.push({d, ds, dow, off, future: ds > today, isToday: ds === today});
+      }
+      return {month, y, mo, dim, days, today, map: attMap()};
+    }
+    function attDayStatus(rec, day) {
+      if (rec) {
+        if (rec.outTime) return 'present';
+        return day.isToday ? 'working' : 'noout';
+      }
+      if (day.future) return 'future';
+      if (day.off) return 'off';
+      if (day.isToday) return 'pending';
+      return 'absent';
+    }
+    const ATT_PILL = {
+      present: ['Present', 'status-done'], working: ['Working', 'status-inprogress'], noout: ['No check-out', 'status-inprogress'],
+      absent: ['Absent', 'status-blocked'], off: ['Week off', 'pill-neutral'], pending: ['Not in yet', 'pill-neutral'], future: ['Upcoming', 'pill-neutral']
+    };
+    const ATT_SYM = {present: '✓', working: '•', noout: '!', absent: '✕', off: '–', pending: '', future: ''};
+    function attMemberStats(m, R) {
+      let present = 0, absent = 0, workElapsed = 0, presentWork = 0, ms = 0, closed = 0, noOut = 0;
+      const presentDays = [], absentDays = [];
+      R.days.forEach(day => {
+        const rec = R.map[m.id + '|' + day.ds];
+        if (rec) {
+          present++; presentDays.push(day.d);
+          if (rec.outTime) {ms += rec.outTime - rec.inTime; closed++;}
+          else if (day.ds < R.today) noOut++;
+          if (!day.off && !day.future) {workElapsed++; presentWork++;}
+        } else if (!day.off && !day.future && !day.isToday) {
+          absent++; absentDays.push(day.d); workElapsed++;
+        }
+      });
+      return {present, absent, noOut, ms, closed, presentDays, absentDays, pct: workElapsed ? Math.round(presentWork / workElapsed * 100) : null};
+    }
+    function renderAttDetailSelect() {
+      const sel = document.getElementById('att-detail-member');
+      if (!sel) return;
+      const list = sortedMembers();
+      if (!list.some(m => m.id === attDetailId)) attDetailId = list.length ? list[0].id : '';
+      sel.innerHTML = list.map(m => `<option value="${m.id}">${escapeHtml(m.name)}</option>`).join('') || '<option value="">No members yet</option>';
+      sel.value = attDetailId;
+    }
+    function attPick(id) {
+      attDetailId = id;
+      attEdit = null;
+      renderAttReport();
+      const el = document.getElementById('att-detail');
+      if (el) el.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+    }
+    function renderAttReport() {
+      const sumEl = document.getElementById('att-summary');
+      if (!sumEl) return;
+      renderAttDetailSelect();
+      const R = attReportCtx();
+      const list = sortedMembers();
+      const monthName = new Date(R.y, R.mo - 1, 1).toLocaleDateString(undefined, {month: 'long', year: 'numeric'});
+
+      const completedWork = R.days.filter(d => !d.off && d.ds < R.today).length;
+      const offDays = R.days.filter(d => d.off).length;
+      const entries = attendance.filter(a => a.date.slice(0, 7) === R.month).length;
+      document.getElementById('att-month-stats').innerHTML = `
+        <div class="ml-stat"><strong>${completedWork}</strong>Completed working days</div>
+        <div class="ml-stat"><strong>${offDays}</strong>Week-off days</div>
+        <div class="ml-stat"><strong>${entries}</strong>Attendance entries · ${escapeHtml(monthName)}</div>`;
+
+      if (list.length === 0) {
+        sumEl.innerHTML = '<div class="empty">No team members yet.</div>';
+        document.getElementById('att-grid').innerHTML = '';
+        document.getElementById('att-detail').innerHTML = '';
+        return;
+      }
+
+      // Summary table
+      let h = '<table><tr><th>Member</th><th>Days present</th><th>Days absent</th><th>Attendance</th><th>Total hours</th><th>Avg / day</th></tr>';
+      list.forEach(m => {
+        const s = attMemberStats(m, R);
+        h += `<tr class="${m.id === attDetailId ? 'att-sel' : ''}" style="cursor:pointer;" onclick="attPick('${m.id}')">
+          <td><strong>${escapeHtml(m.name)}</strong></td>
+          <td>${s.present}${s.noOut ? `<div class="mod-team-note">${s.noOut} without check-out</div>` : ''}</td>
+          <td>${s.absent}</td>
+          <td>${s.pct === null ? '—' : s.pct + '%'}${s.pct === null ? '' : `<div class="bar" style="width:90px;"><div style="width:${s.pct}%"></div></div>`}</td>
+          <td>${s.closed ? fmtDur(s.ms) : '—'}</td>
+          <td>${s.closed ? fmtDur(s.ms / s.closed) : '—'}</td>
+        </tr>`;
+      });
+      sumEl.innerHTML = h + '</table>';
+
+      // Day-by-day map
+      let g = '<table class="hm"><tr><th class="hm-name"></th>' + R.days.map(d => `<th class="hm-d${d.isToday ? ' today' : ''}">${d.d}</th>`).join('') + '</tr>';
+      g += '<tr><th class="hm-name"></th>' + R.days.map(d => `<th class="hm-w">${'SMTWTFS'[d.dow]}</th>`).join('') + '</tr>';
+      list.forEach(m => {
+        g += `<tr><th class="hm-name">${escapeHtml(m.name)}</th>`;
+        R.days.forEach(d => {
+          const rec = R.map[m.id + '|' + d.ds];
+          const s = attDayStatus(rec, d);
+          const tip = m.name + ' · ' + d.ds + ' · ' + ATT_PILL[s][0] + (rec ? ' · In ' + fmtTime(rec.inTime) + (rec.outTime ? ' · Out ' + fmtTime(rec.outTime) : '') : '');
+          g += `<td class="hc hc-${s}${d.isToday ? ' hc-today' : ''}" title="${escapeAttr(tip)}">${ATT_SYM[s]}</td>`;
+        });
+        g += '</tr>';
+      });
+      document.getElementById('att-grid').innerHTML = g + '</table>';
+
+      renderAttDetail(R, list);
+    }
+    function renderAttDetail(R, list) {
+      const el = document.getElementById('att-detail');
+      const m = list.find(x => x.id === attDetailId);
+      if (!m) {el.innerHTML = ''; return;}
+      const s = attMemberStats(m, R);
+      const monthName = new Date(R.y, R.mo - 1, 1).toLocaleDateString(undefined, {month: 'long', year: 'numeric'});
+      let h = `<div class="sub-section-title" style="margin-top:0;">${escapeHtml(m.name.toUpperCase())} · ${escapeHtml(monthName.toUpperCase())}</div>
+        <div class="att-days-line"><b>Came on (${s.presentDays.length})</b>${s.presentDays.length ? s.presentDays.join(', ') : 'No attendance yet'}</div>
+        <div class="att-days-line"><b>Did not come (${s.absentDays.length})</b>${s.absentDays.length ? s.absentDays.join(', ') : 'None'}</div>`;
+      h += '<table style="margin-top:12px;"><tr><th>Date</th><th>Day</th><th>Status</th><th>Check-in</th><th>Check-out</th><th>Hours</th>' + (isAdmin ? '<th></th>' : '') + '</tr>';
+      R.days.forEach(day => {
+        const rec = R.map[m.id + '|' + day.ds];
+        const st = attDayStatus(rec, day);
+        const pill = ATT_PILL[st];
+        const hours = rec ? (rec.outTime ? fmtDur(rec.outTime - rec.inTime) : (day.isToday ? `<span data-live-start="${rec.inTime}">${fmtDur(Date.now() - rec.inTime)}</span>` : '—')) : '—';
+        const dayName = new Date(R.y, R.mo - 1, day.d).toLocaleDateString(undefined, {weekday: 'short'});
+        const edit = isAdmin && !day.future ? `<button class="mini-remove" onclick="attStartEdit('${day.ds}')">Edit</button>` : '';
+        h += `<tr>
+          <td class="task-date">${day.d} ${escapeHtml(monthName.split(' ')[0].slice(0, 3))}</td>
+          <td>${dayName}</td>
+          <td><span class="status-pill ${pill[1]}">${pill[0]}</span></td>
+          <td>${rec ? fmtTime(rec.inTime) : '—'}</td>
+          <td>${rec && rec.outTime ? fmtTime(rec.outTime) : '—'}</td>
+          <td>${hours}</td>
+          ${isAdmin ? `<td>${edit}</td>` : ''}
+        </tr>`;
+        if (isAdmin && attEdit && attEdit.mid === m.id && attEdit.ds === day.ds) {
+          h += `<tr class="att-edit-row"><td colspan="7">
+            <strong>Edit ${escapeHtml(day.ds)}</strong> &nbsp;
+            Check-in <input type="time" value="${escapeAttr(attEdit.inV)}" oninput="attEdit.inV=this.value"> &nbsp;
+            Check-out <input type="time" value="${escapeAttr(attEdit.outV)}" oninput="attEdit.outV=this.value"> &nbsp;
+            <button class="btn btn-sm" onclick="attSaveEdit()">Save</button>
+            <button class="btn btn-sm btn-ghost" onclick="attCancelEdit()">Cancel</button>
+            ${rec ? '<button class="mini-remove" onclick="attDeleteRecord()">Remove this day\'s entry</button>' : ''}
+            <span id="ae-err" style="color:var(--danger); font-size:13px; margin-left:8px;"></span>
+          </td></tr>`;
+        }
+      });
+      el.innerHTML = h + '</table>' + (isAdmin ? '' : '<div class="progress-note">Only the admin can correct attendance entries.</div>');
+    }
+    function attStartEdit(ds) {
+      if (!isAdmin) return;
+      const rec = attMap()[attDetailId + '|' + ds];
+      attEdit = {mid: attDetailId, ds, inV: rec ? hhmm(rec.inTime) : '', outV: rec && rec.outTime ? hhmm(rec.outTime) : ''};
+      renderAttReport();
+    }
+    function attCancelEdit() {attEdit = null; renderAttReport();}
+    async function attSaveEdit() {
+      if (!isAdmin || !attEdit) {showToast('Admin only'); return;}
+      const errEl = document.getElementById('ae-err');
+      errEl.textContent = '';
+      const {mid, ds, inV, outV} = attEdit;
+      const m = members.find(x => x.id === mid);
+      if (!m) return;
+      if (!inV) {errEl.textContent = 'Enter the check-in time.'; return;}
+      const inD = new Date(ds + 'T' + inV + ':00');
+      const outD = outV ? new Date(ds + 'T' + outV + ':00') : null;
+      if (isNaN(inD) || (outD && isNaN(outD))) {errEl.textContent = 'Check the times.'; return;}
+      if (outD && outD <= inD) {errEl.textContent = 'Check-out must be after check-in.'; return;}
+      try {
+        await db.collection('attendance').doc(attKey(mid, ds)).set({
+          memberId: mid, memberName: m.name, date: ds,
+          inTime: firebase.firestore.Timestamp.fromDate(inD),
+          outTime: outD ? firebase.firestore.Timestamp.fromDate(outD) : null,
+          inBy: 'Admin (edited)', outBy: outD ? 'Admin (edited)' : '', edited: true
+        });
+        attEdit = null;
+        showToast('Attendance saved');
+      } catch (e) {
+        console.log('[attSaveEdit] FAILED:', e);
+        errEl.textContent = 'Could not save. Check the Firestore rules.';
+      }
+    }
+    async function attDeleteRecord() {
+      if (!isAdmin || !attEdit) return;
+      if (!confirm('Remove this attendance entry? The member will show as absent for that day.')) return;
+      try {
+        await db.collection('attendance').doc(attKey(attEdit.mid, attEdit.ds)).delete();
+        attEdit = null;
+        showToast('Entry removed');
+      } catch (e) {showToast('Could not remove. Check the Firestore rules.');}
+    }
+    function renderAttendance() {
+      renderAttHero();
+      renderAttToday();
+      renderAttReport();
+    }
+    // Runs every second: live clock + running timers
+    function attTick() {
+      const c = document.getElementById('att-clock');
+      if (!c) return;
+      const now = new Date();
+      c.textContent = now.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+      document.getElementById('att-date').textContent = now.toLocaleDateString(undefined, {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'});
+      document.querySelectorAll('[data-live-start]').forEach(el => {
+        el.textContent = fmtDur(Date.now() - Number(el.dataset.liveStart));
+      });
+      const d = localDate();
+      if (attLastDay !== d) {attLastDay = d; renderAttendance();}   // new day started
+    }
+
+    // ---- Google Sheets (CSV download + automatic sync through a Google Apps Script web app) ----
+    const SHEET_URL_RE = /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/;
+    const SHEET_HEAD = {
+      log: ['Date', 'Member', 'Status', 'Task', 'Posted at'],
+      inv: ['Date', 'Item', 'Price', 'Bought by', 'Notes'],
+      upg: ['Date', 'Module', 'Type', 'What changed', 'Done'],
+      out: ['Ref no', 'Date out', 'Project', 'From', 'To', 'Vehicle plate', 'Driver', 'Item', 'Quantity', 'Remarks'],
+      ret: ['Ref no', 'Date out', 'Closed on', 'Project', 'Item', 'Carried', 'Came back', 'Status', 'Reason'],
+      att: ['Date', 'Member', 'Check-in', 'Check-out', 'Hours', 'Status']
+    };
+    // Stops a text cell from being treated as a formula when opened in Google Sheets / Excel
+    function safeCell(v) {
+      if (v === null || v === undefined) return '';
+      if (typeof v === 'number') return v;
+      if (typeof v === 'boolean') return v ? 'Yes' : 'No';
+      const s = String(v);
+      return /^[=+\-@\t\r]/.test(s) ? "'" + s : s;
+    }
+    function padRows(rows, n) {
+      return rows.map(r => {
+        const a = r.map(safeCell);
+        while (a.length < n) a.push('');
+        return a.slice(0, n);
+      });
+    }
+    function itemStatusPlain(out, ret) {
+      const s = itemStatus(out, ret);
+      if (s.key === 'safe') return Number(ret) > Number(out) ? 'Safe (extra ' + fmtNum(Number(ret) - Number(out)) + ')' : 'Safe';
+      if (s.key === 'short') return Number(ret) === 0 ? 'Not with us' : 'Short by ' + fmtNum(Number(out) - Number(ret));
+      return 'Not checked';
+    }
+    function sheetDatasets() {
+      const asc = (a, b) => (a.timestamp || 0) - (b.timestamp || 0);
+      const ongoing = projects.filter(p => p.status === 'upcoming').sort(asc);
+      const ds = [];
+
+      ds.push({key: 'log', label: 'Daily Log', sheet: 'Daily Log', headers: SHEET_HEAD.log,
+        rows: tasks.slice().sort(asc).map(t => [t.date, t.memberName, STATUS_LABEL[t.status] || t.status, t.task, new Date(t.timestamp).toLocaleString()])});
+
+      ds.push({key: 'att', label: 'Attendance', sheet: 'Attendance', headers: SHEET_HEAD.att,
+        rows: attendance.slice().sort((a, b) => (a.date > b.date ? 1 : a.date < b.date ? -1 : (a.inTime || 0) - (b.inTime || 0)))
+          .map(a => [a.date, a.memberName, fmtTime(a.inTime), a.outTime ? fmtTime(a.outTime) : '',
+            a.outTime ? Math.round((a.outTime - a.inTime) / 36000) / 100 : '', a.outTime ? 'Present' : 'No check-out'])});
+
+      ds.push({key: 'inv', label: 'Inventory', sheet: 'Inventory', headers: SHEET_HEAD.inv,
+        rows: inventory.slice().sort(asc).map(i => [i.date, i.itemName, i.price, i.buyerName, i.notes || ''])});
+
+      ds.push({key: 'proj', label: 'OnGoing Projects', sheet: 'Projects',
+        headers: ['Project', 'Project lead', 'Notes', 'Sub-projects', 'Work items done', 'Work items total', '% done'],
+        rows: ongoing.map(p => {const st = projectStats(p); return [p.name, p.ownerName || '', p.description || '', (p.subProjects || []).length, st.done, st.total, st.pct + '%'];})});
+
+      const work = [];
+      ongoing.forEach(p => (p.subProjects || []).forEach(s => {
+        if (!(s.tasks || []).length) work.push([p.name, s.name, s.memberName || '', '', '']);
+        (s.tasks || []).forEach(t => work.push([p.name, s.name, s.memberName || '', t.text, t.done ? 'Yes' : 'No']));
+      }));
+      ds.push({key: 'work', label: 'Sub-projects & work items', sheet: 'Project Work Items',
+        headers: ['Project', 'Sub-project', 'Member', 'Work item', 'Done'], rows: work});
+
+      ds.push({key: 'mod', label: 'Modules', sheet: 'Modules',
+        headers: ['Module', 'Team leader', 'Parent project', 'Description', 'Upgrades done', 'Upgrades total', '% done'],
+        rows: modules.slice().sort(asc).map(m => {const st = moduleStats(m); return [m.name, m.ownerName || '', m.parentProjectName || '', m.description || '', st.done, st.total, st.pct + '%'];})});
+
+      ds.push({key: 'upg', label: 'Module upgrades', sheet: 'Module Upgrades', headers: SHEET_HEAD.upg,
+        rows: moduleUpdates.slice().sort(asc).map(u => [u.date, u.moduleName, TYPE_LABEL[u.type] || u.type, u.description, isUpgradeDone(u) ? 'Yes' : 'No'])});
+
+      const mats = [];
+      ongoing.forEach(p => (p.materialList || []).forEach(m => mats.push([p.name, m.name, m.qty])));
+      ds.push({key: 'mats', label: 'Material List', sheet: 'Material List', headers: ['Project', 'Material', 'Quantity'], rows: mats});
+
+      const tripsAsc = trips.slice().sort(asc);
+      const outRows = [], retRows = [];
+      tripsAsc.forEach(t => (t.items || []).forEach(it => {
+        outRows.push([t.refNo, t.date, t.projectName || '', t.from || '', t.to || '', t.vehicle || '', t.driver || '', it.desc, it.qty, it.remarks || '']);
+        if (it.returnedQty !== null && it.returnedQty !== undefined) {
+          retRows.push([t.refNo, t.date, t.closedDate || '', t.projectName || '', it.desc, it.qty, it.returnedQty, itemStatusPlain(it.qty, it.returnedQty), it.reason || '']);
+        }
+      }));
+      ds.push({key: 'out', label: 'Out passes (items carried)', sheet: 'Out Passes', headers: SHEET_HEAD.out, rows: outRows});
+      ds.push({key: 'ret', label: 'Return checks', sheet: 'Return Checks', headers: SHEET_HEAD.ret, rows: retRows});
+
+      ds.push({key: 'mem', label: 'Team Members', sheet: 'Team Members', headers: ['Name', 'Role', 'Email'],
+        rows: members.slice().sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)).map(m => [m.name, m.role || '', m.email || ''])});
+      return ds;
+    }
+    function csvCell(v) {
+      const s = String(safeCell(v));
+      return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }
+    function downloadDataset(key) {
+      const d = sheetDatasets().find(x => x.key === key);
+      if (!d) return;
+      const lines = [d.headers.map(csvCell).join(',')].concat(d.rows.map(r => r.map(csvCell).join(',')));
+      const blob = new Blob(['\ufeff' + lines.join('\r\n')], {type: 'text/csv;charset=utf-8'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'protthapan-' + key + '-' + todayStr() + '.csv';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {URL.revokeObjectURL(a.href); a.remove();}, 500);
+      showToast('Downloaded ' + d.label);
+    }
+    function renderSheetData() {
+      const el = document.getElementById('sheet-downloads');
+      if (!el) return;
+      let h = '<table><tr><th>List</th><th>Rows</th><th>Sheet tab name</th><th></th></tr>';
+      sheetDatasets().forEach(d => {
+        h += `<tr><td><strong>${escapeHtml(d.label)}</strong></td><td>${d.rows.length}</td><td>${escapeHtml(d.sheet)}</td>
+          <td><button class="btn btn-sm" onclick="downloadDataset('${d.key}')">Download CSV</button></td></tr>`;
+      });
+      el.innerHTML = h + '</table>';
+    }
+    function refreshSheetsIfOpen() {
+      const v = document.getElementById('view-sheets');
+      if (v && v.style.display === 'block') renderSheetData();
+    }
+    function sheetIsOn() {return !!(sheetCfg.enabled && sheetCfg.url && sheetCfg.key);}
+    function renderSheetStatus() {
+      const el = document.getElementById('sheet-status');
+      if (!el) return;
+      el.innerHTML = sheetIsOn()
+        ? '<div class="admin-note" style="border-left-color:var(--forest);">✅ <strong>Automatic sync is ON.</strong> New daily logs, attendance check-outs, inventory items, module upgrades, out passes and closed return checks are added to your Google Sheet as new rows.</div>'
+        : '<div class="admin-note">Automatic sync is <strong>OFF</strong>. ' + (isAdmin ? 'Fill in the form below to connect a Google Sheet.' : 'The admin can connect a Google Sheet here.') + '</div>';
+    }
+    function fillSheetForm() {
+      const url = document.getElementById('sh-url');
+      if (!url || document.activeElement === url || document.activeElement === document.getElementById('sh-key')) return;
+      url.value = sheetCfg.url || '';
+      document.getElementById('sh-key').value = sheetCfg.key || '';
+      document.getElementById('sh-enabled').checked = !!sheetCfg.enabled;
+    }
+    function setSheetMsg(text, ok) {
+      const el = document.getElementById('sh-msg');
+      el.style.color = ok === false ? 'var(--danger)' : (ok ? 'var(--forest)' : 'var(--ink-soft)');
+      el.textContent = text || '';
+    }
+    async function saveSheetSettings() {
+      if (!isAdmin) {showToast('Admin only'); return;}
+      const url = document.getElementById('sh-url').value.trim();
+      const key = document.getElementById('sh-key').value.trim();
+      const enabled = document.getElementById('sh-enabled').checked;
+      if (url && !SHEET_URL_RE.test(url)) {setSheetMsg('The URL must look like https://script.google.com/macros/s/.../exec', false); return;}
+      if (enabled && (!url || !key)) {setSheetMsg('Enter the web app URL and the secret key before turning sync on.', false); return;}
+      try {
+        await db.collection('settings').doc('sheets').set({url, key, enabled, updatedBy: currentName, updatedAt: Date.now()});
+        setSheetMsg('Settings saved.', true);
+      } catch (e) {
+        console.log('[saveSheetSettings] FAILED:', e);
+        setSheetMsg('Could not save. Add the "settings" rule in Firestore (see setup steps).', false);
+      }
+    }
+    // New entries: fire-and-forget (no-cors) so a row is never sent twice
+    function liveSync(sheet, headers, rows) {
+      if (!sheetIsOn() || !SHEET_URL_RE.test(sheetCfg.url)) return;
+      try {
+        fetch(sheetCfg.url, {
+          method: 'POST', mode: 'no-cors',
+          headers: {'Content-Type': 'text/plain;charset=utf-8'},
+          body: JSON.stringify({key: sheetCfg.key, sheet, headers, rows: padRows(rows, headers.length)})
+        }).catch(e => console.warn('[liveSync] failed:', e));
+      } catch (e) {console.warn('[liveSync] failed:', e);}
+    }
+    // Test / full send: tries to read the answer, falls back to fire-and-forget
+    async function sheetPost(payload) {
+      const opts = {method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify(payload)};
+      try {
+        const res = await fetch(sheetCfg.url, opts);
+        return await res.json();
+      } catch (e) {
+        await fetch(sheetCfg.url, {...opts, mode: 'no-cors'});
+        return {ok: null, opaque: true};
+      }
+    }
+    function sheetReady() {
+      if (!isAdmin) {showToast('Admin only'); return false;}
+      if (!sheetCfg.url || !sheetCfg.key || !SHEET_URL_RE.test(sheetCfg.url)) {
+        setSheetMsg('Save the web app URL and the secret key first.', false);
+        return false;
+      }
+      return true;
+    }
+    async function sendSheetTest() {
+      if (!sheetReady()) return;
+      setSheetMsg('Sending test row…');
+      try {
+        const r = await sheetPost({key: sheetCfg.key, sheet: 'Connection test', headers: ['Time', 'Message', 'Sent by'],
+          rows: padRows([[new Date().toLocaleString(), 'Hello from Protthapan Technologies', currentName]], 3)});
+        if (r.ok === false) setSheetMsg('The sheet answered: ' + (r.error || 'error') + (r.error === 'bad key' ? ' — the secret key does not match the one in your script.' : ''), false);
+        else if (r.ok === null) setSheetMsg('Test row sent. Open your Google Sheet and look for the "Connection test" tab.', true);
+        else setSheetMsg('Connected ✓ — a row was added to the "Connection test" tab.', true);
+      } catch (e) {setSheetMsg('Could not reach the web app URL. Check it and try again.', false);}
+    }
+    async function sendAllToSheet() {
+      if (!sheetReady()) return;
+      if (!confirm('This clears and rewrites every tab in your Google Sheet with the current data. Continue?')) return;
+      const btn = document.getElementById('sh-sendall');
+      btn.disabled = true;
+      const ds = sheetDatasets();
+      try {
+        for (let i = 0; i < ds.length; i++) {
+          setSheetMsg('Sending ' + (i + 1) + ' of ' + ds.length + ': ' + ds[i].label + '…');
+          const r = await sheetPost({key: sheetCfg.key, sheet: ds[i].sheet, headers: ds[i].headers, rows: padRows(ds[i].rows, ds[i].headers.length), replace: true});
+          if (r.ok === false) {
+            setSheetMsg('Stopped at "' + ds[i].label + '": ' + (r.error || 'error') + (r.error === 'bad key' ? ' — the secret key does not match your script.' : ''), false);
+            btn.disabled = false;
+            return;
+          }
+        }
+        setSheetMsg('Done — all ' + ds.length + ' tabs were sent. Open your Google Sheet to check.', true);
+      } catch (e) {
+        setSheetMsg('Could not reach the web app URL. Check it and try again.', false);
+      }
+      btn.disabled = false;
+    }
+
     async function addInventoryItem() {
       const itemName = document.getElementById('inv-item').value.trim();
       const price = document.getElementById('inv-price').value.trim();
@@ -2709,6 +3795,7 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
         document.getElementById('inv-item').value = '';
         document.getElementById('inv-price').value = '';
         document.getElementById('inv-notes').value = '';
+        liveSync('Inventory', SHEET_HEAD.inv, [[date, itemName, price, buyer ? buyer.name : 'Unknown', notes]]);
         showToast('Item added');
       } catch (e) {errEl.textContent = 'Could not save. Check your Firebase setup.';}
     }
@@ -2840,7 +3927,11 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
         ? 'Add everyone on your team so they can log their own updates.'
         : 'Everyone on the team.';
       document.getElementById('admin-nav-label').textContent = '🔓 Logout (' + (currentName || 'user') + ')';
+      document.getElementById('sheet-admin-form').style.display = isAdmin ? 'block' : 'none';
+      document.getElementById('sheet-member-note').style.display = isAdmin ? 'none' : 'block';
       renderMemberList();
+      renderSheetStatus();
+      renderAttendance();
     }
     function adminLogout() {
       const done = () => location.reload();
@@ -3030,6 +4121,7 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
         });
         document.getElementById('log-task').value = '';
         notify('task', taskRef.id);
+        liveSync('Daily Log', SHEET_HEAD.log, [[date, member ? member.name : 'Unknown', STATUS_LABEL[status] || status, task, new Date().toLocaleString()]]);
         showToast('Update posted');
       } catch (e) {errEl.textContent = 'Could not save. Check your Firebase setup.';}
     }
@@ -3047,8 +4139,9 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       document.getElementById('view-blog').style.display = view === 'blog' ? 'block' : 'none';
       document.getElementById('view-feed').style.display = view === 'feed' ? 'block' : 'none';
       document.getElementById('view-members').style.display = view === 'members' ? 'block' : 'none';
+      document.getElementById('view-sheets').style.display = view === 'sheets' ? 'block' : 'none';
       if (view === 'feed') renderFeed();
-      if (view === 'log') renderMyUpdates();
+      if (view === 'log') {renderMyUpdates(); renderAttendance();}
       if (view === 'inventory') renderInventory();
       if (view === 'report') renderReport();
       if (view === 'upcoming') renderUpcoming();
@@ -3057,6 +4150,7 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       if (view === 'pass') {renderProjectPickers(); renderDraftItems(); renderPassList();}
       if (view === 'materials') renderMaterialList();
       if (view === 'blog') renderBlogList();
+      if (view === 'sheets') {renderSheetData(); renderSheetStatus(); fillSheetForm();}
 
       const shown = document.getElementById('view-' + view);
       if (shown) {
@@ -3073,36 +4167,51 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       document.getElementById('up2-date').value = todayStr();
       document.getElementById('blog-date').value = todayStr();
       document.getElementById('ps-date').value = todayStr();
+      document.getElementById('att-month').value = localDate().slice(0, 7);
+      try {
+        const wo = localStorage.getItem('ptAttWeekoff');
+        if (wo) document.getElementById('att-weekoff').value = wo;
+      } catch (e) {}
+      attLastDay = localDate();
 
       db.collection('members').onSnapshot(snap => {
         members = snap.docs.map(d => ({id: d.id, ...d.data()}));
-        renderMemberSelects(); renderMemberList(); renderMyUpdates(); renderUpcoming();
+        renderMemberSelects(); renderMemberList(); renderMyUpdates(); renderUpcoming(); refreshSheetsIfOpen();
+        renderAttMemberSelect(); renderAttendance();
       }, () => showToast('Could not load members'));
+
+      db.collection('attendance').onSnapshot(snap => {
+        attendance = snap.docs.map(d => {
+          const x = d.data({serverTimestamps: 'estimate'});
+          return {id: d.id, ...x, inTime: toMs(x.inTime), outTime: toMs(x.outTime)};
+        });
+        renderAttendance(); refreshSheetsIfOpen();
+      }, () => showToast('Could not load attendance (check the Firestore rules)'));
 
       db.collection('tasks').onSnapshot(snap => {
         tasks = snap.docs.map(d => ({id: d.id, ...d.data()}));
-        renderMyUpdates(); renderFeed();
+        renderMyUpdates(); renderFeed(); refreshSheetsIfOpen();
       }, () => showToast('Could not load tasks'));
 
       db.collection('inventory').onSnapshot(snap => {
         inventory = snap.docs.map(d => ({id: d.id, ...d.data()}));
-        renderInventory();
+        renderInventory(); refreshSheetsIfOpen();
       }, () => showToast('Could not load inventory'));
 
       db.collection('projects').onSnapshot(snap => {
         projects = snap.docs.map(d => ({id: d.id, ...d.data()}));
         renderReport(); renderUpcoming(); renderModuleParent(); renderModuleList();
-        renderProjectPickers(); renderMaterialTracking();
+        renderProjectPickers(); renderMaterialTracking(); refreshSheetsIfOpen();
       }, () => showToast('Could not load projects'));
 
       db.collection('modules').onSnapshot(snap => {
         modules = snap.docs.map(d => ({id: d.id, ...d.data()}));
-        renderModuleSelects(); renderModuleList(); renderModuleUpdates(); renderModuleProgress();
+        renderModuleSelects(); renderModuleList(); renderModuleUpdates(); renderModuleProgress(); refreshSheetsIfOpen();
       }, () => showToast('Could not load modules'));
 
       db.collection('moduleUpdates').onSnapshot(snap => {
         moduleUpdates = snap.docs.map(d => ({id: d.id, ...d.data()}));
-        renderModuleList(); renderModuleUpdates(); renderModuleProgress();
+        renderModuleList(); renderModuleUpdates(); renderModuleProgress(); refreshSheetsIfOpen();
       }, () => showToast('Could not load module upgrades'));
 
       db.collection('materialCatalog').onSnapshot(snap => {
@@ -3112,8 +4221,14 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
 
       db.collection('passes').onSnapshot(snap => {
         trips = snap.docs.map(d => ({id: d.id, ...d.data()}));
-        renderPassList();
+        renderPassList(); refreshSheetsIfOpen();
       }, () => showToast('Could not load passes'));
+
+      db.collection('settings').doc('sheets').onSnapshot(doc => {
+        const d = doc.exists ? doc.data() : {};
+        sheetCfg = {url: d.url || '', key: d.key || '', enabled: !!d.enabled};
+        renderSheetStatus(); fillSheetForm();
+      }, () => showToast('Could not load Google Sheet settings (check the Firestore rules)'));
 
       db.collection('materials').onSnapshot(snap => {
         materials = snap.docs.map(d => ({id: d.id, ...d.data()}));
@@ -3127,6 +4242,8 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
 
       updateAdminUI();
       renderDraftItems();
+      attTick();
+      setInterval(attTick, 1000);
 
       document.querySelectorAll('.nav-item').forEach(n => {
         if (n.id === 'admin-toggle') {
@@ -3138,6 +4255,23 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       document.getElementById('mem-submit').addEventListener('click', addMember);
       document.getElementById('log-submit').addEventListener('click', submitTask);
       document.getElementById('log-member').addEventListener('change', renderMyUpdates);
+      document.getElementById('att-member').addEventListener('change', () => {
+        try {localStorage.setItem('ptAttMember', document.getElementById('att-member').value);} catch (e) {}
+        renderAttHero();
+      });
+      document.getElementById('att-in').addEventListener('click', attCheckIn);
+      document.getElementById('att-out').addEventListener('click', attCheckOut);
+      document.getElementById('att-month').addEventListener('change', () => {attEdit = null; renderAttReport();});
+      document.getElementById('att-weekoff').addEventListener('change', () => {
+        try {localStorage.setItem('ptAttWeekoff', document.getElementById('att-weekoff').value);} catch (e) {}
+        attEdit = null;
+        renderAttReport();
+      });
+      document.getElementById('att-detail-member').addEventListener('change', e => {
+        attDetailId = e.target.value;
+        attEdit = null;
+        renderAttReport();
+      });
       document.getElementById('feed-filter-member').addEventListener('change', renderFeed);
       document.getElementById('feed-filter-status').addEventListener('change', renderFeed);
       document.getElementById('inv-submit').addEventListener('click', addInventoryItem);
@@ -3162,6 +4296,9 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       document.getElementById('ps-load').addEventListener('click', loadDraftFromProject);
       document.getElementById('ps-submit').addEventListener('click', createTrip);
       document.getElementById('pass-filter').addEventListener('change', renderPassList);
+      document.getElementById('sh-save').addEventListener('click', saveSheetSettings);
+      document.getElementById('sh-test').addEventListener('click', sendSheetTest);
+      document.getElementById('sh-sendall').addEventListener('click', sendAllToSheet);
       document.getElementById('mat-submit').addEventListener('click', addMaterial);
       document.getElementById('blog-submit').addEventListener('click', addBlogPost);
     }
