@@ -1381,69 +1381,6 @@
       width: 130px;
     }
 
-
-    /* ======= Inventory Purchase Request upgrade ======= */
-    .inventory-hero{
-      position:relative; overflow:hidden; padding:30px;
-      background:linear-gradient(135deg,#173326 0%,#29513F 58%,#3c6b55 100%);
-      color:#fff; border:0; border-radius:18px; margin-bottom:20px;
-      box-shadow:0 18px 45px rgba(29,58,45,.18);
-    }
-    .inventory-hero:before,.inventory-hero:after{
-      content:""; position:absolute; border-radius:50%; pointer-events:none;
-      background:rgba(255,255,255,.07); animation:floatOrb 8s ease-in-out infinite;
-    }
-    .inventory-hero:before{width:220px;height:220px;right:-70px;top:-90px}
-    .inventory-hero:after{width:130px;height:130px;left:45%;bottom:-90px;animation-delay:1.5s}
-    .inv-kicker{font-size:11px;letter-spacing:2px;color:#DAB96C;font-weight:800}
-    .inv-hero-title{font-family:Georgia,serif;font-size:30px;margin:5px 0 7px}
-    .inv-hero-copy{max-width:680px;color:#DCE6DF;margin:0}
-    .inv-stat-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
-    .inv-stat{min-width:145px;padding:11px 14px;border:1px solid rgba(255,255,255,.13);
-      background:rgba(255,255,255,.07);border-radius:12px;backdrop-filter:blur(8px)}
-    .inv-stat strong{display:block;font:500 23px Georgia,serif;color:#fff}
-    .inv-stat span{font-size:11px;color:#C7D4CC}
-    .purchase-layout{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:start}
-    .purchase-card{border-radius:16px;overflow:hidden}
-    .purchase-card h2{display:flex;align-items:center;gap:8px}
-    .purchase-card h2 .soft{font-size:12px;font-weight:400;color:var(--ink-soft);margin-left:auto}
-    .catalog-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
-    .catalog-item{position:relative;border:1px solid var(--line);background:#fff;border-radius:12px;padding:13px;
-      cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
-    .catalog-item:hover{transform:translateY(-3px);box-shadow:0 9px 24px rgba(30,35,33,.08);border-color:#a9bcae}
-    .catalog-item.selected{border-color:var(--forest);box-shadow:0 0 0 2px rgba(41,81,63,.1);background:#F4F8F4}
-    .catalog-item .ci-name{font-weight:700;font-size:14px;padding-right:28px}
-    .catalog-item .ci-meta{font-size:11.5px;color:var(--ink-soft);margin-top:3px}
-    .catalog-check{position:absolute;right:11px;top:11px;width:22px;height:22px;border-radius:50%;
-      display:grid;place-items:center;background:#EEF2EE;color:var(--forest);font-size:12px;font-weight:800}
-    .catalog-item.selected .catalog-check{background:var(--forest);color:#fff}
-    .request-list{display:flex;flex-direction:column;gap:9px;margin-top:12px}
-    .request-row{display:grid;grid-template-columns:1fr 92px 34px;gap:8px;align-items:center;padding:10px;
-      border:1px solid var(--line);border-radius:11px;background:#FDFCFA;animation:rowIn .25s ease}
-    .request-row strong{font-size:13.5px}
-    .request-row small{display:block;color:var(--ink-soft);font-size:11px}
-    .qty-input{width:100%!important;text-align:center;padding:7px!important}
-    .icon-btn{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;background:#fff;cursor:pointer;color:var(--danger)}
-    .icon-btn:hover{background:#F7E6E2}
-    .request-summary{margin-top:14px;padding:13px;border-radius:12px;background:#F3F6F3;border:1px solid var(--line)}
-    .request-summary strong{font-size:14px}
-    .channel-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}
-    .channel-btn{border:1px solid var(--line);background:#fff;border-radius:11px;padding:11px 8px;cursor:pointer;font-weight:700;
-      transition:transform .16s ease,box-shadow .16s ease}
-    .channel-btn:hover{transform:translateY(-2px);box-shadow:0 7px 18px rgba(30,35,33,.08)}
-    .channel-btn.primary{background:var(--forest);color:#fff;border-color:var(--forest)}
-    .email-preview{border:1px solid var(--line);border-radius:13px;background:#fff;overflow:hidden;margin-top:14px}
-    .email-head{padding:12px 14px;background:#F3F6F3;border-bottom:1px solid var(--line);font-size:12px;color:var(--ink-soft)}
-    .email-body{padding:15px;font-size:13.5px;white-space:pre-wrap;line-height:1.65;max-height:300px;overflow:auto}
-    .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .saved-note{font-size:12px;color:var(--forest);margin-top:8px;min-height:17px}
-    .inventory-table-wrap{overflow:auto}
-    .inventory-card-table tr{transition:background .15s ease}
-    .inventory-card-table tr:hover{background:#FAFCFA}
-    @keyframes floatOrb{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,15px,0)}}
-    @media(max-width:850px){.purchase-layout{grid-template-columns:1fr}.catalog-grid{grid-template-columns:1fr 1fr}}
-    @media(max-width:600px){.catalog-grid,.settings-grid,.channel-grid{grid-template-columns:1fr}.inventory-hero{padding:22px}.inv-hero-title{font-size:25px}.request-row{grid-template-columns:1fr 82px 34px}}
-
     /* ======= Animations ======= */
     @keyframes appFadeIn {
       from {opacity: 0;}
@@ -1551,41 +1488,51 @@
       }
     }
   
-/* ===== Purchase Desk premium motion layer ===== */
-.inventory-hero{position:relative;overflow:hidden;border:1px solid rgba(185,141,62,.22);background:radial-gradient(circle at 85% 15%,rgba(185,141,62,.18),transparent 28%),linear-gradient(135deg,#17372a 0%,#29513f 52%,#355f4b 100%);box-shadow:0 24px 60px rgba(29,58,45,.18);transform:translateZ(0)}
-.inventory-hero:before,.inventory-hero:after{content:"";position:absolute;border-radius:999px;pointer-events:none;filter:blur(2px);animation:purchaseOrb 9s ease-in-out infinite}
-.inventory-hero:before{width:190px;height:190px;right:-60px;top:-80px;background:rgba(255,255,255,.09)}
-.inventory-hero:after{width:120px;height:120px;left:42%;bottom:-70px;background:rgba(185,141,62,.12);animation-delay:-3s}
-.inv-kicker{letter-spacing:.22em;text-transform:uppercase;font-weight:800;font-size:11px;color:#f0d69e}
-.inv-hero-title{font-size:clamp(32px,4vw,52px);line-height:1.02;font-weight:850;color:#fff;letter-spacing:-.04em;animation:purchaseTitle .7s ease both}
-.inv-hero-copy{max-width:760px;color:rgba(255,255,255,.78);font-size:15px}
-.purchase-card{transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease;animation:purchaseCardIn .55s ease both}
-.purchase-card:hover{transform:translateY(-3px);box-shadow:0 18px 40px rgba(31,42,36,.10);border-color:rgba(185,141,62,.35)}
-.catalog-item{position:relative;overflow:hidden;transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;background:linear-gradient(180deg,#fff,#fbfaf6)}
-.catalog-item:after{content:"";position:absolute;inset:auto -30% -65% -30%;height:100px;background:radial-gradient(ellipse,rgba(185,141,62,.12),transparent 65%);opacity:0;transition:opacity .25s}
-.catalog-item:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(41,81,63,.10)}
-.catalog-item:hover:after,.catalog-item.selected:after{opacity:1}
-.catalog-item.selected{border-color:var(--gold);box-shadow:0 0 0 2px rgba(185,141,62,.12),0 14px 30px rgba(185,141,62,.10);animation:selectedPulse 1.8s ease-in-out infinite}
-.channel-btn{position:relative;overflow:hidden;transition:transform .2s ease,box-shadow .2s ease,background .2s ease}
-.channel-btn:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(29,58,45,.13)}
-.channel-btn:active{transform:scale(.98)}
-.channel-btn.primary{background:linear-gradient(135deg,#29513f,#1d3a2d);box-shadow:0 8px 20px rgba(29,58,45,.18)}
-.channel-btn.sending{pointer-events:none;opacity:.9}
-.channel-btn.sending:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);transform:translateX(-100%);animation:sendShimmer 1.1s infinite}
-.email-preview{position:relative;overflow:hidden;border:1px solid rgba(185,141,62,.25);box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
-.email-preview:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(#b98d3e,#29513f);animation:previewGlow 2.2s ease-in-out infinite}
-.purchase-success{display:flex;align-items:center;gap:10px;margin-top:12px;padding:11px 13px;border-radius:12px;background:#edf8f0;color:#22613a;border:1px solid #bfe2c8;animation:successIn .35s ease both}
-.purchase-error{display:flex;align-items:center;gap:10px;margin-top:12px;padding:11px 13px;border-radius:12px;background:#fff1ef;color:#8f3022;border:1px solid #efc3bc;animation:successIn .35s ease both}
-@keyframes purchaseOrb{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(-18px,16px,0) scale(1.08)}}
-@keyframes purchaseTitle{from{opacity:0;transform:translateY(10px);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}
-@keyframes purchaseCardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-@keyframes selectedPulse{0%,100%{box-shadow:0 0 0 2px rgba(185,141,62,.10),0 14px 30px rgba(185,141,62,.08)}50%{box-shadow:0 0 0 4px rgba(185,141,62,.06),0 16px 34px rgba(185,141,62,.12)}}
-@keyframes sendShimmer{to{transform:translateX(100%)}}
-@keyframes previewGlow{0%,100%{opacity:.55}50%{opacity:1}}
-@keyframes successIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
-@media(max-width:700px){.inv-hero-title{font-size:34px}.channel-grid{grid-template-columns:1fr}.purchase-layout{grid-template-columns:1fr}.inv-stat-row{grid-template-columns:1fr}}
 
-  </style>
+/* ================================================================
+   PROTTHAPAN 2026 UI SYSTEM — visual layer only
+   Keeps the existing IDs/data flow intact while modernising the UI.
+   ================================================================ */
+:root{
+  --bg:#07110e; --bg-2:#0b1914; --panel:#10231b; --panel-2:#132a21;
+  --ink:#f4f7f2; --ink-soft:#9eaea6; --line:rgba(255,255,255,.09);
+  --forest:#3f8f6d; --forest-dark:#0a1712; --gold:#d5a84d;
+  --danger:#e06d57; --radius:18px; --shadow:0 18px 50px rgba(0,0,0,.24);
+}
+html{scroll-behavior:smooth}
+body{background:radial-gradient(circle at 80% -10%,rgba(63,143,109,.18),transparent 34%),radial-gradient(circle at 10% 30%,rgba(213,168,77,.07),transparent 25%),var(--bg);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,#000,transparent 85%);z-index:-1}
+.app{grid-template-columns:270px 1fr;min-height:100vh;background:transparent}
+.sidebar{position:sticky;top:0;height:100vh;overflow:auto;background:linear-gradient(180deg,rgba(11,25,20,.97),rgba(6,15,12,.98));border-right:1px solid var(--line);padding:22px 14px;backdrop-filter:blur(20px);z-index:20}
+.brand{font-family:Georgia,"Times New Roman",serif;font-size:21px;padding:12px 14px 22px;border:0;margin:0 0 12px;letter-spacing:-.3px}.brand span{color:var(--gold)}
+.brand:after{content:"OPERATIONS • WORKSPACE";display:block;font:600 9px/1.2 Inter,sans-serif;letter-spacing:1.7px;color:#688078;margin-top:8px}
+.nav-item{position:relative;margin:4px 0;padding:11px 13px 11px 43px;border:1px solid transparent;border-radius:13px;color:#9aa9a2;font-size:13px;font-weight:600;transition:.22s ease;white-space:nowrap}
+.nav-item:before{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:15px;opacity:.8}
+.nav-item[data-view=log]:before{content:"◷"}.nav-item[data-view=inventory]:before{content:"▦"}.nav-item[data-view=report]:before{content:"◒"}.nav-item[data-view=upcoming]:before{content:"↗"}.nav-item[data-view=modules]:before{content:"◈"}.nav-item[data-view=matlist]:before{content:"☷"}.nav-item[data-view=pass]:before{content:"⇄"}.nav-item[data-view=materials]:before{content:"▤"}.nav-item[data-view=blog]:before{content:"✦"}.nav-item[data-view=feed]:before{content:"◎"}.nav-item[data-view=members]:before{content:"♙"}.nav-item[data-view=sheets]:before{content:"▥"}
+.nav-item:hover{background:rgba(255,255,255,.045);border-color:var(--line);color:#fff;transform:translateX(2px)}
+.nav-item.active{background:linear-gradient(90deg,rgba(63,143,109,.22),rgba(63,143,109,.06));border-color:rgba(63,143,109,.3);color:#fff;box-shadow:inset 3px 0 0 var(--forest)}
+.sidebar-foot{margin:18px 4px 0;padding:14px 10px;border:1px solid var(--line);border-radius:13px;color:#667770;font-size:10.5px;line-height:1.5}
+.main{max-width:none;width:100%;padding:30px clamp(22px,4vw,58px) 60px;min-width:0}
+.main:before{content:"";display:block;height:1px;margin-bottom:22px;background:linear-gradient(90deg,transparent,rgba(63,143,109,.45),transparent)}
+.ui-topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:0 0 22px}.ui-topbar-title{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#6f8279;font-weight:800}.ui-live{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(63,143,109,.28);background:rgba(63,143,109,.08);padding:7px 10px;border-radius:999px;color:#9ed3b9;font-size:10px;font-weight:800;letter-spacing:1px}.ui-live i{width:7px;height:7px;border-radius:50%;background:#62c68f;box-shadow:0 0 12px #62c68f;animation:livePulse 1.8s infinite}
+h1{font-size:clamp(28px,3vw,42px);line-height:1.08;font-weight:700;letter-spacing:-1.5px;margin:0 0 7px;background:linear-gradient(120deg,#fff,#a8b9b1);-webkit-background-clip:text;background-clip:text;color:transparent}.subtitle{font-size:14px;color:#81938a;margin-bottom:26px}
+.panel{background:linear-gradient(145deg,rgba(19,42,33,.92),rgba(12,29,23,.88));border:1px solid var(--line);border-radius:var(--radius);padding:23px;margin-bottom:18px;box-shadow:0 10px 35px rgba(0,0,0,.12);transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease;overflow:hidden;position:relative}.panel:before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.035),transparent 28%);pointer-events:none}.panel:hover{transform:translateY(-2px);border-color:rgba(63,143,109,.24);box-shadow:var(--shadow)}.panel h2{font-size:15px;letter-spacing:.1px;margin:0 0 16px;color:#e7eee9}.panel h2:after{content:"";display:block;width:28px;height:2px;background:var(--gold);margin-top:8px;border-radius:2px;opacity:.75}
+label{color:#7f9188;font-size:11px;font-weight:700;letter-spacing:.35px;text-transform:uppercase;margin-top:15px}input[type=text],input[type=email],input[type=date],input[type=number],input[type=password],input[type=month],input[type=time],select,textarea{background:#091913;color:#edf4ef;border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:11px 12px;transition:.2s ease}input::placeholder,textarea::placeholder{color:#53665d}input:focus,select:focus,textarea:focus{outline:none;border-color:rgba(63,143,109,.8);box-shadow:0 0 0 4px rgba(63,143,109,.11);background:#0b1d16}
+.btn{border-radius:11px;background:linear-gradient(135deg,#3f8f6d,#2d6f54);padding:11px 18px;box-shadow:0 8px 20px rgba(32,102,75,.22);transition:.2s ease}.btn:hover{background:linear-gradient(135deg,#55a77f,#347d5e);transform:translateY(-1px);box-shadow:0 12px 25px rgba(32,102,75,.3)}.btn:active{transform:scale(.98)}.btn-ghost{background:rgba(255,255,255,.035);color:#b8c8c0;border-color:rgba(255,255,255,.12)}
+table{border-collapse:separate;border-spacing:0;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:rgba(4,14,10,.22)}th{background:rgba(255,255,255,.035);color:#81948b;text-transform:uppercase;letter-spacing:.6px;font-size:10px;padding:11px}td{border-bottom:1px solid rgba(255,255,255,.055);color:#c9d4cf;padding:12px 11px}tr:last-child td{border-bottom:0}tr:hover td{background:rgba(63,143,109,.035)}
+.member-tag,.status-pill{border:1px solid rgba(255,255,255,.08)}.member-tag{background:rgba(63,143,109,.13);color:#a7d2bd}.status-inprogress{background:rgba(213,168,77,.13);color:#e4c47f}.status-done{background:rgba(63,143,109,.13);color:#9fd0b7}.status-blocked{background:rgba(224,109,87,.12);color:#ee9b8a}
+.filter-bar{gap:9px}.filter-bar select,.filter-bar input[type=month]{background:#0a1b15;color:#dce7e1;border-color:var(--line)}
+.setup-banner,.admin-note{background:rgba(213,168,77,.08);border:1px solid rgba(213,168,77,.2);border-left:3px solid var(--gold);color:#cdbb8e;border-radius:13px}
+.toast{background:#132a21;border:1px solid rgba(63,143,109,.35);box-shadow:var(--shadow);border-radius:12px;padding:12px 17px}
+.empty{color:#70837a}.loading-shimmer{background:linear-gradient(90deg,transparent,rgba(255,255,255,.04),transparent);background-size:200% 100%;animation:shimmer 1.5s infinite}
+#lock-screen{background:radial-gradient(circle at 50% 0,rgba(63,143,109,.22),transparent 40%),#050d0a}.lock-card{background:linear-gradient(145deg,#10231b,#091711);border:1px solid rgba(255,255,255,.1);border-radius:24px;box-shadow:0 30px 80px rgba(0,0,0,.5);padding:38px}.lock-brand{font-size:25px}.lock-tabs{background:#081610;border:1px solid var(--line);border-radius:12px}.lock-tab{border-radius:9px}.lock-tab.active{background:linear-gradient(135deg,#3f8f6d,#2c6d53)}#lock-screen input{background:#07140f;color:#fff;border-color:var(--line);border-radius:11px}
+.view-enter{animation:pageIn .38s cubic-bezier(.2,.8,.2,1)}
+/* existing specialist layouts */.att-hero,.ongoing-layout,.ml-grid{border-radius:18px}.att-hero{background:linear-gradient(135deg,#0e281f,#153a2c)!important;border:1px solid rgba(63,143,109,.25)!important;box-shadow:var(--shadow)}.att-clock{color:#fff!important;text-shadow:0 0 25px rgba(63,143,109,.45)}.progress-panel{background:linear-gradient(145deg,#10281f,#0c1c16)}.proj-card,.sub-card{background:#0c1c16;border-color:var(--line)}.proj-head:hover{background:rgba(255,255,255,.025)}.bar{background:#07120e}.bar>div{background:linear-gradient(90deg,#3f8f6d,#72c79d)}
+/* purchase desk */.purchase-hero{position:relative;overflow:hidden;border:1px solid rgba(63,143,109,.28);border-radius:22px;padding:28px;margin:0 0 18px;background:radial-gradient(circle at 90% 10%,rgba(213,168,77,.13),transparent 26%),linear-gradient(135deg,#102b20,#0b1a14);box-shadow:var(--shadow)}.purchase-hero:after{content:"";position:absolute;width:230px;height:230px;border-radius:50%;right:-80px;bottom:-110px;background:rgba(63,143,109,.12);filter:blur(5px)}.purchase-kicker{font-size:10px;letter-spacing:2px;color:#7bc09e;font-weight:800}.purchase-title{font-size:30px;font-weight:750;letter-spacing:-1px;margin:7px 0}.purchase-copy{max-width:680px;color:#92a69c;font-size:13px}.purchase-stats{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}.purchase-stat{min-width:120px;padding:11px 13px;border:1px solid var(--line);background:rgba(255,255,255,.025);border-radius:12px}.purchase-stat strong{display:block;font-size:21px;color:#fff}.purchase-stat span{font-size:10px;color:#71847b;text-transform:uppercase;letter-spacing:.6px}.purchase-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(330px,.85fr);gap:18px}.purchase-card{background:linear-gradient(145deg,rgba(19,42,33,.95),rgba(9,22,17,.95));border:1px solid var(--line);border-radius:18px;padding:19px}.purchase-card-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:13px}.purchase-card-title strong{font-size:14px}.catalog-search{margin-bottom:12px}.purchase-catalog{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:9px;max-height:390px;overflow:auto;padding-right:2px}.catalog-item{border:1px solid var(--line);background:rgba(255,255,255,.018);border-radius:13px;padding:12px;cursor:pointer;transition:.2s ease}.catalog-item:hover{transform:translateY(-2px);border-color:rgba(63,143,109,.4);background:rgba(63,143,109,.05)}.catalog-item.selected{border-color:#4fa97e;background:rgba(63,143,109,.12);box-shadow:0 0 0 1px rgba(63,143,109,.15)}.catalog-item-name{font-weight:700;font-size:13px;color:#e7efe9}.catalog-item-unit{font-size:10px;color:#71847b;margin-top:5px}.catalog-check{float:right;color:#70c89b}.request-list{display:flex;flex-direction:column;gap:8px}.request-row{display:grid;grid-template-columns:1fr 72px 28px;gap:8px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.018)}.request-row-name{font-size:12.5px;font-weight:650}.request-row-unit{display:block;font-size:10px;color:#6f8279;margin-top:2px}.qty-input{width:72px!important;text-align:center!important;padding:8px!important}.icon-btn{width:28px;height:28px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.025);color:#d98978;cursor:pointer}.purchase-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.purchase-fields .full{grid-column:1/-1}.purchase-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:13px}.purchase-action{border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.025);color:#dce7e1;padding:11px 8px;font-weight:750;cursor:pointer;transition:.2s}.purchase-action:hover{transform:translateY(-2px);background:rgba(63,143,109,.1);border-color:rgba(63,143,109,.4)}.purchase-action.primary{background:linear-gradient(135deg,#3f8f6d,#2c6d53);border-color:transparent}.email-preview{margin-top:14px;border:1px solid var(--line);border-radius:13px;overflow:hidden}.email-preview-head{padding:10px 12px;background:rgba(255,255,255,.035);font-size:10px;color:#8da097;text-transform:uppercase;letter-spacing:.8px}.email-preview-body{padding:13px;white-space:pre-wrap;color:#b7c6bf;font:12px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;max-height:260px;overflow:auto}.purchase-admin{display:none}.purchase-mini-btn{border:1px solid var(--line);background:rgba(255,255,255,.03);color:#b8c8c0;border-radius:10px;padding:7px 10px;cursor:pointer;font-size:11px}.purchase-message{min-height:18px;font-size:12px;margin-top:9px;color:#83c9a4}.purchase-message.error{color:#ee9684}
+@keyframes pageIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}@keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}@keyframes livePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.75)}}
+@media(max-width:1000px){.app{grid-template-columns:82px 1fr}.brand{font-size:0;text-align:center}.brand:before{content:"P";font:bold 24px Georgia;color:var(--gold)}.brand span,.brand:after{display:none}.nav-item{font-size:0;padding-left:0;text-align:center;height:44px}.nav-item:before{left:50%;transform:translate(-50%,-50%)}.sidebar-foot{font-size:0;text-align:center}.sidebar-foot:before{content:"●";font-size:12px;color:#5a7568}.purchase-grid{grid-template-columns:1fr}}
+@media(max-width:680px){.app{display:block}.sidebar{position:fixed;bottom:0;top:auto;left:0;right:0;height:64px;display:flex;flex-direction:row;overflow:auto;padding:6px 7px;border-right:0;border-top:1px solid var(--line)}.brand,.sidebar-foot{display:none}.nav-item{min-width:58px;margin:0;height:52px;padding:31px 2px 2px;font-size:8px;overflow:hidden;text-overflow:ellipsis}.nav-item:before{top:11px}.main{padding:20px 14px 85px}.row-2,.row-3,.purchase-fields{grid-template-columns:1fr}.purchase-actions{grid-template-columns:1fr}.purchase-hero{padding:21px}.purchase-title{font-size:25px}.panel{padding:17px;border-radius:15px}h1{font-size:28px}.ui-topbar{margin-bottom:16px}.purchase-grid{gap:12px}}
+</style>
 </head>
 
 <body class="locked">
@@ -1638,6 +1585,7 @@
     </div>
 
     <div class="main">
+      <div class="ui-topbar"><div class="ui-topbar-title">Protthapan Technologies • Operations Center</div><div class="ui-live"><i></i> LIVE WORKSPACE</div></div>
       <div id="setup-banner" class="setup-banner" style="display:none;">
         ⚠️ Firebase isn't configured yet. Open this file, find <code>firebaseConfig</code> near the bottom, and paste in
         your own Firebase project keys (free — see setup steps).
@@ -1760,88 +1708,72 @@
       </div>
 
       <div id="view-inventory" style="display:none;">
-        <div class="inventory-hero">
-          <div class="inv-kicker">PROCUREMENT · INVENTORY</div>
-          <div class="inv-hero-title">Purchase Desk</div>
-          <p class="inv-hero-copy">Pick the materials your team needs, set quantities, review the request and send a ready-to-use purchase message to the Purchase Department.</p>
-          <div class="inv-stat-row" id="purchase-stats"></div>
-        </div>
-
-        <div class="purchase-layout">
-          <div>
-            <div class="panel purchase-card">
-              <h2>📦 Select required items <span class="soft">Click an item to add it</span></h2>
-              <div class="filter-bar">
-                <input type="text" id="purchase-search" placeholder="Search inventory items…" style="max-width:280px;">
-                <button class="btn btn-sm btn-ghost" id="purchase-clear">Clear selection</button>
-              </div>
-              <div id="purchase-catalog" class="catalog-grid"></div>
-              <div class="admin-note" style="margin-top:14px;">💡 The catalog below is stored in Firebase. Admins can add your regular purchase items once, then the team can select them whenever a new request is needed.</div>
-              <div id="purchase-admin-add" style="display:none;">
-                <div class="row-3">
-                  <div><label for="catalog-name">New item</label><input id="catalog-name" type="text" placeholder="e.g. HDMI cable"></div>
-                  <div><label for="catalog-unit">Unit</label><input id="catalog-unit" type="text" placeholder="pcs / box / set"></div>
-                  <div style="display:flex;align-items:flex-end"><button class="btn btn-sm" id="catalog-add" style="width:100%">Add to catalog</button></div>
-                </div>
-                <span id="catalog-error" style="color:var(--danger);font-size:13px;"></span>
-              </div>
-            </div>
-
-            <div class="panel purchase-card">
-              <h2>🧾 Purchase request <span class="soft" id="request-count">0 items</span></h2>
-              <div id="purchase-request-list" class="request-list">
-                <div class="empty">Select items above to build your request.</div>
-              </div>
-              <div class="request-summary">
-                <strong>Request summary</strong>
-                <div id="request-summary-text" style="margin-top:5px;color:var(--ink-soft);font-size:13px;">No items selected yet.</div>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <div class="panel purchase-card">
-              <h2>✉️ Send to Purchase Department</h2>
-              <div class="settings-grid">
-                <div><label for="purchase-email">Department email</label><input type="email" id="purchase-email" placeholder="purchase@company.com"></div>
-                <div><label for="purchase-phone">Department phone</label><input type="text" id="purchase-phone" placeholder="+91 98765 43210"></div>
-              </div>
-              <label for="purchase-requester">Requested by</label>
-              <input type="text" id="purchase-requester" placeholder="Your name">
-              <label for="purchase-project">Project / purpose</label>
-              <input type="text" id="purchase-project" placeholder="e.g. Drone Lab setup">
-              <label for="purchase-note">Additional note</label>
-              <textarea id="purchase-note" placeholder="Required by date, vendor preference, urgency, specifications…"></textarea>
-              <div class="channel-grid">
-                <button class="channel-btn primary" id="send-purchase-email">✉ Email</button>
-                <button class="channel-btn" id="send-purchase-whatsapp">💬 WhatsApp</button>
-                <button class="channel-btn" id="send-purchase-sms">📱 SMS</button>
-              </div>
-              <div id="purchase-send-status" style="display:none;"></div>
-              <div class="saved-note" id="purchase-settings-note"></div>
-              <div class="email-preview">
-                <div class="email-head"><strong>MESSAGE PREVIEW</strong> · updates live as you select items</div>
-                <div class="email-body" id="purchase-preview">Select items to generate the purchase request.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
+        <h1>Inventory & Purchase Desk</h1>
+        <p class="subtitle">Track purchased items and send a structured request to the Purchase Department.</p>
         <div class="panel">
-          <h2>Add a purchased inventory item</h2>
+          <h2>Inventory record</h2>
           <div class="row-3">
             <div><label for="inv-item">Item name</label><input type="text" id="inv-item" placeholder="e.g. Wireless mouse"></div>
             <div><label for="inv-price">Price</label><input type="text" id="inv-price" placeholder="e.g. 1200"></div>
             <div><label for="inv-buyer">Bought by</label><select id="inv-buyer"></select></div>
           </div>
-          <label for="inv-date">Date purchased</label><input type="date" id="inv-date">
-          <label for="inv-notes">Notes (optional)</label><textarea id="inv-notes" placeholder="Vendor, purpose, invoice number..."></textarea>
-          <button class="btn" id="inv-submit">Add purchased item</button>
+          <div class="row-2">
+            <div><label for="inv-date">Date purchased</label><input type="date" id="inv-date"></div>
+            <div><label for="inv-notes">Notes</label><input type="text" id="inv-notes" placeholder="Vendor, purpose, invoice number..."></div>
+          </div>
+          <button class="btn" id="inv-submit">Add item</button>
           <span id="inv-error" style="color:var(--danger);font-size:13px;margin-left:12px;"></span>
         </div>
-
+        <div class="purchase-hero">
+          <div class="purchase-kicker">PROCUREMENT WORKFLOW</div>
+          <div class="purchase-title">Purchase Desk</div>
+          <div class="purchase-copy">Select items from the live catalog, set quantities, add the project purpose and send one clean request. Email is sent through the site's backend — no Gmail or Outlook window is opened.</div>
+          <div class="purchase-stats" id="purchase-stats"></div>
+        </div>
+        <div class="purchase-grid">
+          <div class="purchase-card">
+            <div class="purchase-card-title"><strong>1. Select required items</strong><button class="purchase-mini-btn" id="purchase-clear">Clear selection</button></div>
+            <input class="catalog-search" type="text" id="purchase-search" placeholder="Search inventory catalog...">
+            <div class="purchase-catalog" id="purchase-catalog"><div class="empty">Loading catalog…</div></div>
+            <div class="purchase-admin" id="purchase-admin-add">
+              <div class="purchase-fields" style="margin-top:14px;">
+                <div><label for="purchase-new-name">New catalog item</label><input type="text" id="purchase-new-name" placeholder="Item name"></div>
+                <div><label for="purchase-new-unit">Unit</label><input type="text" id="purchase-new-unit" placeholder="pcs / box / set"></div>
+              </div>
+              <button class="purchase-mini-btn" id="purchase-add-catalog" style="margin-top:9px;">+ Add catalog item</button>
+            </div>
+          </div>
+          <div class="purchase-card">
+            <div class="purchase-card-title"><strong>2. Request details</strong><span style="font-size:10px;color:#6f8279;">LIVE PREVIEW</span></div>
+            <div class="request-list" id="purchase-request-list"><div class="empty">No items selected yet.</div></div>
+            <div class="purchase-fields" style="margin-top:12px;">
+              <div><label for="purchase-requester">Requested by</label><input type="text" id="purchase-requester" placeholder="Your name"></div>
+              <div><label for="purchase-project">Project / purpose</label><input type="text" id="purchase-project" placeholder="Project or purpose"></div>
+              <div class="full"><label for="purchase-note">Additional note</label><textarea id="purchase-note" placeholder="Delivery deadline, specifications, vendor preference..."></textarea></div>
+            </div>
+            <div class="email-preview">
+              <div class="email-preview-head">Message preview</div>
+              <div class="email-preview-body" id="purchase-preview">Select an item to build the request.</div>
+            </div>
+            <div class="purchase-actions">
+              <button class="purchase-action primary" id="purchase-email">✉ Send Email</button>
+              <button class="purchase-action" id="purchase-whatsapp">◉ WhatsApp</button>
+              <button class="purchase-action" id="purchase-sms">▣ SMS</button>
+            </div>
+            <div class="purchase-message" id="purchase-message"></div>
+          </div>
+        </div>
+        <div class="panel" style="margin-top:18px;">
+          <h2>Purchase contact settings</h2>
+          <div class="row-2">
+            <div><label for="purchase-email-to">Purchase Department Email</label><input type="email" id="purchase-email-to" placeholder="purchase@yourcompany.com"></div>
+            <div><label for="purchase-phone">Purchase Department Phone / WhatsApp</label><input type="text" id="purchase-phone" placeholder="+91XXXXXXXXXX"></div>
+          </div>
+          <button class="btn btn-sm" id="purchase-save-contact">Save contact</button>
+          <span style="font-size:11px;color:#71847b;margin-left:10px;">Email credentials are never stored in this page.</span>
+        </div>
         <div class="panel">
-          <h2>Purchase history <span id="inv-total" style="color:var(--ink-soft);font-weight:400;"></span></h2>
+          <h2>Purchased inventory <span id="inv-total" style="color:var(--ink-soft);font-weight:400;"></span></h2>
           <div id="inventory-list"><div class="empty loading-shimmer">Loading…</div></div>
         </div>
       </div>
@@ -2275,14 +2207,13 @@
     let attEdit = null;       // admin editing a day: {mid, ds, inV, outV}
     let attLastDay = '';      // used to refresh the board when the date changes at midnight
     let sheetCfg = {url: '', key: '', enabled: false}; // Google Sheet connection (stored in Firestore: settings/sheets)
+    let purchaseCatalog = [];
+    let purchaseSelection = {};
+    let purchaseCfg = {email:'', phone:''};
     let openProjectId = null; // which OnGoing project is currently opened
     let openTripId = null;    // which trip is currently opened
     let retDraft = {};        // unsaved return-check values, so a live refresh never wipes what you typed
     let psDraftItems = [{id: 'd0', desc: '', qty: '', remarks: ''}];
-    let purchaseCatalog = [];
-    let purchaseSelection = {};
-    let purchaseCfg = {email:'', phone:''};
-
     const STATUS_LABEL = {inprogress: "In progress", done: "Completed", blocked: "Blocked"};
     const STATUS_CLASS = {inprogress: "status-inprogress", done: "status-done", blocked: "status-blocked"};
     const TYPE_LABEL = {feature: "New feature", improvement: "Improvement", fix: "Bug fix", idea: "Idea / planned"};
@@ -2392,20 +2323,30 @@
     }
 
     function renderInventory() {
-      const el=document.getElementById('inventory-list'), totalEl=document.getElementById('inv-total');
-      renderPurchaseStats(); renderPurchaseCatalog(); renderPurchaseRequest();
-      if(inventory.length===0){el.innerHTML='<div class="empty">No purchased items logged yet.</div>'; totalEl.textContent=''; return;}
-      const sorted=inventory.slice().sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
-      let total=0;
-      let html='<div class="inventory-table-wrap"><table class="inventory-card-table"><tr><th>Date</th><th>Item</th><th>Price</th><th>Bought by</th><th>Notes</th></tr>';
-      sorted.forEach(i=>{
-        const num=parseFloat(i.price)||0; total+=num;
-        html+=`<tr><td class="task-date">${formatDate(i.date)}</td><td><strong>${escapeHtml(i.itemName)}</strong></td>
-          <td>₹${escapeHtml(i.price)}</td><td><span class="member-tag">${escapeHtml(i.buyerName)}</span></td>
-          <td>${escapeHtml(i.notes||'—')}</td></tr>`;
+      const el = document.getElementById('inventory-list');
+      const totalEl = document.getElementById('inv-total');
+      if (inventory.length === 0) {
+        el.innerHTML = '<div class="empty">No items logged yet.</div>';
+        totalEl.textContent = '';
+        return;
+      }
+      const sorted = inventory.slice().sort((a, b) => b.timestamp - a.timestamp);
+      let total = 0;
+      let html = '<table><tr><th>Date</th><th>Item</th><th>Price</th><th>Bought by</th><th>Notes</th></tr>';
+      sorted.forEach(i => {
+        const num = parseFloat(i.price) || 0;
+        total += num;
+        html += `<tr>
+      <td class="task-date">${formatDate(i.date)}</td>
+      <td>${escapeHtml(i.itemName)}</td>
+      <td>${escapeHtml(i.price)}</td>
+      <td><span class="member-tag">${escapeHtml(i.buyerName)}</span></td>
+      <td>${escapeHtml(i.notes || '—')}</td>
+    </tr>`;
       });
-      el.innerHTML=html+'</table></div>';
-      totalEl.textContent='— total spent: ₹'+total.toLocaleString('en-IN');
+      html += '</table>';
+      el.innerHTML = html;
+      totalEl.textContent = '— total spent: ' + total.toLocaleString();
     }
 
     function renderProjectList(elId, status) {
@@ -3928,178 +3869,6 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       btn.disabled = false;
     }
 
-
-    function purchaseItems() {
-      return Object.values(purchaseSelection).filter(x => Number(x.qty) > 0);
-    }
-    function savePurchasePrefs() {
-      const email=document.getElementById('purchase-email').value.trim();
-      const phone=document.getElementById('purchase-phone').value.trim();
-      purchaseCfg={email,phone};
-      try { localStorage.setItem('ptPurchaseCfg',JSON.stringify(purchaseCfg)); } catch(e){}
-      if (isAdmin && db) {
-        db.collection('settings').doc('purchase').set({email,phone,updatedBy:currentName,updatedAt:Date.now()},{merge:true}).catch(()=>{});
-      }
-      document.getElementById('purchase-settings-note').textContent=isAdmin?'Purchase contact settings saved.':'Contact details saved on this browser.';
-    }
-    function loadPurchasePrefs() {
-      try {
-        const d=JSON.parse(localStorage.getItem('ptPurchaseCfg')||'{}');
-        purchaseCfg={email:d.email||'',phone:d.phone||''};
-      } catch(e){purchaseCfg={email:'',phone:''};}
-      const email=document.getElementById('purchase-email'), phone=document.getElementById('purchase-phone');
-      if(email) email.value=purchaseCfg.email;
-      if(phone) phone.value=purchaseCfg.phone;
-      const req=document.getElementById('purchase-requester');
-      if(req && !req.value) req.value=currentName||'';
-    }
-    function renderPurchaseCatalog() {
-      const el=document.getElementById('purchase-catalog'); if(!el)return;
-      const q=(document.getElementById('purchase-search')?.value||'').toLowerCase().trim();
-      const source=purchaseCatalog.length?purchaseCatalog:catalog.map(x=>({id:'cat-'+x.id,name:x.name,unit:x.unit||'unit'}));
-      const list=source.filter(x=>!q||x.name.toLowerCase().includes(q));
-      if(!list.length){el.innerHTML='<div class="empty" style="grid-column:1/-1">No catalog items yet. Admin can add the regular purchase items below.</div>';return;}
-      el.innerHTML=list.map(x=>{
-        const selected=!!purchaseSelection[x.id];
-        return `<div class="catalog-item ${selected?'selected':''}" onclick="togglePurchaseItem('${escapeAttr(x.id)}')">
-          <div class="ci-name">${escapeHtml(x.name)}</div>
-          <div class="ci-meta">${escapeHtml(x.unit||'unit')}</div>
-          <div class="catalog-check">${selected?'✓':'+'}</div>
-        </div>`;
-      }).join('');
-    }
-    function togglePurchaseItem(id) {
-      const source=purchaseCatalog.length?purchaseCatalog:catalog.map(x=>({id:'cat-'+x.id,name:x.name,unit:x.unit||'unit'}));
-      const item=source.find(x=>x.id===id); if(!item)return;
-      if(purchaseSelection[id]) delete purchaseSelection[id];
-      else purchaseSelection[id]={id,itemName:item.name,unit:item.unit||'unit',qty:1};
-      renderPurchaseCatalog(); renderPurchaseRequest();
-    }
-    function changePurchaseQty(id,value) {
-      if(!purchaseSelection[id])return;
-      const q=Math.max(1,parseInt(value,10)||1);
-      purchaseSelection[id].qty=q; renderPurchaseRequest();
-    }
-    function removePurchaseItem(id) {
-      delete purchaseSelection[id]; renderPurchaseCatalog(); renderPurchaseRequest();
-    }
-    window.togglePurchaseItem=togglePurchaseItem;
-    window.changePurchaseQty=changePurchaseQty;
-    window.removePurchaseItem=removePurchaseItem;
-
-    function purchaseMessage() {
-      const items=purchaseItems();
-      const requester=document.getElementById('purchase-requester')?.value.trim()||currentName||'Team';
-      const project=document.getElementById('purchase-project')?.value.trim()||'General requirement';
-      const note=document.getElementById('purchase-note')?.value.trim()||'No additional note.';
-      const lines=items.length?items.map((x,i)=>`${i+1}. ${x.itemName} — ${x.qty} ${x.unit}`).join('\n'):'No items selected.';
-      return `Hello Purchase Department,
-
-We would like to request the following items:
-
-${lines}
-
-Requested by: ${requester}
-Project / Purpose: ${project}
-
-Additional note:
-${note}
-
-Please confirm availability, expected delivery time and quotation.
-
-Regards,
-Protthapan Technologies`;
-    }
-    function renderPurchaseRequest() {
-      const items=purchaseItems(), el=document.getElementById('purchase-request-list');
-      document.getElementById('request-count').textContent=items.length+' item'+(items.length===1?'':'s');
-      if(!items.length) el.innerHTML='<div class="empty">Select items above to build your request.</div>';
-      else el.innerHTML=items.map(x=>`<div class="request-row">
-        <div><strong>${escapeHtml(x.itemName)}</strong><small>Unit: ${escapeHtml(x.unit)}</small></div>
-        <input class="qty-input" type="number" min="1" value="${x.qty}" onchange="changePurchaseQty('${escapeAttr(x.id)}',this.value)">
-        <button class="icon-btn" title="Remove" onclick="removePurchaseItem('${escapeAttr(x.id)}')">×</button>
-      </div>`).join('');
-      const summary=document.getElementById('request-summary-text');
-      summary.textContent=items.length?items.map(x=>`${x.itemName} × ${x.qty}`).join('  •  '):'No items selected yet.';
-      document.getElementById('purchase-preview').textContent=purchaseMessage();
-    }
-    async function addPurchaseCatalogItem() {
-      if(!isAdmin){showToast('Admin only');return;}
-      const name=document.getElementById('catalog-name').value.trim();
-      const unit=document.getElementById('catalog-unit').value.trim()||'pcs';
-      const err=document.getElementById('catalog-error'); err.textContent='';
-      if(!name){err.textContent='Enter an item name.';return;}
-      if(!db){err.textContent='Firebase not configured yet.';return;}
-      try{
-        await db.collection('inventoryCatalog').add({name,unit,createdAt:Date.now(),createdBy:currentName});
-        document.getElementById('catalog-name').value=''; document.getElementById('catalog-unit').value='';
-        showToast('Item added to purchase catalog');
-      }catch(e){err.textContent='Could not save catalog item.';}
-    }
-    function renderPurchaseStats() {
-      const el=document.getElementById('purchase-stats'); if(!el)return;
-      const total=inventory.reduce((n,i)=>n+(parseFloat(i.price)||0),0);
-      el.innerHTML=`<div class="inv-stat"><strong>${purchaseCatalog.length}</strong><span>Catalog items</span></div>
-        <div class="inv-stat"><strong>${inventory.length}</strong><span>Purchased records</span></div>
-        <div class="inv-stat"><strong>₹${total.toLocaleString('en-IN')}</strong><span>Total recorded spend</span></div>`;
-    }
-    async function sendPurchaseEmail() {
-      const items=purchaseItems();
-      if(!items.length){showToast('Select at least one item');return;}
-      savePurchasePrefs();
-      const email=document.getElementById('purchase-email').value.trim();
-      if(!email){showToast('Enter the Purchase Department email');return;}
-      const btn=document.getElementById('send-purchase-email');
-      const status=document.getElementById('purchase-send-status');
-      const requester=document.getElementById('purchase-requester')?.value.trim()||currentName||'Team';
-      const project=document.getElementById('purchase-project')?.value.trim()||'General requirement';
-      const note=document.getElementById('purchase-note')?.value.trim()||'No additional note.';
-      btn.disabled=true; btn.classList.add('sending'); btn.textContent='⏳ Sending securely…';
-      status.style.display='none'; status.className=''; status.textContent='';
-      try {
-        const response=await fetch('/api/send-purchase-email',{
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({to:email,subject:'Purchase Request — Protthapan Technologies',message:purchaseMessage(),requester,project,note,items})
-        });
-        const data=await response.json().catch(()=>({}));
-        if(!response.ok) throw new Error(data.error||'Email service is unavailable.');
-        status.className='purchase-success'; status.innerHTML='✓ <strong>Purchase request sent successfully.</strong> The Purchase Department has received the email.'; status.style.display='flex';
-        showToast('Purchase request emailed successfully');
-      } catch(e) {
-        console.error('[purchase-email]',e);
-        status.className='purchase-error'; status.innerHTML='⚠ <strong>Email could not be sent.</strong> '+escapeHtml(e.message||'Please try again.'); status.style.display='flex';
-        showToast('Could not send purchase email');
-      } finally {
-        btn.disabled=false; btn.classList.remove('sending'); btn.textContent='✉ Send Email';
-      }
-    }
-    function sendPurchaseWhatsApp() {
-      const items=purchaseItems(); if(!items.length){showToast('Select at least one item');return;}
-      savePurchasePrefs();
-      const phone=document.getElementById('purchase-phone').value.replace(/\D/g,'');
-      if(!phone){showToast('Enter the Purchase Department phone number');return;}
-      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(purchaseMessage())}`,'_blank','noopener');
-    }
-    function sendPurchaseSms() {
-      const items=purchaseItems(); if(!items.length){showToast('Select at least one item');return;}
-      savePurchasePrefs();
-      const phone=document.getElementById('purchase-phone').value.trim();
-      if(!phone){showToast('Enter the Purchase Department phone number');return;}
-      location.href=`sms:${phone}?body=${encodeURIComponent(purchaseMessage())}`;
-    }
-    function initPurchaseUI() {
-      loadPurchasePrefs();
-      document.getElementById('purchase-search')?.addEventListener('input',renderPurchaseCatalog);
-      document.getElementById('purchase-clear')?.addEventListener('click',()=>{purchaseSelection={};renderPurchaseCatalog();renderPurchaseRequest();});
-      document.getElementById('catalog-add')?.addEventListener('click',addPurchaseCatalogItem);
-      document.getElementById('send-purchase-email')?.addEventListener('click',sendPurchaseEmail);
-      document.getElementById('send-purchase-whatsapp')?.addEventListener('click',sendPurchaseWhatsApp);
-      document.getElementById('send-purchase-sms')?.addEventListener('click',sendPurchaseSms);
-      ['purchase-email','purchase-phone','purchase-requester','purchase-project','purchase-note'].forEach(id=>{
-        document.getElementById(id)?.addEventListener('input',renderPurchaseRequest);
-      });
-    }
-
     async function addInventoryItem() {
       const itemName = document.getElementById('inv-item').value.trim();
       const price = document.getElementById('inv-price').value.trim();
@@ -4252,9 +4021,9 @@ Protthapan Technologies`;
         ? 'Add everyone on your team so they can log their own updates.'
         : 'Everyone on the team.';
       document.getElementById('admin-nav-label').textContent = '🔓 Logout (' + (currentName || 'user') + ')';
+      const purchaseAdmin = document.getElementById('purchase-admin-add'); if (purchaseAdmin) purchaseAdmin.style.display = isAdmin ? 'block' : 'none';
       document.getElementById('sheet-admin-form').style.display = isAdmin ? 'block' : 'none';
       document.getElementById('sheet-member-note').style.display = isAdmin ? 'none' : 'block';
-      const pc=document.getElementById('purchase-admin-add'); if(pc) pc.style.display=isAdmin ? 'block' : 'none';
       renderMemberList();
       renderSheetStatus();
       renderAttendance();
@@ -4452,6 +4221,77 @@ Protthapan Technologies`;
       } catch (e) {errEl.textContent = 'Could not save. Check your Firebase setup.';}
     }
 
+    // ---- Purchase Desk -------------------------------------------------
+    function purchaseSource(){
+      if (purchaseCatalog.length) return purchaseCatalog;
+      return catalog.map(x => ({id:'cat-'+x.id, name:x.name, unit:x.unit || 'unit'}));
+    }
+    function purchaseItems(){ return Object.keys(purchaseSelection).map(id => { const item=purchaseSource().find(x=>x.id===id); return item ? {...item, qty:Math.max(1,Number(purchaseSelection[id])||1)} : null; }).filter(Boolean); }
+    function purchaseSetMessage(msg,error){ const el=document.getElementById('purchase-message'); if(!el)return; el.textContent=msg||''; el.classList.toggle('error',!!error); }
+    function savePurchasePrefs(){
+      purchaseCfg={email:(document.getElementById('purchase-email-to').value||'').trim(),phone:(document.getElementById('purchase-phone').value||'').trim()};
+      try{localStorage.setItem('ptPurchaseCfg',JSON.stringify(purchaseCfg));}catch(e){}
+      if(db && isAdmin) db.collection('settings').doc('purchase').set({...purchaseCfg,updatedBy:currentName,updatedAt:Date.now()},{merge:true}).catch(()=>{});
+      purchaseSetMessage('Purchase contact saved.');
+    }
+    function loadPurchasePrefs(){
+      try{const x=JSON.parse(localStorage.getItem('ptPurchaseCfg')||'{}'); purchaseCfg={email:x.email||'',phone:x.phone||''};}catch(e){}
+      const e=document.getElementById('purchase-email-to'), p=document.getElementById('purchase-phone'); if(e)e.value=purchaseCfg.email||''; if(p)p.value=purchaseCfg.phone||'';
+    }
+    function renderPurchaseStats(){
+      const el=document.getElementById('purchase-stats'); if(!el)return;
+      const source=purchaseSource(); const selected=purchaseItems();
+      el.innerHTML='<div class="purchase-stat"><strong>'+source.length+'</strong><span>Catalog items</span></div><div class="purchase-stat"><strong>'+selected.length+'</strong><span>Selected lines</span></div><div class="purchase-stat"><strong>'+selected.reduce((a,x)=>a+x.qty,0)+'</strong><span>Total quantity</span></div>';
+    }
+    function renderPurchaseCatalog(){
+      const el=document.getElementById('purchase-catalog'); if(!el)return;
+      const q=(document.getElementById('purchase-search')?.value||'').toLowerCase().trim();
+      const source=purchaseSource().filter(x=>(x.name||'').toLowerCase().includes(q));
+      if(!source.length){el.innerHTML='<div class="empty">No catalog items found.</div>';renderPurchaseStats();return;}
+      el.innerHTML=source.map(x=>{const selected=Object.prototype.hasOwnProperty.call(purchaseSelection,x.id);return `<div class="catalog-item ${selected?'selected':''}" data-purchase-id="${escapeHtml(x.id)}"><span class="catalog-check">${selected?'✓':'+'}</span><div class="catalog-item-name">${escapeHtml(x.name||'Unnamed')}</div><div class="catalog-item-unit">Unit: ${escapeHtml(x.unit||'unit')}</div></div>`}).join('');
+      el.querySelectorAll('[data-purchase-id]').forEach(n=>n.addEventListener('click',()=>togglePurchaseItem(n.dataset.purchaseId)));
+      renderPurchaseStats();
+    }
+    function togglePurchaseItem(id){
+      const source=purchaseSource(); const item=source.find(x=>x.id===id); if(!item)return;
+      if(Object.prototype.hasOwnProperty.call(purchaseSelection,id)) delete purchaseSelection[id]; else purchaseSelection[id]=1;
+      renderPurchaseCatalog();renderPurchaseRequest();
+    }
+    function changePurchaseQty(id,val){ purchaseSelection[id]=Math.max(1,parseInt(val,10)||1);renderPurchaseRequest();renderPurchaseStats(); }
+    function removePurchaseItem(id){delete purchaseSelection[id];renderPurchaseCatalog();renderPurchaseRequest();}
+    function purchaseMessage(){
+      const items=purchaseItems(); const requester=(document.getElementById('purchase-requester')?.value||currentName||'Team member').trim(); const project=(document.getElementById('purchase-project')?.value||'').trim(); const note=(document.getElementById('purchase-note')?.value||'').trim();
+      if(!items.length)return 'Hello Purchase Department,\n\nWe would like to request the following items:\n\nNo items selected yet.';
+      let out='Hello Purchase Department,\n\nWe would like to request the following items:\n\n'; items.forEach((x,i)=>out+=(i+1)+'. '+x.name+' — '+x.qty+' '+(x.unit||'unit')+'\n'); out+='\nRequested by: '+requester+'\nProject / Purpose: '+(project||'Not specified')+'\n'; if(note)out+='\nAdditional note:\n'+note+'\n'; out+='\nPlease confirm availability, expected delivery time and quotation.\n\nRegards,\nProtthapan Technologies'; return out;
+    }
+    function renderPurchaseRequest(){
+      const el=document.getElementById('purchase-request-list'), preview=document.getElementById('purchase-preview'); if(!el)return; const items=purchaseItems();
+      if(!items.length)el.innerHTML='<div class="empty">No items selected yet.</div>'; else el.innerHTML=items.map(x=>`<div class="request-row"><div><div class="request-row-name">${escapeHtml(x.name)}</div><span class="request-row-unit">${escapeHtml(x.unit||'unit')}</span></div><input class="qty-input" type="number" min="1" value="${x.qty}" data-qty-id="${escapeHtml(x.id)}"><button class="icon-btn" data-remove-id="${escapeHtml(x.id)}" title="Remove">×</button></div>`).join('');
+      el.querySelectorAll('[data-qty-id]').forEach(n=>n.addEventListener('change',()=>changePurchaseQty(n.dataset.qtyId,n.value))); el.querySelectorAll('[data-remove-id]').forEach(n=>n.addEventListener('click',()=>removePurchaseItem(n.dataset.removeId)));
+      if(preview)preview.textContent=purchaseMessage(); renderPurchaseStats();
+    }
+    async function addPurchaseCatalogItem(){
+      if(!isAdmin){purchaseSetMessage('Only an admin can add catalog items.',true);return;}
+      const name=document.getElementById('purchase-new-name').value.trim(), unit=document.getElementById('purchase-new-unit').value.trim()||'unit'; if(!name){purchaseSetMessage('Enter an item name.',true);return;}
+      if(!db){purchaseSetMessage('Firebase is not configured.',true);return;} try{await db.collection('inventoryCatalog').add({name,unit,createdBy:currentName,createdAt:Date.now()});document.getElementById('purchase-new-name').value='';document.getElementById('purchase-new-unit').value='';purchaseSetMessage('Catalog item added.');}catch(e){purchaseSetMessage('Could not add catalog item. Check Firestore rules.',true);}
+    }
+    async function sendPurchaseEmail(){
+      const items=purchaseItems(); if(!items.length){purchaseSetMessage('Select at least one item first.',true);return;}
+      const to=(document.getElementById('purchase-email-to').value||purchaseCfg.email||'').trim(); if(!to){purchaseSetMessage('Add the Purchase Department email first.',true);return;}
+      const btn=document.getElementById('purchase-email');btn.disabled=true;btn.textContent='Sending…';purchaseSetMessage('Sending securely in the background…');
+      try{const res=await fetch('/api/send-purchase-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to,subject:'Purchase Request — Protthapan Technologies',message:purchaseMessage(),requester:(document.getElementById('purchase-requester').value||currentName||'Team member').trim(),items})});const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data.error||'Email service unavailable');purchaseSetMessage('✓ Email sent successfully to the Purchase Department.');}catch(e){purchaseSetMessage('Email could not be sent: '+(e.message||'server error')+'. No Gmail/Outlook window was opened.',true);}finally{btn.disabled=false;btn.textContent='✉ Send Email';}
+    }
+    function sendPurchaseWhatsApp(){const phone=(document.getElementById('purchase-phone').value||purchaseCfg.phone||'').replace(/\D/g,'');if(!phone){purchaseSetMessage('Add the Purchase Department phone number first.',true);return;}window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(purchaseMessage()),'_blank','noopener');}
+    function sendPurchaseSms(){const phone=(document.getElementById('purchase-phone').value||purchaseCfg.phone||'').trim();if(!phone){purchaseSetMessage('Add the Purchase Department phone number first.',true);return;}window.location.href='sms:'+phone+'?body='+encodeURIComponent(purchaseMessage());}
+    function initPurchaseUI(){
+      loadPurchasePrefs(); renderPurchaseCatalog();renderPurchaseRequest();
+      document.getElementById('purchase-search')?.addEventListener('input',renderPurchaseCatalog); document.getElementById('purchase-clear')?.addEventListener('click',()=>{purchaseSelection={};renderPurchaseCatalog();renderPurchaseRequest();}); document.getElementById('purchase-save-contact')?.addEventListener('click',savePurchasePrefs); document.getElementById('purchase-add-catalog')?.addEventListener('click',addPurchaseCatalogItem); document.getElementById('purchase-email')?.addEventListener('click',sendPurchaseEmail); document.getElementById('purchase-whatsapp')?.addEventListener('click',sendPurchaseWhatsApp); document.getElementById('purchase-sms')?.addEventListener('click',sendPurchaseSms);
+      ['purchase-requester','purchase-project','purchase-note'].forEach(id=>document.getElementById(id)?.addEventListener('input',renderPurchaseRequest));
+      if(db) db.collection('inventoryCatalog').onSnapshot(snap=>{purchaseCatalog=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.name||'').localeCompare(b.name||''));renderPurchaseCatalog();renderPurchaseRequest();},()=>{purchaseCatalog=[];renderPurchaseCatalog();renderPurchaseRequest();});
+      if(db) db.collection('settings').doc('purchase').onSnapshot(doc=>{if(!doc.exists)return;const d=doc.data()||{};purchaseCfg={email:d.email||purchaseCfg.email,phone:d.phone||purchaseCfg.phone};loadPurchasePrefs();},()=>{});
+      const add=document.getElementById('purchase-admin-add');if(add)add.style.display=isAdmin?'block':'none';
+    }
+
     function switchView(view) {
       document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === view));
       document.getElementById('view-log').style.display = view === 'log' ? 'block' : 'none';
@@ -4524,16 +4364,6 @@ Protthapan Technologies`;
         renderInventory(); refreshSheetsIfOpen();
       }, () => showToast('Could not load inventory'));
 
-      db.collection('inventoryCatalog').onSnapshot(snap => {
-        purchaseCatalog = snap.docs.map(d => ({id: d.id, ...d.data()}))
-          .sort((a,b) => (a.name || '').localeCompare(b.name || ''));
-        renderPurchaseCatalog(); renderPurchaseStats();
-      }, () => {
-        // The rest of Inventory continues to work even if the optional catalog collection/rule is not created yet.
-        purchaseCatalog = [];
-        renderPurchaseCatalog(); renderPurchaseStats();
-      });
-
       db.collection('projects').onSnapshot(snap => {
         projects = snap.docs.map(d => ({id: d.id, ...d.data()}));
         renderReport(); renderUpcoming(); renderModuleParent(); renderModuleList();
@@ -4566,15 +4396,6 @@ Protthapan Technologies`;
         renderSheetStatus(); fillSheetForm();
       }, () => showToast('Could not load Google Sheet settings (check the Firestore rules)'));
 
-      db.collection('settings').doc('purchase').onSnapshot(doc => {
-        if (!doc.exists) return;
-        const d=doc.data()||{};
-        purchaseCfg={email:d.email||purchaseCfg.email||'',phone:d.phone||purchaseCfg.phone||''};
-        const e=document.getElementById('purchase-email'), p=document.getElementById('purchase-phone');
-        if(e && !e.value) e.value=purchaseCfg.email;
-        if(p && !p.value) p.value=purchaseCfg.phone;
-      }, () => {});
-
       db.collection('materials').onSnapshot(snap => {
         materials = snap.docs.map(d => ({id: d.id, ...d.data()}));
         renderMaterialList();
@@ -4586,6 +4407,7 @@ Protthapan Technologies`;
       }, () => showToast('Could not load blog posts'));
 
       updateAdminUI();
+      initPurchaseUI();
       renderDraftItems();
       attTick();
       setInterval(attTick, 1000);
@@ -4597,7 +4419,6 @@ Protthapan Technologies`;
           n.addEventListener('click', () => switchView(n.dataset.view));
         }
       });
-      initPurchaseUI();
       document.getElementById('mem-submit').addEventListener('click', addMember);
       document.getElementById('log-submit').addEventListener('click', submitTask);
       document.getElementById('log-member').addEventListener('change', renderMyUpdates);
