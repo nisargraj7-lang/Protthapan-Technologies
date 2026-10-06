@@ -1954,6 +1954,43 @@ svg text{fill:#18324E!important}
 #purchase-preview{width:100%;min-height:230px;border:none!important;border-radius:0!important;padding:13px!important;resize:vertical;font:12.5px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace!important;box-shadow:none!important;display:block}
 .email-preview-head .purchase-mini-btn{float:right;margin-top:-4px}
 </style>
+
+<style id="pt-v2-style">
+.stock-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap}
+.stock-ok{background:#E3F4EB;color:#16704E}.stock-none{background:#FBE9EC;color:#B13243}
+.stock-sub{font-size:11.5px;color:#60738A;margin-top:3px;font-weight:400}
+.inv-search-wrap{position:relative}
+.inv-search-wrap input{padding-right:38px}
+.inv-search-x{position:absolute;right:8px;top:6px;border:0;background:transparent;color:#60738A;font-size:15px;cursor:pointer;padding:4px 8px}
+.inv-suggest{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:60;background:#fff;border:1px solid #C9DCEE;border-radius:12px;box-shadow:0 14px 34px rgba(11,59,130,.16);max-height:300px;overflow:auto}
+.inv-sg{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 13px;cursor:pointer;color:#14263D;font-size:14px;border-bottom:1px solid #EEF3F9}
+.inv-sg:last-child{border-bottom:0}.inv-sg.active,.inv-sg:hover{background:#EEF5FF}
+.inv-sg mark{background:#FFF1B8;color:inherit;border-radius:3px;padding:0 1px}
+.inv-sg-none{padding:12px 14px;color:#60738A;font-size:13px}
+.email-setup{margin-top:12px;border:1px solid #D5E2F0;border-radius:12px;background:#F8FBFF}
+.email-setup summary{cursor:pointer;padding:10px 13px;font-weight:700;font-size:13px;color:#0B3B82}
+.email-setup-body{padding:4px 13px 13px;font-size:12.5px;color:#46586D}
+.email-setup-body code{background:#EAF1FA;padding:1px 5px;border-radius:5px;font-size:11.5px}
+.rem-channels{display:flex;gap:16px;padding-top:8px}.rem-channels label{display:flex;align-items:center;gap:6px;margin:0;font-size:13.5px;color:inherit}
+.rem-channels input{width:auto}
+.rem-st{font-size:12px;line-height:1.6}.rem-ok{color:#16704E;font-weight:700}.rem-wait{color:#8A6410;font-weight:700}.rem-bad{color:#B13243;font-weight:700}
+#rem-banner{position:fixed;right:16px;top:16px;z-index:9999;display:none;max-width:340px;width:calc(100% - 32px)}
+.rem-card{background:#fff;border:1px solid #CFE3D7;border-left:5px solid #25D366;border-radius:14px;padding:13px 15px;box-shadow:0 16px 40px rgba(0,0,0,.2);margin-bottom:10px;color:#14263D;font-size:14px}
+.rem-sub{font-size:12px;color:#60738A;margin-top:2px}
+.rem-actions{display:flex;gap:8px;margin-top:10px}
+.rem-actions button{border:0;border-radius:9px;padding:8px 12px;font-weight:700;cursor:pointer;background:#25D366;color:#fff;font-size:13px}
+.rem-actions button.ghost{background:#EEF2F7;color:#46586D}
+.pt-sel-col{width:34px;text-align:center}
+.pt-sel{width:16px;height:16px;accent-color:#C43D52;cursor:pointer}
+.pt-card-sel{display:flex;align-items:center;gap:7px;font-size:12px;color:#60738A;margin:0 0 8px;cursor:pointer}
+.pt-clear-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:12px;padding:10px 12px;border:1px dashed #E5BFC5;border-radius:12px;background:#FFF8F9;font-size:13px;color:#5B6A7D}
+.pt-clear-bar label{display:flex;align-items:center;gap:7px;margin:0;color:inherit;cursor:pointer}
+.pt-clear-go{border:1px solid #E5BFC5;background:#fff;color:#B13243;border-radius:9px;padding:7px 13px;font-weight:700;cursor:pointer;font-size:13px}
+.pt-clear-go:hover:not(:disabled){background:#B13243;color:#fff}.pt-clear-go:disabled{opacity:.45;cursor:not-allowed}
+.pt-clear-hint{font-size:11.5px;color:#8696A9}
+.purchase-actions{grid-template-columns:1fr 1fr!important}
+@media(max-width:680px){.purchase-actions{grid-template-columns:1fr!important}}
+</style>
 </head>
 
 <body class="locked">
@@ -2129,6 +2166,15 @@ svg text{fill:#18324E!important}
       <div id="view-inventory" style="display:none;">
         <h1>Inventory & Purchase Desk</h1>
         <p class="subtitle">Track purchased items and send a structured request to the Purchase Department.</p>
+        <div class="panel inv-search-panel">
+          <h2>🔎 Search inventory</h2>
+          <div class="inv-search-wrap">
+            <input type="text" id="inv-search" autocomplete="off" placeholder="Type 2–3 letters of an item name, e.g. “mou”, “bat”, “pro”…">
+            <button type="button" class="inv-search-x" id="inv-search-x" title="Clear search" style="display:none">✕</button>
+            <div class="inv-suggest" id="inv-suggest" style="display:none"></div>
+          </div>
+          <div class="progress-note" id="inv-search-note">Suggestions appear as you type. Pick one (or keep typing) to filter the stock summary and purchased list below.</div>
+        </div>
         <div class="panel">
           <h2>Inventory record</h2>
           <div class="row-3">
@@ -2159,7 +2205,7 @@ svg text{fill:#18324E!important}
         <div class="purchase-hero">
           <div class="purchase-kicker">PROCUREMENT WORKFLOW</div>
           <div class="purchase-title">Purchase Desk</div>
-          <div class="purchase-copy">Select items from the live catalog, set quantities, add the project purpose and send one clean request. Email is sent through the site's backend — no Gmail or Outlook window is opened.</div>
+          <div class="purchase-copy">Select items from the live catalog, set quantities, add the project purpose and send one clean request. Email goes from the Sender email ID to the Receiver email ID straight from this page — no Gmail or Outlook window is opened.</div>
           <div class="purchase-stats" id="purchase-stats"></div>
         </div>
         <div class="purchase-grid">
@@ -2184,26 +2230,63 @@ svg text{fill:#18324E!important}
               <div class="full"><label for="purchase-note">Additional note</label><textarea id="purchase-note" placeholder="Delivery deadline, specifications, vendor preference..."></textarea></div>
             </div>
             <div class="purchase-fields" style="margin-top:12px;">
-              <div><label for="purchase-email-to">Company email (To)</label><input type="email" id="purchase-email-to" placeholder="purchase@yourcompany.com"></div>
-              <div><label for="purchase-phone">Company phone / WhatsApp</label><input type="text" id="purchase-phone" placeholder="+91XXXXXXXXXX"></div>
+              <div><label for="purchase-email-from">Sender email ID (from)</label><input type="email" id="purchase-email-from" placeholder="your.name@gmail.com"></div>
+              <div><label for="purchase-email-to">Receiver email ID (to)</label><input type="email" id="purchase-email-to" placeholder="purchase@yourcompany.com"></div>
+              <div class="full"><label for="purchase-phone">Receiver phone / WhatsApp</label><input type="text" id="purchase-phone" placeholder="+91XXXXXXXXXX"></div>
               <div class="full"><label for="purchase-subject">Email subject</label><input type="text" id="purchase-subject" value="Purchase Request — Protthapan Technologies"></div>
             </div>
             <div class="email-preview">
               <div class="email-preview-head">✏️ Write / edit your message <button type="button" class="purchase-mini-btn" id="purchase-reset-draft">↺ Reset to auto draft</button></div>
               <textarea id="purchase-preview" placeholder="Type your message to the Purchase Department..."></textarea>
             </div>
-            <div style="margin-top:10px;"><button type="button" class="purchase-mini-btn" id="purchase-save-contact">💾 Save contact</button><span style="font-size:11px;color:#71847b;margin-left:10px;">Email passwords are never stored in this page.</span></div>
+            <div style="margin-top:10px;"><button type="button" class="purchase-mini-btn" id="purchase-save-contact">💾 Save sender / receiver</button><span style="font-size:11px;color:#71847b;margin-left:10px;">Email passwords are never stored in this page.</span></div>
+            <details class="email-setup" id="email-setup">
+              <summary>⚙ Email sending setup (do this once)</summary>
+              <div class="email-setup-body">
+                <p>A web page cannot send email by itself, so it uses the free <strong>EmailJS</strong> service (emailjs.com). Create an account → add an Email Service (Gmail etc.) → create a Template that uses these variables: <code>{{to_email}}</code>, <code>{{from_name}}</code>, <code>{{reply_to}}</code>, <code>{{subject}}</code>, <code>{{message}}</code> → copy the three values below. Set the template's “To email” field to <code>{{to_email}}</code>.</p>
+                <div class="purchase-fields">
+                  <div><label for="ejs-service">Service ID</label><input type="text" id="ejs-service" placeholder="service_xxxxxxx"></div>
+                  <div><label for="ejs-template">Template ID</label><input type="text" id="ejs-template" placeholder="template_xxxxxxx"></div>
+                  <div class="full"><label for="ejs-key">Public key</label><input type="text" id="ejs-key" placeholder="Your EmailJS public key"></div>
+                </div>
+                <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+                  <button type="button" class="purchase-mini-btn" id="ejs-save">💾 Save email setup</button>
+                  <button type="button" class="purchase-mini-btn" id="ejs-test">✉ Send test email</button>
+                  <button type="button" class="purchase-mini-btn" id="purchase-mailto">Open in my mail app instead</button>
+                </div>
+                <div class="purchase-message" id="ejs-status"></div>
+              </div>
+            </details>
             <div class="purchase-actions">
               <button class="purchase-action primary" id="purchase-email">✉ Send Email</button>
               <button class="purchase-action" id="purchase-whatsapp">◉ WhatsApp</button>
-              <button class="purchase-action" id="purchase-sms">▣ SMS</button>
             </div>
             <div class="purchase-message" id="purchase-message"></div>
           </div>
         </div>
         
+        <div class="panel" id="reminder-panel">
+          <h2>⏰ Reminders <span style="color:var(--ink-soft);font-weight:400;">— sent by email and WhatsApp at the time you choose</span></h2>
+          <div class="row-3">
+            <div><label for="rem-title">Reminder about</label><input type="text" id="rem-title" placeholder="e.g. Reorder batteries"></div>
+            <div><label for="rem-when">Send at (date &amp; time)</label><input type="datetime-local" id="rem-when"></div>
+            <div><label for="rem-from">Sender email ID</label><input type="email" id="rem-from" placeholder="your.name@gmail.com"></div>
+          </div>
+          <div class="row-3">
+            <div><label for="rem-to-email">Receiver email ID</label><input type="email" id="rem-to-email" placeholder="person@example.com"></div>
+            <div><label for="rem-to-phone">Receiver WhatsApp number</label><input type="text" id="rem-to-phone" placeholder="+91XXXXXXXXXX"></div>
+            <div><label>Send through</label>
+              <div class="rem-channels"><label><input type="checkbox" id="rem-ch-email" checked> Email</label><label><input type="checkbox" id="rem-ch-wa" checked> WhatsApp</label></div></div>
+          </div>
+          <label for="rem-note">Message (optional)</label>
+          <textarea id="rem-note" placeholder="Extra details to include in the reminder…"></textarea>
+          <button class="btn" id="rem-submit">Set reminder</button>
+          <span id="rem-error" style="color:var(--danger);font-size:13px;margin-left:12px;"></span>
+          <div class="progress-note">Email is sent automatically at the set time while this page is open (it also sends any missed reminder the next time the page opens). WhatsApp does not allow silent sending from a web page, so at the set time a “Send on WhatsApp” box appears — one tap opens the chat with the message ready.</div>
+          <div id="rem-list" style="margin-top:14px"><div class="empty">No reminders set yet.</div></div>
+        </div>
         <div class="panel">
-          <h2>📦 Stock summary <span style="color:var(--ink-soft);font-weight:400;">— same product = one line, quantity added up automatically</span></h2>
+          <h2>📦 Stock summary <span style="color:var(--ink-soft);font-weight:400;">— bought, used in projects and items left</span></h2>
           <div id="stock-summary"><div class="empty loading-shimmer">Loading…</div></div>
         </div>
         <div class="panel">
@@ -2645,6 +2728,8 @@ svg text{fill:#18324E!important}
     let purchaseSelection = {};
     let purchaseCfg = {email:'', phone:''};
     let purchaseMsgEdited = false;
+    let invQuery = '';        // Inventory search text
+    let ptV2Inited = false;
     let openProjectId = null; // which OnGoing project is currently opened
     let openTripId = null;    // which trip is currently opened
     let retDraft = {};        // unsaved return-check values, so a live refresh never wipes what you typed
@@ -2743,7 +2828,7 @@ svg text{fill:#18324E!important}
     function renderTaskTable(list, showMember) {
       let html = '<table><tr><th>Date</th>' + (showMember ? '<th>Member</th>' : '') + '<th>Task</th><th>Status</th><th></th></tr>';
       list.forEach(t => {
-        html += '<tr><td class="task-date">' + formatDate(t.date) + '</td>';
+        html += '<tr data-docid="' + t.id + '"><td class="task-date">' + formatDate(t.date) + '</td>';
         if (showMember) html += `<td><span class="member-tag">${escapeHtml(t.memberName)}</span></td>`;
         html += `<td>${escapeHtml(t.task)}</td>`;
         if (canEditTask(t)) {
@@ -2774,6 +2859,12 @@ svg text{fill:#18324E!important}
       el.innerHTML = filtered.length ? renderTaskTable(filtered, true) : '<div class="empty">No updates match this filter yet.</div>';
     }
 
+    function invMatches(name) {
+      const q = (invQuery || '').trim().toLowerCase();
+      if (!q) return true;
+      const n = String(name || '').toLowerCase();
+      return q.split(/\s+/).every(t => n.includes(t));
+    }
     function renderInventory() {
       renderStockSummary();
       const el = document.getElementById('inventory-list');
@@ -2783,14 +2874,19 @@ svg text{fill:#18324E!important}
         totalEl.textContent = '';
         return;
       }
-      const sorted = inventory.slice().sort((a, b) => b.timestamp - a.timestamp);
+      const sorted = inventory.filter(i => invMatches(i.itemName)).sort((a, b) => b.timestamp - a.timestamp);
+      if (sorted.length === 0) {
+        el.innerHTML = '<div class="empty">No purchased items match "' + escapeHtml(invQuery) + '".</div>';
+        totalEl.textContent = '';
+        return;
+      }
       let total = 0, totalQty = 0;
       let html = '<table><tr><th>Date</th><th>Item</th><th>Qty</th><th>Price</th><th>Bought by</th><th>Notes</th></tr>';
       sorted.forEach(i => {
         total += parseFloat(i.price) || 0;
         const hasQ = i.quantity !== undefined && i.quantity !== null && !isNaN(Number(i.quantity));
         if (hasQ) totalQty += Number(i.quantity);
-        html += `<tr>
+        html += `<tr data-docid="${i.id}">
       <td class="task-date">${formatDate(i.date)}</td>
       <td>${escapeHtml(i.itemName)}</td>
       <td><strong>${hasQ ? fmtNum(i.quantity) : '—'}</strong></td>
@@ -2802,7 +2898,7 @@ svg text{fill:#18324E!important}
       el.innerHTML = html + '</table>';
       totalEl.textContent = '— ' + sorted.length + ' records · ' + fmtNum(totalQty) + ' items · total spent: ' + total.toLocaleString();
     }
-    function renderProjectList(elId, status) {
+        function renderProjectList(elId, status) {
       const el = document.getElementById(elId);
       const list = projects.filter(p => p.status === status).sort((a, b) => b.timestamp - a.timestamp);
       if (list.length === 0) {
@@ -2811,7 +2907,7 @@ svg text{fill:#18324E!important}
       }
       let html = '<table><tr><th>Project</th><th>Owner</th><th>Notes</th></tr>';
       list.forEach(p => {
-        html += `<tr>
+        html += `<tr data-docid="${p.id}">
       <td><strong>${escapeHtml(p.name)}</strong></td>
       <td>${p.ownerName ? `<span class="member-tag">${escapeHtml(p.ownerName)}</span>` : '<span class="empty" style="padding:0;">Unassigned</span>'}</td>
       <td>${escapeHtml(p.description || '—')}</td>
@@ -2958,7 +3054,7 @@ svg text{fill:#18324E!important}
       list.forEach(p => {
         const st = projectStats(p);
         const open = p.id === openProjectId;
-        html += `<div class="proj-card ${open ? 'open' : ''}">
+        html += `<div class="proj-card ${open ? 'open' : ''}" data-docid="${p.id}">
           <div class="proj-head" onclick="toggleProject('${p.id}')">
             <span class="proj-chevron">▶</span>
             <span class="proj-title">${escapeHtml(p.name)}</span>
@@ -3087,7 +3183,7 @@ svg text{fill:#18324E!important}
             if (team.length) parentCell += `<div class="mod-team-note">Team: ${escapeHtml(team.map(t => t.name).join(', '))}</div>`;
           }
         }
-        html += `<tr>
+        html += `<tr data-docid="${m.id}">
       <td><strong>${escapeHtml(m.name)}</strong></td>
       <td>${m.ownerName ? `<span class="member-tag">${escapeHtml(m.ownerName)}</span>` : '<span class="empty" style="padding:0;">Unassigned</span>'}</td>
       <td>${parentCell}</td>
@@ -3152,7 +3248,7 @@ svg text{fill:#18324E!important}
       if (list.length === 0) {el.innerHTML = '<div class="empty">No upgrades logged yet.</div>'; return;}
       let html = '<table><tr><th>Date</th><th>Module</th><th>Type</th><th>What changed</th><th>Done</th></tr>';
       list.forEach(u => {
-        html += `<tr>
+        html += `<tr data-docid="${u.id}">
       <td class="task-date">${formatDate(u.date)}</td>
       <td><span class="member-tag">${escapeHtml(u.moduleName)}</span></td>
       <td><span class="status-pill ${TYPE_CLASS[u.type] || 'type-idea'}">${escapeHtml(TYPE_LABEL[u.type] || u.type)}</span></td>
@@ -3264,7 +3360,7 @@ svg text{fill:#18324E!important}
       const ex = list.find(m => m.name.toLowerCase() === name.toLowerCase());
       if (ex) ex.qty = fmtNum(Number(ex.qty) + qty);
       else list.push({id: newId(), name, qty});
-      if (await saveMats(pid, list)) showToast(name + ' added to the list');
+      if (await saveMats(pid, list)) showToast(name + ' added to the project — ' + invLeftText(name, pid, list));
     }
     function addMaterialToList() {
       const errEl = document.getElementById('ml-error');
@@ -3335,15 +3431,16 @@ svg text{fill:#18324E!important}
       if (list.length === 0) {
         h += '<div class="empty">Nothing in the list yet. Add a material above.</div>';
       } else {
-        h += '<table><tr><th>Material</th><th>Quantity</th><th></th></tr>';
+        h += '<table><tr><th>Material</th><th>Quantity</th><th>In inventory</th><th></th></tr>';
         list.forEach(m => {
-          h += `<tr>
+          h += `<tr data-matpid="${p.id}" data-matid="${m.id}">
             <td><strong>${escapeHtml(m.name)}</strong></td>
             <td><span class="qty-ctl">
               <button class="qty-btn" title="Remove one" onclick="changeMatQty('${p.id}','${m.id}',-1)">−</button>
               <strong>${fmtNum(m.qty)}</strong>
               <button class="qty-btn" title="Add one" onclick="changeMatQty('${p.id}','${m.id}',1)">+</button>
             </span></td>
+            <td>${invLeftBadge(m.name)}</td>
             <td><button class="mini-remove" onclick="removeMat('${p.id}','${m.id}')">Remove</button></td>
           </tr>`;
         });
@@ -3616,7 +3713,7 @@ svg text{fill:#18324E!important}
       el.innerHTML = list.map(t => {
         const st = tripState(t);
         const open = t.id === openTripId;
-        return `<div class="proj-card ${open ? 'open' : ''}">
+        return `<div class="proj-card ${open ? 'open' : ''}" data-docid="${t.id}">
           <div class="proj-head" onclick="toggleTrip('${t.id}')">
             <span class="proj-chevron">▶</span>
             <span class="proj-title">${escapeHtml(t.refNo)} <span style="color:var(--ink-soft); font-weight:400;">· ${formatDate(t.date)}${t.to ? ' · to ' + escapeHtml(t.to) : ''}</span></span>
@@ -4381,7 +4478,7 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
         const titleHtml = m.link
           ? `<a href="${escapeHtml(m.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(m.title)}</a>`
           : escapeHtml(m.title);
-        html += `<tr>
+        html += `<tr data-docid="${m.id}">
       <td><strong>${titleHtml}</strong></td>
       <td>${escapeHtml(MATERIAL_TYPE_LABEL[m.type] || m.type)}</td>
       <td>${m.memberName ? `<span class="member-tag">${escapeHtml(m.memberName)}</span>` : '<span class="empty" style="padding:0;">—</span>'}</td>
@@ -4429,7 +4526,7 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       const sorted = blogPosts.slice().sort((a, b) => b.timestamp - a.timestamp);
       let html = '';
       sorted.forEach(p => {
-        html += `<div style="padding:16px 0; border-bottom:1px solid var(--line);">
+        html += `<div data-docid="${p.id}" style="padding:16px 0; border-bottom:1px solid var(--line);">
       <h3 style="margin:0 0 4px 0; font-family:Georgia, 'Times New Roman', serif; font-weight:500; font-size:18px;">${escapeHtml(p.title)}</h3>
       <div style="color:var(--ink-soft); font-size:12.5px; margin-bottom:10px;">${escapeHtml(p.authorName || 'Unknown')} · ${formatDate(p.date)}</div>
       <div style="white-space:pre-wrap;">${escapeHtml(p.summary)}</div>
@@ -4682,17 +4779,21 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
     }
     function purchaseItems(){ return Object.keys(purchaseSelection).map(id => { const item=purchaseSource().find(x=>x.id===id); return item ? {...item, qty:Math.max(1,Number(purchaseSelection[id])||1)} : null; }).filter(Boolean); }
     function purchaseSetMessage(msg,error){ const el=document.getElementById('purchase-message'); if(!el)return; el.textContent=msg||''; el.classList.toggle('error',!!error); }
-    function savePurchasePrefs(){
-      purchaseCfg={email:(document.getElementById('purchase-email-to').value||'').trim(),phone:(document.getElementById('purchase-phone').value||'').trim()};
+function savePurchasePrefs(quiet){
+      const v=id=>(document.getElementById(id)?.value||'').trim();
+      purchaseCfg={email:v('purchase-email-to'),phone:v('purchase-phone'),from:v('purchase-email-from')};
       try{localStorage.setItem('ptPurchaseCfg',JSON.stringify(purchaseCfg));}catch(e){}
-      if(db && isAdmin) db.collection('settings').doc('purchase').set({...purchaseCfg,updatedBy:currentName,updatedAt:Date.now()},{merge:true}).catch(()=>{});
-      purchaseSetMessage(isAdmin?'Purchase contact saved for everyone.':'Purchase contact saved on this device.');
+      if(db && isAdmin) db.collection('settings').doc('purchase').set({email:purchaseCfg.email,phone:purchaseCfg.phone,updatedBy:currentName,updatedAt:Date.now()},{merge:true}).catch(()=>{});
+      if(quiet!==true) purchaseSetMessage(isAdmin?'Sender / receiver saved (receiver shared with everyone).':'Sender / receiver saved on this device.');
     }
     function loadPurchasePrefs(){
-      try{const x=JSON.parse(localStorage.getItem('ptPurchaseCfg')||'{}'); purchaseCfg={email:x.email||'',phone:x.phone||''};}catch(e){}
-      const e=document.getElementById('purchase-email-to'), p=document.getElementById('purchase-phone'); if(e)e.value=purchaseCfg.email||''; if(p)p.value=purchaseCfg.phone||'';
+      let x={}; try{x=JSON.parse(localStorage.getItem('ptPurchaseCfg')||'{}')||{};}catch(e){}
+      purchaseCfg={email:x.email||purchaseCfg.email||'',phone:x.phone||purchaseCfg.phone||'',from:x.from||purchaseCfg.from||''};
+      if(!purchaseCfg.from && typeof currentUserEmail==='string' && currentUserEmail && currentUserEmail!==ADMIN_EMAIL) purchaseCfg.from=currentUserEmail;
+      const e=document.getElementById('purchase-email-to'), p=document.getElementById('purchase-phone'), f=document.getElementById('purchase-email-from');
+      if(e&&!e.value)e.value=purchaseCfg.email||''; if(p&&!p.value)p.value=purchaseCfg.phone||''; if(f&&!f.value)f.value=purchaseCfg.from||'';
     }
-    function renderPurchaseStats(){
+        function renderPurchaseStats(){
       const el=document.getElementById('purchase-stats'); if(!el)return;
       const source=purchaseSource(); const selected=purchaseItems();
       el.innerHTML='<div class="purchase-stat"><strong>'+source.length+'</strong><span>Catalog items</span></div><div class="purchase-stat"><strong>'+selected.length+'</strong><span>Selected lines</span></div><div class="purchase-stat"><strong>'+selected.reduce((a,x)=>a+x.qty,0)+'</strong><span>Total quantity</span></div>';
@@ -4730,35 +4831,38 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       const name=document.getElementById('purchase-new-name').value.trim(), unit=document.getElementById('purchase-new-unit').value.trim()||'unit'; if(!name){purchaseSetMessage('Enter an item name.',true);return;}
       if(!db){purchaseSetMessage('Firebase is not configured.',true);return;} try{await db.collection('inventoryCatalog').add({name,unit,createdBy:currentName,createdAt:Date.now()});document.getElementById('purchase-new-name').value='';document.getElementById('purchase-new-unit').value='';purchaseSetMessage('Catalog item added.');}catch(e){purchaseSetMessage('Could not add catalog item. Check Firestore rules.',true);}
     }
-    async function sendPurchaseEmail(){
+async function sendPurchaseEmail(){
       const msg=purchaseMessage().trim(); if(!msg){purchaseSetMessage('Write a message first.',true);return;}
-      const to=(document.getElementById('purchase-email-to').value||purchaseCfg.email||'').trim();
-      if(!/^\S+@\S+\.\S+$/.test(to)){purchaseSetMessage('Enter a valid company email address.',true);return;}
-      const subject=(document.getElementById('purchase-subject').value||'Purchase Request — Protthapan Technologies').trim();
-      const requester=(document.getElementById('purchase-requester').value||currentName||'Team member').trim();
+      const val=id=>(document.getElementById(id)?.value||'').trim();
+      const from=val('purchase-email-from'), to=val('purchase-email-to');
+      if(!validEmail(from)){purchaseSetMessage('Enter the Sender email ID (your email).',true);return;}
+      if(!validEmail(to)){purchaseSetMessage('Enter the Receiver email ID (who should get the email).',true);return;}
+      const subject=val('purchase-subject')||'Purchase Request — Protthapan Technologies';
+      const requester=val('purchase-requester')||currentName||'Team member';
       const btn=document.getElementById('purchase-email');btn.disabled=true;btn.textContent='Sending…';purchaseSetMessage('Sending…');
       try{
-        const res=await fetch('/api/send-purchase-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to,subject,message:msg,requester,items:purchaseItems()})});
-        const data=await res.json().catch(()=>({}));
-        if(!res.ok)throw new Error(data.error||'Email service unavailable');
-        purchaseSetMessage('✓ Email sent to '+to+'.');
+        await sendEmailCore({to,from,fromName:requester,subject,message:msg,items:purchaseItems()});
+        purchaseSetMessage('✓ Email sent from '+from+' to '+to+'.');
+        savePurchasePrefs(true);
       }catch(e){
-        purchaseSetMessage('Server email is not available. Opening your mail app with this message instead…',true);
-        window.location.href='mailto:'+to+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(msg);
+        if(e.message==='NO_SERVICE'){
+          purchaseSetMessage('Email service is not connected yet. Open "Email sending setup" below, paste your EmailJS keys once, then press Send Email again.',true);
+          const d=document.getElementById('email-setup'); if(d)d.open=true;
+        } else purchaseSetMessage('Could not send the email: '+e.message,true);
       }finally{btn.disabled=false;btn.textContent='✉ Send Email';}
     }
-    function sendPurchaseWhatsApp(){const phone=(document.getElementById('purchase-phone').value||purchaseCfg.phone||'').replace(/\D/g,'');if(!phone){purchaseSetMessage('Add the Purchase Department phone number first.',true);return;}window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(purchaseMessage()),'_blank','noopener');}
-    function sendPurchaseSms(){const phone=(document.getElementById('purchase-phone').value||purchaseCfg.phone||'').trim();if(!phone){purchaseSetMessage('Add the Purchase Department phone number first.',true);return;}window.location.href='sms:'+phone+'?body='+encodeURIComponent(purchaseMessage());}
+        function sendPurchaseWhatsApp(){const phone=(document.getElementById('purchase-phone').value||purchaseCfg.phone||'').replace(/\D/g,'');if(!phone){purchaseSetMessage('Add the Purchase Department phone number first.',true);return;}window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(purchaseMessage()),'_blank','noopener');}
     function initPurchaseUI(){
       const rq=document.getElementById('purchase-requester'); if(rq&&!rq.value) rq.value=currentName||'';
       document.getElementById('purchase-preview')?.addEventListener('input',()=>{purchaseMsgEdited=true;});
       document.getElementById('purchase-reset-draft')?.addEventListener('click',()=>{purchaseMsgEdited=false;renderPurchaseRequest();});
       loadPurchasePrefs(); renderPurchaseCatalog();renderPurchaseRequest();
-      document.getElementById('purchase-search')?.addEventListener('input',renderPurchaseCatalog); document.getElementById('purchase-clear')?.addEventListener('click',()=>{purchaseSelection={};renderPurchaseCatalog();renderPurchaseRequest();}); document.getElementById('purchase-save-contact')?.addEventListener('click',savePurchasePrefs); document.getElementById('purchase-add-catalog')?.addEventListener('click',addPurchaseCatalogItem); document.getElementById('purchase-email')?.addEventListener('click',sendPurchaseEmail); document.getElementById('purchase-whatsapp')?.addEventListener('click',sendPurchaseWhatsApp); document.getElementById('purchase-sms')?.addEventListener('click',sendPurchaseSms);
+      document.getElementById('purchase-search')?.addEventListener('input',renderPurchaseCatalog); document.getElementById('purchase-clear')?.addEventListener('click',()=>{purchaseSelection={};renderPurchaseCatalog();renderPurchaseRequest();}); document.getElementById('purchase-save-contact')?.addEventListener('click',savePurchasePrefs); document.getElementById('purchase-add-catalog')?.addEventListener('click',addPurchaseCatalogItem); document.getElementById('purchase-email')?.addEventListener('click',sendPurchaseEmail); document.getElementById('purchase-whatsapp')?.addEventListener('click',sendPurchaseWhatsApp);
       ['purchase-requester','purchase-project','purchase-note'].forEach(id=>document.getElementById(id)?.addEventListener('input',renderPurchaseRequest));
       if(db) db.collection('inventoryCatalog').onSnapshot(snap=>{purchaseCatalog=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.name||'').localeCompare(b.name||''));renderPurchaseCatalog();renderPurchaseRequest();},()=>{purchaseCatalog=[];renderPurchaseCatalog();renderPurchaseRequest();});
-      if(db) db.collection('settings').doc('purchase').onSnapshot(doc=>{if(!doc.exists)return;const d=doc.data()||{};purchaseCfg={email:d.email||purchaseCfg.email,phone:d.phone||purchaseCfg.phone};loadPurchasePrefs();},()=>{});
+      if(db) db.collection('settings').doc('purchase').onSnapshot(doc=>{if(!doc.exists)return;const d=doc.data()||{};purchaseCfg={email:d.email||purchaseCfg.email,phone:d.phone||purchaseCfg.phone,from:purchaseCfg.from||''};loadPurchasePrefs();},()=>{});
       const add=document.getElementById('purchase-admin-add');if(add)add.style.display=isAdmin?'block':'none';
+      ptInvV2Init();
     }
 
     function switchView(view) {
@@ -4830,13 +4934,13 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
 
       db.collection('inventory').onSnapshot(snap => {
         inventory = snap.docs.map(d => ({id: d.id, ...d.data()})); filterPersonalArrays();
-        renderInventory(); refreshSheetsIfOpen();
+        renderInventory(); try{renderMaterialTracking();}catch(e){} refreshSheetsIfOpen();
       }, () => showToast('Could not load inventory'));
 
       db.collection('projects').onSnapshot(snap => {
         projects = snap.docs.map(d => ({id: d.id, ...d.data()})); filterPersonalArrays();
         renderReport(); renderUpcoming(); renderModuleParent(); renderModuleList();
-        renderProjectPickers(); renderMaterialTracking(); refreshSheetsIfOpen();
+        renderProjectPickers(); renderMaterialTracking(); try{renderStockSummary();}catch(e){} refreshSheetsIfOpen();
       }, () => showToast('Could not load projects'));
 
       db.collection('modules').onSnapshot(snap => {
@@ -4996,11 +5100,9 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       if (top && !document.getElementById('pt-userbar')) {
         const bar=document.createElement('div'); bar.id='pt-userbar'; bar.className='pt-userbar';
         bar.innerHTML=`<span class="pt-user-badge"><i class="pt-user-dot"></i><span id="pt-current-user">Signed in</span></span>
-          <input id="pt-page-search" class="pt-page-search" type="text" placeholder="Search this page…">
-          <button id="pt-clear-history" class="btn pt-clear-btn" type="button">Clear my history</button>`;
+          <input id="pt-page-search" class="pt-page-search" type="text" placeholder="Search this page…">`;
         top.parentNode.insertBefore(bar, top.nextSibling);
         document.getElementById('pt-page-search').addEventListener('input', applyPageSearch);
-        document.getElementById('pt-clear-history').addEventListener('click', clearCurrentPageHistory);
       }
 
       const nav = document.querySelector('.sidebar');
@@ -5057,7 +5159,6 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       const name=isAdmin?'Admin':(m?m.name:(currentUserEmail||'Team member'));
       const badge=document.getElementById('pt-current-user'); if(badge) badge.textContent=name+(isAdmin?' · full access':' · personal access');
       const r=document.getElementById('dt-receiver'); if(r) r.textContent=name;
-      const clear=document.getElementById('pt-clear-history'); if(clear) clear.textContent=isAdmin?'Clear current page history':'Clear my history';
       const attSel=document.getElementById('att-member'); if(attSel && !isAdmin) attSel.disabled=true;
       const logSel=document.getElementById('log-member'); if(logSel && !isAdmin) logSel.disabled=true;
     }
@@ -5205,13 +5306,55 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       });
       return m;
     }
+function stockUsage(){
+      const u={};
+      projects.forEach(p=>(p.materialList||[]).forEach(m=>{
+        const k=stockKey(m.name); if(!k)return;
+        const q=Number(m.qty)||0;
+        const e=u[k]||(u[k]={name:m.name,qty:0,projects:[]});
+        e.qty+=q; e.projects.push({name:p.name,qty:q});
+      }));
+      return u;
+    }
+    function stockRows(){
+      const sm=stockMap(), us=stockUsage();
+      return [...new Set([...Object.keys(sm),...Object.keys(us)])].map(k=>{
+        const s=sm[k], u=us[k], bought=s?s.qty:0, used=u?u.qty:0;
+        return {key:k,name:s?s.name:u.name,bought,used,left:Math.max(0,bought-used),over:Math.max(0,used-bought),count:s?s.count:0,last:s?s.last:'',projects:u?u.projects:[],inInv:!!s};
+      }).sort((a,b)=>a.name.localeCompare(b.name));
+    }
+    function stockPill(r){
+      if(!r.inInv) return '<span class="stock-pill stock-none">Not in inventory</span>';
+      if(r.left<=0) return '<span class="stock-pill stock-none">Empty — no items left</span>';
+      return '<span class="stock-pill stock-ok">'+fmtNum(r.left)+' item'+(r.left===1?'':'s')+' left</span>';
+    }
+    function invLeftBadge(name){
+      const k=stockKey(name), r=stockRows().find(x=>x.key===k);
+      return r?stockPill(r):'<span class="stock-pill stock-none">Not in inventory</span>';
+    }
+    // text used in the toast when a material is added to a project (this project's new list is counted)
+    function invLeftText(name,pid,list){
+      const k=stockKey(name), sm=stockMap(); const bought=sm[k]?sm[k].qty:0;
+      let used=0;
+      projects.forEach(p=>{ if(p.id===pid)return; (p.materialList||[]).forEach(m=>{if(stockKey(m.name)===k)used+=Number(m.qty)||0;}); });
+      (list||[]).forEach(m=>{if(stockKey(m.name)===k)used+=Number(m.qty)||0;});
+      if(!sm[k]) return 'not in inventory';
+      const left=bought-used;
+      return left>0?(fmtNum(left)+' item'+(left===1?'':'s')+' left in inventory'):'inventory is empty, no items left';
+    }
     function renderStockSummary(){
       const el=document.getElementById('stock-summary'); if(!el)return;
-      const list=Object.values(stockMap()).sort((a,b)=>a.name.localeCompare(b.name));
-      if(!list.length){el.innerHTML='<div class="empty">No stock yet. Add an item or upload an invoice.</div>';return;}
-      el.innerHTML='<table><tr><th>Product</th><th>Total quantity</th><th>Purchases</th><th>Last bought</th></tr>'+list.map(e=>`<tr><td><strong>${escapeHtml(e.name)}</strong></td><td><span class="member-tag">${fmtNum(e.qty)}</span></td><td>${e.count}</td><td class="task-date">${e.last?formatDate(e.last):'—'}</td></tr>`).join('')+'</table>';
+      const all=stockRows();
+      if(!all.length){el.innerHTML='<div class="empty">No stock yet. Add an item or upload an invoice.</div>';return;}
+      const list=all.filter(r=>invMatches(r.name));
+      if(!list.length){el.innerHTML='<div class="empty">No stock items match "'+escapeHtml(invQuery)+'".</div>';return;}
+      el.innerHTML='<table><tr><th>Product</th><th>Bought</th><th>Used in projects</th><th>Left in inventory</th><th>Last bought</th></tr>'+list.map(r=>{
+        const usedTxt=r.used>0?('<strong>'+fmtNum(r.used)+'</strong><div class="stock-sub">'+r.projects.map(p=>escapeHtml(p.name)+' ×'+fmtNum(p.qty)).join(', ')+'</div>'):'<span class="stock-sub">Not used yet</span>';
+        const over=r.over>0&&r.inInv?'<div class="stock-sub" style="color:var(--danger)">Used '+fmtNum(r.over)+' more than bought</div>':'';
+        return `<tr data-stockkey="${escapeAttr(r.key)}"><td><strong>${escapeHtml(r.name)}</strong></td><td><span class="member-tag">${r.inInv?fmtNum(r.bought):'—'}</span></td><td>${usedTxt}</td><td>${stockPill(r)}${over}</td><td class="task-date">${r.last?formatDate(r.last):'—'}</td></tr>`;
+      }).join('')+'</table>';
     }
-    function loadImg(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{URL.revokeObjectURL(u);res(im);};im.onerror=()=>rej(new Error('Could not read this image.'));im.src=u;});}
+        function loadImg(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{URL.revokeObjectURL(u);res(im);};im.onerror=()=>rej(new Error('Could not read this image.'));im.src=u;});}
     function drawScaled(im,max){const r=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*r);c.height=Math.round(im.height*r);const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);return c;}
     async function invPreview(file){
       invDraft.file=file; invDraft.rows=[]; invDraft.scanned=false; renderInvReview();
@@ -5306,7 +5449,7 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       if(!invoices.length){el.innerHTML='<div class="empty">No invoices uploaded yet.</div>';return;}
       el.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">'+invoices.slice().sort((a,b)=>(b.timestamp||0)-(a.timestamp||0)).map(x=>{
         const ok=/^data:image\/(jpeg|png|webp);base64,/.test(x.image||''), mine=isAdmin||x.ownerUid===currentUserUid;
-        return `<div class="sub-card">${ok?`<img src="${escapeAttr(x.image)}" alt="Invoice" style="width:100%;height:130px;object-fit:cover;border-radius:8px;cursor:pointer;" onclick="invView('${x.id}')">`:''}
+        return `<div class="sub-card" data-docid="${x.id}">${ok?`<img src="${escapeAttr(x.image)}" alt="Invoice" style="width:100%;height:130px;object-fit:cover;border-radius:8px;cursor:pointer;" onclick="invView('${x.id}')">`:''}
           <div class="sub-name" style="margin-top:8px;">${escapeHtml(x.invoiceNo||'Invoice')} <span style="font-weight:400;color:var(--ink-soft);font-size:12px;">· ${x.date?formatDate(x.date):''}</span></div>
           <div class="mod-team-note">${(x.items||[]).length} item(s) · ${escapeHtml(x.buyerName||'')}</div>
           <div class="ps-actions" style="margin-top:6px;"><button class="btn btn-sm btn-ghost" onclick="invView('${x.id}')">View</button>${mine?`<button class="mini-remove" onclick="invDelete('${x.id}')">Delete</button>`:''}</div></div>`;
@@ -5406,7 +5549,7 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
     async function deleteDroneTicket(id){const t=(window.__droneTickets||[]).find(x=>x.id===id);if(!t||(!isAdmin&&t.ownerUid!==currentUserUid)){showToast('You can only remove your own ticket.');return;}if(!confirm('Delete this receiving ticket?'))return;try{await db.collection('droneTickets').doc(id).delete();showToast('Ticket deleted');}catch(e){showToast('Could not delete ticket.');}}
     window.deleteDroneTicket=deleteDroneTicket;
     function renderDroneTickets(list){
-      const el=document.getElementById('dt-list');if(!el)return;const mine=list||[];window.__droneTickets=mine||[];if(!mine?.length){el.innerHTML='<div class="empty">No drone receiving tickets yet.</div>';return;}el.innerHTML=mine.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).map(t=>{const cls=t.status==='done'?'done':(t.condition==='working'?'open':'issue');return `<div class="pt-ticket-card ${cls}"><div class="pt-ticket-head"><div><div class="pt-ticket-title">${escapeHtml(t.ticketNo)} · ${escapeHtml(t.droneId)}</div><div class="pt-ticket-meta">Received by ${escapeHtml(t.receiverName||'Unknown')} · ${escapeHtml(t.date||'')}</div></div><span class="status-pill ${t.status==='done'?'status-done':'status-inprogress'}">${t.status==='done'?'Done':'Open'}</span></div><div class="row-2"><div><div class="pt-ticket-section">Condition</div><div class="pt-ticket-value">${escapeHtml(t.condition||'—')}</div></div><div><div class="pt-ticket-section">Priority</div><div class="pt-ticket-value">${escapeHtml(t.priority||'normal')}</div></div></div>${t.serial?`<div class="pt-ticket-section">Serial</div><div class="pt-ticket-value">${escapeHtml(t.serial)}</div>`:''}${t.source?`<div class="pt-ticket-section">Received from</div><div class="pt-ticket-value">${escapeHtml(t.source)}</div>`:''}${t.damage?`<div class="pt-ticket-section">Damaged parts</div><div class="pt-ticket-value">${escapeHtml(t.damage)}</div>`:''}${t.missing?`<div class="pt-ticket-section">Missing parts</div><div class="pt-ticket-value">${escapeHtml(t.missing)}</div>`:''}${t.issues?`<div class="pt-ticket-section">Issues</div><div class="pt-ticket-value">${escapeHtml(t.issues)}</div>`:''}${t.feedback?`<div class="pt-ticket-section">Feedback / action</div><div class="pt-ticket-value">${escapeHtml(t.feedback)}</div>`:''}<div class="pt-ticket-actions" style="${(isAdmin||t.ownerUid===currentUserUid)?'':'display:none'}">${t.status!=='done'?`<button class="btn btn-sm" onclick="closeDroneTicket('${t.id}')">Mark done</button>`:''}<button class="btn btn-sm pt-clear-btn" onclick="deleteDroneTicket('${t.id}')">Delete</button></div></div>`}).join('');applyPageSearch();
+      const el=document.getElementById('dt-list');if(!el)return;const mine=list||[];window.__droneTickets=mine||[];if(!mine?.length){el.innerHTML='<div class="empty">No drone receiving tickets yet.</div>';return;}el.innerHTML=mine.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).map(t=>{const cls=t.status==='done'?'done':(t.condition==='working'?'open':'issue');return `<div class="pt-ticket-card ${cls}" data-docid="${t.id}"><div class="pt-ticket-head"><div><div class="pt-ticket-title">${escapeHtml(t.ticketNo)} · ${escapeHtml(t.droneId)}</div><div class="pt-ticket-meta">Received by ${escapeHtml(t.receiverName||'Unknown')} · ${escapeHtml(t.date||'')}</div></div><span class="status-pill ${t.status==='done'?'status-done':'status-inprogress'}">${t.status==='done'?'Done':'Open'}</span></div><div class="row-2"><div><div class="pt-ticket-section">Condition</div><div class="pt-ticket-value">${escapeHtml(t.condition||'—')}</div></div><div><div class="pt-ticket-section">Priority</div><div class="pt-ticket-value">${escapeHtml(t.priority||'normal')}</div></div></div>${t.serial?`<div class="pt-ticket-section">Serial</div><div class="pt-ticket-value">${escapeHtml(t.serial)}</div>`:''}${t.source?`<div class="pt-ticket-section">Received from</div><div class="pt-ticket-value">${escapeHtml(t.source)}</div>`:''}${t.damage?`<div class="pt-ticket-section">Damaged parts</div><div class="pt-ticket-value">${escapeHtml(t.damage)}</div>`:''}${t.missing?`<div class="pt-ticket-section">Missing parts</div><div class="pt-ticket-value">${escapeHtml(t.missing)}</div>`:''}${t.issues?`<div class="pt-ticket-section">Issues</div><div class="pt-ticket-value">${escapeHtml(t.issues)}</div>`:''}${t.feedback?`<div class="pt-ticket-section">Feedback / action</div><div class="pt-ticket-value">${escapeHtml(t.feedback)}</div>`:''}<div class="pt-ticket-actions" style="${(isAdmin||t.ownerUid===currentUserUid)?'':'display:none'}">${t.status!=='done'?`<button class="btn btn-sm" onclick="closeDroneTicket('${t.id}')">Mark done</button>`:''}<button class="btn btn-sm pt-clear-btn" onclick="deleteDroneTicket('${t.id}')">Delete</button></div></div>`}).join('');applyPageSearch();
     }
 
     function switchView(view){
@@ -5420,6 +5563,355 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       const q=document.getElementById('pt-page-search');if(q)q.value='';applyPageSearch();updateEnhancedIdentityUI();
       target?.classList.add('view-enter');
     }
+
+    /* ================================================================
+       INVENTORY V2: email sender/receiver, reminders, search suggestions,
+       per-item "tick and clear"
+       ================================================================ */
+    const PT_EMAILJS_KEY = 'ptEmailJs';
+    function emailJsCfg(){try{return JSON.parse(localStorage.getItem(PT_EMAILJS_KEY)||'{}')||{};}catch(e){return {};}}
+    function emailJsReady(){const c=emailJsCfg();return !!(c.service&&c.template&&c.key);}
+    function validEmail(v){return /^\S+@\S+\.\S+$/.test(String(v||'').trim());}
+    function waDigits(p){let d=String(p||'').replace(/\D/g,''); if(d.length===10)d='91'+d; return d;}
+
+    // Sends one email. Uses EmailJS (set up once) or, if present, the site's own /api/send-purchase-email backend.
+    async function sendEmailCore(o){
+      const c=emailJsCfg();
+      const body=(o.from?('Sent by: '+(o.fromName||o.from)+' <'+o.from+'>\n\n'):'')+o.message;
+      if(emailJsReady()){
+        const res=await fetch('https://api.emailjs.com/api/v1.0/email/send',{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({service_id:c.service,template_id:c.template,user_id:c.key,template_params:{to_email:o.to,from_email:o.from,reply_to:o.from,from_name:o.fromName||o.from,subject:o.subject,message:body}})});
+        if(!res.ok){const t=await res.text().catch(()=>'');throw new Error(t||('Email service error '+res.status));}
+        return;
+      }
+      let res;
+      try{res=await fetch('/api/send-purchase-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:o.to,from:o.from,requester:o.fromName,subject:o.subject,message:body,items:o.items||[]})});}
+      catch(e){throw new Error('NO_SERVICE');}
+      if(!res.ok)throw new Error('NO_SERVICE');
+    }
+    function ejsStatus(msg,bad){const el=document.getElementById('ejs-status');if(el){el.textContent=msg||'';el.classList.toggle('error',!!bad);}}
+    function ptSaveEmailJs(){
+      const v=id=>(document.getElementById(id)?.value||'').trim();
+      const cfg={service:v('ejs-service'),template:v('ejs-template'),key:v('ejs-key')};
+      if(!cfg.service||!cfg.template||!cfg.key){ejsStatus('Fill all three values.',true);return;}
+      try{localStorage.setItem(PT_EMAILJS_KEY,JSON.stringify(cfg));}catch(e){}
+      if(db&&isAdmin)db.collection('settings').doc('emailjs').set({...cfg,updatedAt:Date.now()},{merge:true}).catch(()=>{});
+      ejsStatus('✓ Saved. Emails will now be sent from this page.');
+    }
+    async function ptTestEmail(){
+      const v=id=>(document.getElementById(id)?.value||'').trim();
+      const from=v('purchase-email-from'), to=v('purchase-email-to')||from;
+      if(!validEmail(from)){ejsStatus('Enter the Sender email ID above first.',true);return;}
+      if(!validEmail(to)){ejsStatus('Enter the Receiver email ID above first.',true);return;}
+      ptSaveEmailJs(); if(!emailJsReady())return;
+      ejsStatus('Sending test…');
+      try{await sendEmailCore({to,from,fromName:currentName||'Protthapan',subject:'Test email — Protthapan Technologies',message:'This is a test email from the Inventory page.'});ejsStatus('✓ Test email sent to '+to+'.');}
+      catch(e){ejsStatus('Test failed: '+(e.message==='NO_SERVICE'?'service not connected':e.message),true);}
+    }
+    function ptMailtoFallback(){
+      const v=id=>(document.getElementById(id)?.value||'').trim();
+      const to=v('purchase-email-to'); if(!validEmail(to)){ejsStatus('Enter the Receiver email ID first.',true);return;}
+      window.location.href='mailto:'+to+'?subject='+encodeURIComponent(v('purchase-subject'))+'&body='+encodeURIComponent(purchaseMessage());
+    }
+
+    /* ---------- Reminders (email + WhatsApp) ---------- */
+    let reminders=[], remMode='cloud', remBusy=false;
+    function remLocalRead(){try{return JSON.parse(localStorage.getItem('ptReminders')||'[]')||[];}catch(e){return [];}}
+    function remLocalWrite(){try{localStorage.setItem('ptReminders',JSON.stringify(reminders));}catch(e){}}
+    function remInit(){
+      const local=()=>{remMode='local';reminders=remLocalRead();renderReminders();};
+      if(db){
+        try{db.collection('reminders').onSnapshot(snap=>{if(remMode==='local')return;remMode='cloud';reminders=snap.docs.map(d=>({id:d.id,...d.data()}));renderReminders();},err=>{console.warn('reminders:',err);local();});}
+        catch(e){local();}
+      } else local();
+      setInterval(remTick,15000); setTimeout(remTick,3000);
+    }
+    async function remAdd(r){
+      if(remMode==='cloud'){try{await db.collection('reminders').add(r);return;}catch(e){console.warn(e);remMode='local';reminders=remLocalRead();showToast('Saved on this device only (cloud not allowed by Firestore rules).');}}
+      r.id='l'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); reminders.push(r); remLocalWrite(); renderReminders();
+    }
+    async function remPatch(id,patch){
+      if(remMode==='cloud'){try{await db.collection('reminders').doc(id).update(patch);return true;}catch(e){return false;}}
+      const r=reminders.find(x=>x.id===id); if(!r)return false; Object.assign(r,patch); remLocalWrite(); renderReminders(); return true;
+    }
+    async function remRemove(id){
+      if(remMode==='cloud'){try{await db.collection('reminders').doc(id).delete();return true;}catch(e){return false;}}
+      reminders=reminders.filter(x=>x.id!==id); remLocalWrite(); renderReminders(); return true;
+    }
+    async function remClaim(r){
+      if(remMode!=='cloud')return true;
+      try{const ref=db.collection('reminders').doc(r.id);
+        return await db.runTransaction(async tx=>{const sn=await tx.get(ref);const d=sn.data()||{};if(d.emailSent||(d.emailClaim&&Date.now()-d.emailClaim<90000))return false;tx.update(ref,{emailClaim:Date.now()});return true;});}
+      catch(e){return false;}
+    }
+    function remText(r){
+      return 'Reminder: '+r.title+'\n\n'+(r.note?r.note+'\n\n':'')+'Due: '+new Date(r.dueAt).toLocaleString()+'\nFrom: '+(r.fromName||r.fromEmail||'Protthapan Technologies');
+    }
+    function remWaLink(r){return 'https://wa.me/'+waDigits(r.toPhone)+'?text='+encodeURIComponent(remText(r));}
+    async function remTick(){
+      if(remBusy)return; remBusy=true;
+      try{
+        const now=Date.now();
+        for(const r of reminders.slice()){
+          if(!r.dueAt||r.dueAt>now)continue;
+          if(r.channels&&r.channels.email&&!r.emailSent&&!r.emailError){
+            if(!validEmail(r.toEmail)||!validEmail(r.fromEmail)){await remPatch(r.id,{emailError:'Invalid sender or receiver email'});continue;}
+            if(!(await remClaim(r)))continue;
+            try{
+              await sendEmailCore({to:r.toEmail,from:r.fromEmail,fromName:r.fromName,subject:'Reminder: '+r.title,message:remText(r)});
+              await remPatch(r.id,{emailSent:true,emailSentAt:Date.now()});
+              showToast('Reminder email sent to '+r.toEmail);
+            }catch(e){await remPatch(r.id,{emailError:e.message==='NO_SERVICE'?'Email service not set up':e.message,emailClaim:null});}
+          }
+        }
+      }finally{remBusy=false;remRenderBanner();}
+    }
+    function remRenderBanner(){
+      let b=document.getElementById('rem-banner');
+      if(!b){b=document.createElement('div');b.id='rem-banner';document.body.appendChild(b);}
+      const now=Date.now();
+      const due=reminders.filter(r=>r.channels&&r.channels.whatsapp&&!r.waSent&&!r.waDismissed&&r.dueAt&&r.dueAt<=now&&waDigits(r.toPhone).length>=11);
+      b.style.display=due.length?'block':'none';
+      b.innerHTML=due.map(r=>`<div class="rem-card"><strong>⏰ Reminder due</strong><div>${escapeHtml(r.title)}</div><div class="rem-sub">WhatsApp to ${escapeHtml(r.toPhone)}</div><div class="rem-actions"><button type="button" data-rem-wa="${escapeAttr(r.id)}">Send on WhatsApp</button><button type="button" class="ghost" data-rem-dismiss="${escapeAttr(r.id)}">Dismiss</button></div></div>`).join('');
+    }
+    function renderReminders(){
+      const el=document.getElementById('rem-list'); if(!el){remRenderBanner();return;}
+      if(!reminders.length){el.innerHTML='<div class="empty">No reminders set yet.</div>';remRenderBanner();return;}
+      const now=Date.now();
+      el.innerHTML='<table><tr><th>Send at</th><th>Reminder</th><th>To</th><th>Status</th><th></th></tr>'+reminders.slice().sort((a,b)=>(a.dueAt||0)-(b.dueAt||0)).map(r=>{
+        const st=[];
+        if(r.channels&&r.channels.email){
+          if(r.emailSent)st.push('<span class="rem-ok">✉ Email sent ✓</span>');
+          else if(r.emailError)st.push('<span class="rem-bad">✉ Email failed: '+escapeHtml(r.emailError)+'</span>');
+          else st.push('<span class="rem-wait">✉ Email '+(r.dueAt<=now?'sending…':'scheduled')+'</span>');
+        }
+        if(r.channels&&r.channels.whatsapp){
+          if(r.waSent)st.push('<span class="rem-ok">◉ WhatsApp sent ✓</span>');
+          else if(r.waDismissed)st.push('<span class="rem-bad">◉ WhatsApp dismissed</span>');
+          else st.push('<span class="rem-wait">◉ WhatsApp '+(r.dueAt<=now?'waiting for your tap':'scheduled')+'</span>');
+        }
+        const to=[r.channels&&r.channels.email?escapeHtml(r.toEmail||''):'',r.channels&&r.channels.whatsapp?escapeHtml(r.toPhone||''):''].filter(Boolean).join('<br>');
+        return `<tr data-remid="${escapeAttr(r.id)}"><td class="task-date">${new Date(r.dueAt).toLocaleString()}</td><td><strong>${escapeHtml(r.title)}</strong>${r.note?'<div class="stock-sub">'+escapeHtml(r.note)+'</div>':''}</td><td>${to}</td><td class="rem-st">${st.join('<br>')}</td><td><button type="button" class="mini-remove" data-rem-now="${escapeAttr(r.id)}" style="color:#1769D2">Send now</button></td></tr>`;
+      }).join('')+'</table>';
+      remRenderBanner();
+    }
+    async function remCreate(){
+      const v=id=>(document.getElementById(id)?.value||'').trim(), err=document.getElementById('rem-error'); err.textContent='';
+      const title=v('rem-title'), when=v('rem-when'), fromEmail=v('rem-from'), toEmail=v('rem-to-email'), toPhone=v('rem-to-phone'), note=v('rem-note');
+      const chE=document.getElementById('rem-ch-email').checked, chW=document.getElementById('rem-ch-wa').checked;
+      const dueAt=new Date(when).getTime();
+      if(!title){err.textContent='Write what the reminder is about.';return;}
+      if(!when||isNaN(dueAt)){err.textContent='Choose the date and time.';return;}
+      if(!chE&&!chW){err.textContent='Choose Email, WhatsApp or both.';return;}
+      if(chE&&!validEmail(fromEmail)){err.textContent='Enter the Sender email ID.';return;}
+      if(chE&&!validEmail(toEmail)){err.textContent='Enter the Receiver email ID.';return;}
+      if(chW&&waDigits(toPhone).length<11){err.textContent='Enter the receiver WhatsApp number with country code (e.g. +91…).';return;}
+      await remAdd({title,note,dueAt,fromEmail,fromName:currentName||'Protthapan Technologies',toEmail,toPhone,channels:{email:chE,whatsapp:chW},createdBy:currentName||'',createdAt:Date.now()});
+      ['rem-title','rem-note'].forEach(id=>document.getElementById(id).value='');
+      showToast('Reminder set for '+new Date(dueAt).toLocaleString());
+      if(chE&&!emailJsReady())showToast('Reminder saved. Finish “Email sending setup” so the email can go out.');
+      remTick();
+    }
+    document.addEventListener('click',async e=>{
+      const t=e.target.closest?e.target:null; if(!t)return;
+      const wa=t.closest('[data-rem-wa]'), dis=t.closest('[data-rem-dismiss]'), now=t.closest('[data-rem-now]');
+      if(wa){const r=reminders.find(x=>x.id===wa.dataset.remWa);if(r){window.open(remWaLink(r),'_blank','noopener');await remPatch(r.id,{waSent:true,waSentAt:Date.now()});remRenderBanner();}}
+      else if(dis){await remPatch(dis.dataset.remDismiss,{waDismissed:true});remRenderBanner();}
+      else if(now){const r=reminders.find(x=>x.id===now.dataset.remNow);if(r){await remPatch(r.id,{dueAt:Date.now()-1000,emailError:null,emailClaim:null,waDismissed:false});remTick();}}
+    });
+
+    /* ---------- Inventory search with suggestions ---------- */
+    let invSgIndex=-1, invSgItems=[];
+    function invUniverse(){
+      const m={};
+      stockRows().forEach(r=>{m[r.key]={name:r.name,left:r.left,inInv:r.inInv};});
+      purchaseSource().forEach(c=>{const k=stockKey(c.name);if(k&&!m[k])m[k]={name:c.name,left:0,inInv:false};});
+      return Object.values(m);
+    }
+    function invSuggestFor(q){
+      const ql=q.trim().toLowerCase(); if(ql.length<2)return [];
+      const toks=ql.split(/\s+/);
+      return invUniverse().filter(x=>{const n=x.name.toLowerCase();return toks.every(t=>n.includes(t));})
+        .sort((a,b)=>{const an=a.name.toLowerCase(),bn=b.name.toLowerCase();const as=an.startsWith(ql)?0:(an.split(/\s+/).some(w=>w.startsWith(toks[0]))?1:2),bs=bn.startsWith(ql)?0:(bn.split(/\s+/).some(w=>w.startsWith(toks[0]))?1:2);return as-bs||an.localeCompare(bn);}).slice(0,8);
+    }
+    function invHighlight(name,q){
+      const i=name.toLowerCase().indexOf(q.trim().toLowerCase().split(/\s+/)[0]);
+      const len=q.trim().split(/\s+/)[0].length;
+      if(i<0||!len)return escapeHtml(name);
+      return escapeHtml(name.slice(0,i))+'<mark>'+escapeHtml(name.slice(i,i+len))+'</mark>'+escapeHtml(name.slice(i+len));
+    }
+    function invRenderSuggest(){
+      const box=document.getElementById('inv-suggest'), inp=document.getElementById('inv-search'); if(!box||!inp)return;
+      const q=inp.value; invSgItems=invSuggestFor(q); invSgIndex=-1;
+      if(q.trim().length<2){box.style.display='none';return;}
+      if(!invSgItems.length){box.innerHTML='<div class="inv-sg-none">No matching item. Keep typing or check the spelling.</div>';box.style.display='block';return;}
+      box.innerHTML=invSgItems.map((x,i)=>`<div class="inv-sg" data-i="${i}"><span>${invHighlight(x.name,q)}</span>${x.inInv?(x.left>0?'<span class="stock-pill stock-ok">'+fmtNum(x.left)+' left</span>':'<span class="stock-pill stock-none">Empty — no items left</span>'):'<span class="stock-pill stock-none">Not in inventory</span>'}</div>`).join('');
+      box.style.display='block';
+    }
+    function invApplySearch(text){
+      invQuery=text||'';
+      const x=document.getElementById('inv-search-x'); if(x)x.style.display=invQuery?'block':'none';
+      renderStockSummary(); renderInventory();
+    }
+    function invPick(i){
+      const it=invSgItems[i]; if(!it)return;
+      const inp=document.getElementById('inv-search'); inp.value=it.name;
+      document.getElementById('inv-suggest').style.display='none';
+      invApplySearch(it.name);
+    }
+    function invSetActive(n){
+      const rows=[...document.querySelectorAll('#inv-suggest .inv-sg')]; if(!rows.length)return;
+      invSgIndex=(n+rows.length)%rows.length;
+      rows.forEach((r,i)=>r.classList.toggle('active',i===invSgIndex));
+      rows[invSgIndex].scrollIntoView({block:'nearest'});
+    }
+    function ptInvV2Init(){
+      if(ptV2Inited)return; ptV2Inited=true;
+      const g=id=>document.getElementById(id);
+      // email setup
+      const c=emailJsCfg(); if(g('ejs-service'))g('ejs-service').value=c.service||''; if(g('ejs-template'))g('ejs-template').value=c.template||''; if(g('ejs-key'))g('ejs-key').value=c.key||'';
+      if(db)db.collection('settings').doc('emailjs').onSnapshot(doc=>{if(!doc.exists)return;const d=doc.data()||{};if(!emailJsReady()&&d.service&&d.template&&d.key){try{localStorage.setItem(PT_EMAILJS_KEY,JSON.stringify({service:d.service,template:d.template,key:d.key}));}catch(e){}if(g('ejs-service')){g('ejs-service').value=d.service;g('ejs-template').value=d.template;g('ejs-key').value=d.key;}}},()=>{});
+      g('ejs-save')?.addEventListener('click',ptSaveEmailJs);
+      g('ejs-test')?.addEventListener('click',ptTestEmail);
+      g('purchase-mailto')?.addEventListener('click',ptMailtoFallback);
+      // reminders
+      const when=g('rem-when'); if(when&&!when.value){const d=new Date(Date.now()+10*60000);d.setSeconds(0,0);const p=n=>String(n).padStart(2,'0');when.value=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes());}
+      loadPurchasePrefs();
+      if(g('rem-from')&&!g('rem-from').value)g('rem-from').value=purchaseCfg.from||'';
+      if(g('rem-to-email')&&!g('rem-to-email').value)g('rem-to-email').value=purchaseCfg.email||'';
+      if(g('rem-to-phone')&&!g('rem-to-phone').value)g('rem-to-phone').value=purchaseCfg.phone||'';
+      g('rem-submit')?.addEventListener('click',remCreate);
+      remInit();
+      // search
+      const inp=g('inv-search');
+      inp?.addEventListener('input',()=>{invApplySearch(inp.value);invRenderSuggest();});
+      inp?.addEventListener('focus',invRenderSuggest);
+      inp?.addEventListener('keydown',e=>{
+        const open=g('inv-suggest').style.display!=='none';
+        if(e.key==='ArrowDown'){e.preventDefault();invSetActive(invSgIndex+1);}
+        else if(e.key==='ArrowUp'){e.preventDefault();invSetActive(invSgIndex-1);}
+        else if(e.key==='Enter'&&open&&invSgItems.length){e.preventDefault();invPick(invSgIndex>=0?invSgIndex:0);}
+        else if(e.key==='Escape'){g('inv-suggest').style.display='none';}
+      });
+      g('inv-suggest')?.addEventListener('mousedown',e=>{const r=e.target.closest('.inv-sg');if(r){e.preventDefault();invPick(Number(r.dataset.i));}});
+      g('inv-search-x')?.addEventListener('click',()=>{inp.value='';g('inv-suggest').style.display='none';invApplySearch('');inp.focus();});
+      document.addEventListener('click',e=>{if(!e.target.closest('.inv-search-wrap')){const b=g('inv-suggest');if(b)b.style.display='none';}});
+    }
+
+    /* ---------- Tick and clear: a checkbox on every list item + "Clear selected" under each list ---------- */
+    const ptSel={};
+    const ptOwnTask=r=>canEditTask(r);
+    const PT_LISTS=[
+      {el:'my-updates',coll:'tasks',row:'tr[data-docid]',arr:()=>tasks,own:ptOwnTask},
+      {el:'feed-list',coll:'tasks',row:'tr[data-docid]',arr:()=>tasks,own:ptOwnTask},
+      {el:'inventory-list',coll:'inventory',row:'tr[data-docid]',arr:()=>inventory,own:r=>isAdmin||r.buyerId===currentMemberId||(!!r.ownerUid&&r.ownerUid===currentUserUid)},
+      {el:'invoice-list',coll:'invoices',row:'.sub-card[data-docid]',arr:()=>invoices,own:r=>isAdmin||r.ownerUid===currentUserUid},
+      {el:'report-list',coll:'projects',row:'tr[data-docid]',arr:()=>projects,own:r=>isAdmin||r.ownerId===currentMemberId},
+      {el:'upcoming-list',coll:'projects',row:'.proj-card[data-docid]',arr:()=>projects,own:r=>isAdmin||r.ownerId===currentMemberId},
+      {el:'module-list',coll:'modules',row:'tr[data-docid]',arr:()=>modules,own:r=>isAdmin},
+      {el:'module-updates-list',coll:'moduleUpdates',row:'tr[data-docid]',arr:()=>moduleUpdates,own:r=>isAdmin||r.ownerUid===currentUserUid},
+      {el:'pass-list',coll:'passes',row:'.proj-card[data-docid]',arr:()=>trips,own:r=>isAdmin||r.createdByUid===currentUserUid},
+      {el:'material-list',coll:'materials',row:'tr[data-docid]',arr:()=>materials,own:r=>isAdmin||r.memberId===currentMemberId},
+      {el:'blog-list',coll:'blogPosts',row:'[data-docid]',arr:()=>blogPosts,own:r=>isAdmin||r.authorId===currentMemberId||r.ownerUid===currentUserUid},
+      {el:'dt-list',coll:'droneTickets',row:'.pt-ticket-card[data-docid]',arr:()=>window.__droneTickets||[],own:r=>isAdmin||r.ownerUid===currentUserUid},
+      {el:'stock-summary',kind:'stock',row:'tr[data-stockkey]',rid:r=>r.getAttribute('data-stockkey'),ownId:k=>isAdmin||inventory.some(i=>stockKey(i.itemName)===k&&(i.buyerId===currentMemberId||(!!i.ownerUid&&i.ownerUid===currentUserUid)))},
+      {el:'ml-tracking',kind:'mat',row:'tr[data-matid]',rid:r=>r.getAttribute('data-matpid')+'|'+r.getAttribute('data-matid'),ownId:()=>true,barAfter:'table'},
+      {el:'rem-list',kind:'rem',row:'tr[data-remid]',rid:r=>r.getAttribute('data-remid'),ownId:id=>{const r=reminders.find(x=>x.id===id);return !!r&&(isAdmin||remMode==='local'||r.createdBy===currentName);}}
+    ];
+    function ptRid(cfg,row){return cfg.rid?cfg.rid(row):row.getAttribute('data-docid');}
+    function ptOwns(cfg,id){
+      if(cfg.ownId)return !!cfg.ownId(id);
+      const r=cfg.arr().find(x=>x.id===id); return !!r&&!!cfg.own(r);
+    }
+    function ptUpdateBar(k){
+      const box=document.getElementById(k); if(!box)return;
+      const bar=box.querySelector('.pt-clear-bar'); if(!bar)return;
+      const n=(ptSel[k]||new Set()).size, btn=bar.querySelector('.pt-clear-go');
+      btn.disabled=n===0; btn.textContent=n?('Clear selected ('+n+')'):'Clear selected';
+      const boxes=[...box.querySelectorAll('input.pt-sel')], all=bar.querySelector('.pt-sel-all');
+      all.checked=boxes.length>0&&boxes.every(b=>b.checked);
+    }
+    function ptEnhanceList(cfg){
+      const box=document.getElementById(cfg.el); if(!box||box.querySelector('.pt-clear-bar'))return;
+      const rows=[...box.querySelectorAll(cfg.row)]; if(!rows.length)return;
+      const owned=new Set(rows.filter(r=>ptOwns(cfg,ptRid(cfg,r))).map(r=>ptRid(cfg,r)));
+      if(!owned.size)return;
+      const set=ptSel[cfg.el]||(ptSel[cfg.el]=new Set());
+      [...set].forEach(id=>{if(!owned.has(id))set.delete(id);});
+      rows.forEach(row=>{
+        const id=ptRid(cfg,row), mine=owned.has(id);
+        if(row.tagName==='TR'){
+          const tbl=row.closest('table');
+          if(tbl&&!tbl.querySelector('th.pt-sel-col')){const hr=tbl.rows[0];if(hr&&hr.querySelector('th')){const th=document.createElement('th');th.className='pt-sel-col';hr.insertBefore(th,hr.firstChild);}}
+          const td=document.createElement('td');td.className='pt-sel-col';
+          if(mine)td.innerHTML='<input type="checkbox" class="pt-sel" title="Tick to clear this item">';
+          row.insertBefore(td,row.firstChild);
+          const cb=td.querySelector('input'); if(cb){cb.dataset.k=cfg.el;cb.dataset.id=id;cb.checked=set.has(id);}
+        } else if(mine){
+          const lab=document.createElement('label');lab.className='pt-card-sel';
+          lab.innerHTML='<input type="checkbox" class="pt-sel"> Tick to clear this item';
+          const cb=lab.querySelector('input');cb.dataset.k=cfg.el;cb.dataset.id=id;cb.checked=set.has(id);
+          row.insertBefore(lab,row.firstChild);
+        }
+      });
+      const bar=document.createElement('div');bar.className='pt-clear-bar';
+      bar.innerHTML='<label><input type="checkbox" class="pt-sel-all"> Select all</label><button type="button" class="pt-clear-go" disabled>Clear selected</button><span class="pt-clear-hint">Tick the items you want to remove, then press Clear selected.</span>';
+      const anchor=cfg.barAfter?box.querySelector(cfg.barAfter):null;
+      if(anchor)anchor.insertAdjacentElement('afterend',bar); else box.appendChild(bar);
+      ptUpdateBar(cfg.el);
+    }
+    let ptBusy=false, ptTimer=0;
+    function ptEnhanceAll(){
+      if(ptBusy)return; ptBusy=true;
+      try{PT_LISTS.forEach(ptEnhanceList);}catch(e){console.warn('clear-bars:',e);}
+      ptBusy=false;
+    }
+    async function ptClearSelected(k){
+      const cfg=PT_LISTS.find(c=>c.el===k), set=ptSel[k]; if(!cfg||!set||!set.size)return;
+      if(!db){showToast('Firebase is not configured.');return;}
+      const ids=[...set];
+      if(!confirm('Clear '+ids.length+' selected item'+(ids.length===1?'':'s')+'? This cannot be undone.'))return;
+      let ok=0,fail=0;
+      try{
+        if(cfg.kind==='stock'){
+          const docs=inventory.filter(i=>ids.includes(stockKey(i.itemName))&&(isAdmin||i.buyerId===currentMemberId||(!!i.ownerUid&&i.ownerUid===currentUserUid)));
+          const res=await Promise.allSettled(docs.map(i=>db.collection('inventory').doc(i.id).delete()));
+          ok=ids.length; res.forEach(r=>{if(r.status==='rejected')fail++;});
+        } else if(cfg.kind==='mat'){
+          const byP={}; ids.forEach(x=>{const [pid,mid]=x.split('|');(byP[pid]=byP[pid]||[]).push(mid);});
+          for(const pid of Object.keys(byP)){const list=getMats(pid).filter(m=>!byP[pid].includes(m.id)); if(await saveMats(pid,list))ok+=byP[pid].length; else fail+=byP[pid].length;}
+        } else if(cfg.kind==='rem'){
+          for(const id of ids){if(await remRemove(id))ok++;else fail++;}
+        } else {
+          const res=await Promise.allSettled(ids.map(id=>db.collection(cfg.coll).doc(id).delete()));
+          res.forEach(r=>{if(r.status==='fulfilled')ok++;else fail++;});
+        }
+      }catch(e){console.error(e);fail=ids.length-ok;}
+      set.clear();
+      showToast(ok?('Cleared '+ok+' item'+(ok===1?'':'s')+(fail?(' · '+fail+' could not be cleared'):'')):'Could not clear. Check Firestore rules.');
+      ptUpdateBar(k);
+      if(cfg.coll==='droneTickets'||cfg.kind==='rem')ptEnhanceAll();
+    }
+    document.addEventListener('change',e=>{
+      const t=e.target; if(!t.classList)return;
+      if(t.classList.contains('pt-sel')){
+        const k=t.dataset.k, set=ptSel[k]||(ptSel[k]=new Set());
+        if(t.checked)set.add(t.dataset.id);else set.delete(t.dataset.id);
+        ptUpdateBar(k);
+      } else if(t.classList.contains('pt-sel-all')){
+        const k=t.closest('.pt-clear-bar').dataset.k||'';
+        const box=t.closest('.pt-clear-bar').parentNode; 
+        const cfg=PT_LISTS.find(c=>{const b=document.getElementById(c.el);return b&&b.contains(t);}); if(!cfg)return;
+        const set=ptSel[cfg.el]||(ptSel[cfg.el]=new Set());
+        document.getElementById(cfg.el).querySelectorAll('input.pt-sel').forEach(cb=>{cb.checked=t.checked;if(t.checked)set.add(cb.dataset.id);else set.delete(cb.dataset.id);});
+        ptUpdateBar(cfg.el);
+      }
+    });
+    document.addEventListener('click',e=>{
+      const b=e.target.closest&&e.target.closest('.pt-clear-go'); if(!b)return;
+      const cfg=PT_LISTS.find(c=>{const x=document.getElementById(c.el);return x&&x.contains(b);}); if(cfg)ptClearSelected(cfg.el);
+    });
+    new MutationObserver(()=>{clearTimeout(ptTimer);ptTimer=setTimeout(ptEnhanceAll,60);}).observe(document.body,{childList:true,subtree:true});
 
     // ---- Start: only the lock screen is shown; the app and data load after a valid login ----
     document.getElementById('lock-submit').addEventListener('click', tryLogin);
