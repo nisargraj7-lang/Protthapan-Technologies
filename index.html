@@ -1960,25 +1960,23 @@ svg text{fill:#18324E!important}
   <div id="lock-screen">
     <div class="lock-card">
       <div class="lock-brand">Protthapan<span> Technologies</span></div>
-      <div class="lock-sub">🔒 Choose your lock to continue</div>
-
+      <div class="lock-sub">🔒 Secure account login — your identity controls what you can view and edit.</div>
       <div class="lock-tabs">
-        <button type="button" class="lock-tab active" id="tab-admin">Admin lock</button>
-        <button type="button" class="lock-tab" id="tab-member">Member lock</button>
+        <button type="button" class="lock-tab active" id="tab-admin">Admin</button>
+        <button type="button" class="lock-tab" id="tab-member">Team member</button>
       </div>
-
       <div id="lock-admin-fields">
-        <label for="lock-user">Admin name</label>
-        <input type="text" id="lock-user" autocomplete="username" autocapitalize="none" spellcheck="false">
-        <label for="lock-pass">Admin password</label>
+        <label for="lock-user">Admin email</label>
+        <input type="email" id="lock-user" autocomplete="username" autocapitalize="none" spellcheck="false" value="protthapan@protthapan.team">
+        <label for="lock-pass">Password</label>
         <input type="password" id="lock-pass" autocomplete="current-password">
       </div>
-
       <div id="lock-member-fields" style="display:none;">
-        <label for="lock-member-pass">Member password</label>
+        <label for="lock-member-email">Team member email</label>
+        <input type="email" id="lock-member-email" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="your.name@company.com">
+        <label for="lock-member-pass">Password</label>
         <input type="password" id="lock-member-pass" autocomplete="current-password">
       </div>
-
       <button class="btn lock-btn" id="lock-submit">Log in</button>
       <div id="lock-error"></div>
     </div>
@@ -2592,16 +2590,12 @@ svg text{fill:#18324E!important}
     };
     // ==========================================================================
 
-    // ======= Two locks: Admin lock + Member lock =======
-    // Only SHA-256 hashes of the passwords are stored here (not the passwords themselves).
-    // Admin  : name "protthapan"  + password protthapan@007
-    // Member : password protthapantec@123
-    const ADMIN_USER_HASH = "81413bdf307e771569c0f1591789b0d11a224be2d25cd90e9d37d7b5738eade1";
-    const ADMIN_PASS_HASH = "fd7ad762233aa533ccd1775439c70350b4c702c0f8a4a665a2da5e62b963dd56";
-    const MEMBER_PASS_HASH = "a7c794fd4f59b786d31c06e8e04430d3320ee8cf9c72a2f794046f8ff16d2c48";
-    // Two fixed Firebase logins are used behind the scenes (created automatically on first correct login).
+    // ======= Account identity =======
+    // Admin uses the existing Firebase account below. Every team member must use
+    // their own Firebase Authentication email/password and the same email must be
+    // registered in Firestore -> members.
     const ADMIN_EMAIL = "protthapan@protthapan.team";
-    const MEMBER_EMAIL = "member@protthapan.team";
+    const MEMBER_EMAIL = ""; // Legacy variable kept for compatibility; member login is now per-account.
     let isAdmin = false;
     let currentName = '';
     let lockRole = 'admin';
@@ -3164,7 +3158,7 @@ svg text{fill:#18324E!important}
     }
     async function removeModule(id) {
       if (!confirm('Remove this module? Its upgrade history will stay in the log.')) return;
-      try {await db.collection('modules').doc(id).delete();} catch (e) {showToast('Could not remove module');}
+      try {if(!isAdmin){showToast('Only the admin can remove modules.');return;} await db.collection('modules').doc(id).delete();} catch (e) {showToast('Could not remove module');}
     }
     window.removeModule = removeModule;
 
@@ -4431,7 +4425,7 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
     }
     async function removeBlogPost(id) {
       if (!confirm('Remove this post?')) return;
-      try {await db.collection('blogPosts').doc(id).delete();} catch (e) {showToast('Could not remove post');}
+      try {if(!isAdmin && !isOwner(blogPosts.find(x=>x.id===id)?.authorId, blogPosts.find(x=>x.id===id)?.ownerUid)){showToast('You can only remove your own post.');return;} await db.collection('blogPosts').doc(id).delete();} catch (e) {showToast('Could not remove post');}
     }
     window.removeBlogPost = removeBlogPost;
 
@@ -4749,7 +4743,7 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
     }
 
     // Starts the app and live data. Only runs AFTER a lock has been opened.
-    function init() {
+    function legacyInit() {
       document.getElementById('log-date').value = todayStr();
       document.getElementById('inv-date').value = todayStr();
       document.getElementById('up2-date').value = todayStr();
@@ -4768,7 +4762,7 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
         renderAttMemberSelect(); renderAttendance();
       }, () => showToast('Could not load members'));
 
-      db.collection('attendance').onSnapshot(snap => {
+      (isAdmin ? db.collection('attendance') : db.collection('attendance').where('memberId', '==', currentMemberId)).onSnapshot(snap => {
         attendance = snap.docs.map(d => {
           const x = d.data({serverTimestamps: 'estimate'});
           return {id: d.id, ...x, inTime: toMs(x.inTime), outTime: toMs(x.outTime)};
@@ -4776,29 +4770,29 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
         renderAttendance(); refreshSheetsIfOpen();
       }, () => showToast('Could not load attendance (check the Firestore rules)'));
 
-      db.collection('tasks').onSnapshot(snap => {
-        tasks = snap.docs.map(d => ({id: d.id, ...d.data()}));
+      (isAdmin ? db.collection('tasks') : db.collection('tasks').where('memberId', '==', currentMemberId)).onSnapshot(snap => {
+        tasks = snap.docs.map(d => ({id: d.id, ...d.data()})); filterPersonalArrays();
         renderMyUpdates(); renderFeed(); refreshSheetsIfOpen();
       }, () => showToast('Could not load tasks'));
 
-      db.collection('inventory').onSnapshot(snap => {
-        inventory = snap.docs.map(d => ({id: d.id, ...d.data()}));
+      (isAdmin ? db.collection('inventory') : db.collection('inventory').where('buyerId', '==', currentMemberId)).onSnapshot(snap => {
+        inventory = snap.docs.map(d => ({id: d.id, ...d.data()})); filterPersonalArrays();
         renderInventory(); refreshSheetsIfOpen();
       }, () => showToast('Could not load inventory'));
 
       db.collection('projects').onSnapshot(snap => {
-        projects = snap.docs.map(d => ({id: d.id, ...d.data()}));
+        projects = snap.docs.map(d => ({id: d.id, ...d.data()})); filterPersonalArrays();
         renderReport(); renderUpcoming(); renderModuleParent(); renderModuleList();
         renderProjectPickers(); renderMaterialTracking(); refreshSheetsIfOpen();
       }, () => showToast('Could not load projects'));
 
       db.collection('modules').onSnapshot(snap => {
-        modules = snap.docs.map(d => ({id: d.id, ...d.data()}));
+        modules = snap.docs.map(d => ({id: d.id, ...d.data()})); filterPersonalArrays();
         renderModuleSelects(); renderModuleList(); renderModuleUpdates(); renderModuleProgress(); refreshSheetsIfOpen();
       }, () => showToast('Could not load modules'));
 
       db.collection('moduleUpdates').onSnapshot(snap => {
-        moduleUpdates = snap.docs.map(d => ({id: d.id, ...d.data()}));
+        moduleUpdates = snap.docs.map(d => ({id: d.id, ...d.data()})); filterPersonalArrays();
         renderModuleList(); renderModuleUpdates(); renderModuleProgress(); refreshSheetsIfOpen();
       }, () => showToast('Could not load module upgrades'));
 
@@ -4807,8 +4801,8 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
         renderCatalogSelect(); renderMaterialTracking();
       }, () => showToast('Could not load the material dropdown'));
 
-      db.collection('passes').onSnapshot(snap => {
-        trips = snap.docs.map(d => ({id: d.id, ...d.data()}));
+      (isAdmin ? db.collection('passes') : db.collection('passes').where('createdByUid', '==', currentUserUid)).onSnapshot(snap => {
+        trips = snap.docs.map(d => ({id: d.id, ...d.data()})); filterPersonalArrays();
         renderPassList(); refreshSheetsIfOpen();
       }, () => showToast('Could not load passes'));
 
@@ -4818,15 +4812,20 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
         renderSheetStatus(); fillSheetForm();
       }, () => showToast('Could not load Google Sheet settings (check the Firestore rules)'));
 
-      db.collection('materials').onSnapshot(snap => {
-        materials = snap.docs.map(d => ({id: d.id, ...d.data()}));
+      (isAdmin ? db.collection('materials') : db.collection('materials').where('memberId', '==', currentMemberId)).onSnapshot(snap => {
+        materials = snap.docs.map(d => ({id: d.id, ...d.data()})); filterPersonalArrays();
         renderMaterialList();
       }, () => showToast('Could not load materials'));
 
-      db.collection('blogPosts').onSnapshot(snap => {
-        blogPosts = snap.docs.map(d => ({id: d.id, ...d.data()}));
+      (isAdmin ? db.collection('blogPosts') : db.collection('blogPosts').where('authorId', '==', currentMemberId)).onSnapshot(snap => {
+        blogPosts = snap.docs.map(d => ({id: d.id, ...d.data()})); filterPersonalArrays();
         renderBlogList();
       }, () => showToast('Could not load blog posts'));
+
+      if (db) db.collection('droneTickets').onSnapshot(snap => {
+        const list=snap.docs.map(d=>({id:d.id,...d.data()}));
+        renderDroneTickets(list);
+      },()=>showToast('Could not load drone receiving tickets'));
 
       updateAdminUI();
       initPurchaseUI();
@@ -4892,12 +4891,344 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       document.getElementById('blog-submit').addEventListener('click', addBlogPost);
     }
 
+
+    /* ================================================================
+       PROTTHAPAN ACCESS / HISTORY / DRONE TICKET UPGRADE
+       Front-end layer. Firestore rules must also enforce ownership.
+       ================================================================ */
+    let currentMemberId = null;
+    let currentUserUid = '';
+    let currentUserEmail = '';
+    let enhancedReady = false;
+    let currentView = 'log';
+
+    function memberForCurrentUser(){
+      return members.find(m => m.id === currentMemberId) || null;
+    }
+    function isOwner(memberId, uid){
+      if (isAdmin) return true;
+      return (!!currentMemberId && memberId === currentMemberId) || (!!currentUserUid && uid === currentUserUid);
+    }
+    function requireMember(action){
+      if (isAdmin) return true;
+      if (!currentMemberId || !currentUserUid) { showToast('Your team-member account is not linked yet.'); return false; }
+      return true;
+    }
+
+    function ensureEnhancedUI(){
+      if (enhancedReady) return;
+      enhancedReady = true;
+      const style = document.createElement('style');
+      style.id = 'pt-enhanced-style';
+      style.textContent = `
+        .pt-userbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:0 0 18px;padding:10px 12px;border:1px solid #D5E2F0;border-radius:14px;background:#fff;box-shadow:0 7px 22px rgba(31,78,121,.06)}
+        .pt-user-badge{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;background:#EEF5FF;color:#0B3B82;font-size:11px;font-weight:800}
+        .pt-user-dot{width:8px;height:8px;border-radius:50%;background:#2DBB78;box-shadow:0 0 8px rgba(45,187,120,.55)}
+        .pt-page-search{flex:1;min-width:180px!important;margin:0!important}
+        .pt-clear-btn{margin:0!important;padding:9px 12px!important;background:#fff!important;color:#B13243!important;border:1px solid #E5BFC5!important;box-shadow:none!important}
+        .pt-clear-btn:hover{background:#FFF4F5!important;transform:none!important}
+        .pt-ticket-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:start}
+        .pt-ticket-card{border:1px solid #D5E2F0;border-radius:15px;background:#fff;padding:15px;margin-top:10px}
+        .pt-ticket-card.done{border-left:4px solid #16704E}.pt-ticket-card.open{border-left:4px solid #1769D2}.pt-ticket-card.issue{border-left:4px solid #B13243}
+        .pt-ticket-head{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+        .pt-ticket-title{font-weight:800;color:#102A49}.pt-ticket-meta{font-size:11px;color:#60738A}.pt-ticket-section{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#60738A;margin-top:12px}.pt-ticket-value{white-space:pre-wrap;color:#263D56;font-size:13px;margin-top:3px}
+        .pt-ticket-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.pt-ticket-actions button{margin:0!important;padding:7px 10px!important}
+        .pt-readonly{background:#F4F8FF!important;color:#536B86!important}
+        .pt-owner-lock{font-size:11px;color:#60738A;margin-top:7px}
+        .pt-search-hidden{display:none!important}
+        @media(max-width:850px){.pt-ticket-grid{grid-template-columns:1fr}.pt-userbar{align-items:stretch}.pt-page-search{min-width:100%!important}}
+      `;
+      document.head.appendChild(style);
+
+      const top = document.querySelector('.ui-topbar');
+      if (top && !document.getElementById('pt-userbar')) {
+        const bar=document.createElement('div'); bar.id='pt-userbar'; bar.className='pt-userbar';
+        bar.innerHTML=`<span class="pt-user-badge"><i class="pt-user-dot"></i><span id="pt-current-user">Signed in</span></span>
+          <input id="pt-page-search" class="pt-page-search" type="text" placeholder="Search this page…">
+          <button id="pt-clear-history" class="btn pt-clear-btn" type="button">Clear my history</button>`;
+        top.parentNode.insertBefore(bar, top.nextSibling);
+        document.getElementById('pt-page-search').addEventListener('input', applyPageSearch);
+        document.getElementById('pt-clear-history').addEventListener('click', clearCurrentPageHistory);
+      }
+
+      const nav = document.querySelector('.sidebar');
+      const navAnchor = document.getElementById('admin-toggle');
+      if(nav && !document.querySelector('.nav-item[data-view="tickets"]')){
+        const n=document.createElement('div'); n.className='nav-item'; n.dataset.view='tickets'; n.textContent='Drone Tickets';
+        nav.insertBefore(n, navAnchor || null);
+        n.addEventListener('click',()=>switchView('tickets'));
+      }
+
+      const appMain=document.querySelector('.main');
+      if(appMain && !document.getElementById('view-tickets')){
+        const v=document.createElement('div'); v.id='view-tickets'; v.style.display='none';
+        v.innerHTML=`
+          <h1>Drone Receiving Tickets</h1>
+          <p class="subtitle">Create a receiving ticket whenever a drone arrives. The receiver is automatically linked to the signed-in account.</p>
+          <div class="pt-ticket-grid">
+            <div class="panel">
+              <h2>Create receiving ticket</h2>
+              <div class="row-2">
+                <div><label>Drone / Asset ID</label><input id="dt-drone-id" type="text" placeholder="e.g. DRN-001"></div>
+                <div><label>Serial number</label><input id="dt-serial" type="text" placeholder="Optional serial number"></div>
+              </div>
+              <div class="row-2">
+                <div><label>Received from</label><input id="dt-source" type="text" placeholder="Vendor / team / location"></div>
+                <div><label>Received date</label><input id="dt-date" type="date"></div>
+              </div>
+              <div class="row-2">
+                <div><label>Condition</label><select id="dt-condition"><option value="working">Working properly</option><option value="minor_issue">Minor issue</option><option value="damaged">Parts damaged</option><option value="missing_parts">Parts missing</option><option value="not_working">Not working</option></select></div>
+                <div><label>Priority</label><select id="dt-priority"><option value="normal">Normal</option><option value="high">High</option><option value="critical">Critical</option></select></div>
+              </div>
+              <label>Parts damaged</label><textarea id="dt-damage" placeholder="List damaged parts, if any..."></textarea>
+              <label>Parts / accessories missing</label><textarea id="dt-missing" placeholder="Battery, propeller, charger, goggles, etc."></textarea>
+              <label>Issues / observations</label><textarea id="dt-issues" placeholder="Flight issue, motor issue, GPS issue, physical condition..."></textarea>
+              <label>Receiving feedback / action required</label><textarea id="dt-feedback" placeholder="What should the team do next?"></textarea>
+              <button class="btn" id="dt-submit">Generate ticket</button><span id="dt-error" style="color:var(--danger);font-size:13px;margin-left:12px"></span>
+              <div class="pt-owner-lock">🔒 Receiver: <strong id="dt-receiver">—</strong>. Only this signed-in member can edit/close the ticket. Admin can supervise all tickets.</div>
+            </div>
+            <div class="panel">
+              <h2>My receiving history</h2>
+              <div id="dt-list"><div class="empty">No drone tickets yet.</div></div>
+            </div>
+          </div>`;
+        const firstView=appMain.querySelector('#view-log');
+        appMain.insertBefore(v, firstView);
+        document.getElementById('dt-date').value=todayStr();
+        document.getElementById('dt-submit').addEventListener('click', createDroneTicket);
+      }
+      updateEnhancedIdentityUI();
+    }
+
+    function updateEnhancedIdentityUI(){
+      const m=memberForCurrentUser();
+      const name=isAdmin?'Admin':(m?m.name:(currentUserEmail||'Team member'));
+      const badge=document.getElementById('pt-current-user'); if(badge) badge.textContent=name+(isAdmin?' · full access':' · personal access');
+      const r=document.getElementById('dt-receiver'); if(r) r.textContent=name;
+      const clear=document.getElementById('pt-clear-history'); if(clear) clear.textContent=isAdmin?'Clear current page history':'Clear my history';
+      const attSel=document.getElementById('att-member'); if(attSel && !isAdmin) attSel.disabled=true;
+      const logSel=document.getElementById('log-member'); if(logSel && !isAdmin) logSel.disabled=true;
+    }
+
+    function applyPageSearch(){
+      const q=(document.getElementById('pt-page-search')?.value||'').trim().toLowerCase();
+      const view=document.getElementById('view-'+currentView); if(!view)return;
+      view.querySelectorAll('table tbody tr, table tr:not(:first-child), .proj-card, .sub-card, .att-card, .mod-card, .catalog-item, .request-row, .pt-ticket-card').forEach(el=>{
+        const hit=!q || (el.innerText||'').toLowerCase().includes(q); el.classList.toggle('pt-search-hidden',!hit);
+      });
+    }
+
+    async function deleteOwnedQuery(query){
+      const snap=await query.get();
+      if(snap.empty)return 0;
+      let count=0;
+      for(let i=0;i<snap.docs.length;i+=450){
+        const batch=db.batch();
+        snap.docs.slice(i,i+450).forEach(d=>batch.delete(d.ref));
+        await batch.commit();
+        count+=Math.min(450,snap.docs.length-i);
+      }
+      return count;
+    }
+    async function clearCurrentPageHistory(){
+      if(!db){showToast('Firebase is not configured.');return;}
+      if(!isAdmin && !currentMemberId){showToast('Your account is not linked to a team member.');return;}
+      const map={
+        log:()=>isAdmin?db.collection('tasks'):db.collection('tasks').where('memberId','==',currentMemberId),
+        feed:()=>isAdmin?db.collection('tasks'):db.collection('tasks').where('memberId','==',currentMemberId),
+        attendance:()=>isAdmin?db.collection('attendance'):db.collection('attendance').where('memberId','==',currentMemberId),
+        inventory:()=>isAdmin?db.collection('inventory'):db.collection('inventory').where('buyerId','==',currentMemberId),
+        materials:()=>isAdmin?db.collection('materials'):db.collection('materials').where('memberId','==',currentMemberId),
+        blog:()=>isAdmin?db.collection('blogPosts'):db.collection('blogPosts').where('authorId','==',currentMemberId),
+        pass:()=>isAdmin?db.collection('passes'):db.collection('passes').where('createdByUid','==',currentUserUid),
+        modules:()=>isAdmin?db.collection('moduleUpdates'):db.collection('moduleUpdates').where('ownerUid','==',currentUserUid),
+        report:()=>isAdmin?db.collection('projects'):db.collection('projects').where('ownerId','==',currentMemberId),
+        upcoming:()=>isAdmin?db.collection('projects'):db.collection('projects').where('ownerId','==',currentMemberId),
+        tickets:()=>isAdmin?db.collection('droneTickets'):db.collection('droneTickets').where('ownerUid','==',currentUserUid)
+      };
+      const make=map[currentView];
+      if(!make){showToast('This page does not have personal history to clear.');return;}
+      if(!confirm('Clear only the history owned by '+(isAdmin?'the current admin scope':(memberForCurrentUser()?.name||'you'))+' on this page? This cannot be undone.'))return;
+      try{const n=await deleteOwnedQuery(make());showToast(n?('Cleared '+n+' record'+(n===1?'':'s')):'Nothing to clear.');}
+      catch(e){console.error(e);showToast('Could not clear history. Check Firestore rules.');}
+    }
+
+    function filterPersonalArrays(){
+      if(isAdmin)return;
+      tasks=tasks.filter(x=>x.memberId===currentMemberId);
+      inventory=inventory.filter(x=>x.buyerId===currentMemberId);
+      materials=materials.filter(x=>x.memberId===currentMemberId);
+      blogPosts=blogPosts.filter(x=>x.authorId===currentMemberId);
+      trips=trips.filter(x=>x.createdByUid===currentUserUid);
+      attendance=attendance.filter(x=>x.memberId===currentMemberId);
+      projects=projects.filter(p=>p.ownerId===currentMemberId || (p.subProjects||[]).some(s=>s.memberId===currentMemberId));
+      modules=modules.filter(m=>m.ownerId===currentMemberId);
+      const ids=new Set(modules.map(m=>m.id));
+      moduleUpdates=moduleUpdates.filter(u=>ids.has(u.moduleId) || u.ownerUid===currentUserUid);
+    }
+
+    function renderMemberSelects(){
+      const all=[document.getElementById('log-member'),document.getElementById('inv-buyer'),document.getElementById('proj-owner'),document.getElementById('blog-author'),document.getElementById('feed-filter-member'),document.getElementById('up-owner'),document.getElementById('mod-owner'),document.getElementById('mat-member')].filter(Boolean);
+      if(isAdmin){
+        const normal=[document.getElementById('log-member'),document.getElementById('inv-buyer'),document.getElementById('proj-owner'),document.getElementById('blog-author')].filter(Boolean);
+        normal.forEach(sel=>{const keep=sel.value;sel.innerHTML='<option value="">Select member…</option>';members.forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.name;sel.appendChild(o)});sel.value=keep||'';});
+        const filters=[document.getElementById('feed-filter-member')].filter(Boolean);filters.forEach(sel=>{const keep=sel.value;sel.innerHTML='<option value="">All members</option>';members.forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.name;sel.appendChild(o)});sel.value=keep||'';});
+        const optional=[document.getElementById('up-owner'),document.getElementById('mod-owner'),document.getElementById('mat-member')].filter(Boolean);optional.forEach(sel=>{const keep=sel.value;sel.innerHTML='<option value="">Unassigned</option>';members.forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.name;sel.appendChild(o)});sel.value=keep||'';});
+      }else{
+        const me=memberForCurrentUser();
+        const fixed=[document.getElementById('log-member'),document.getElementById('inv-buyer'),document.getElementById('proj-owner'),document.getElementById('blog-author'),document.getElementById('feed-filter-member'),document.getElementById('up-owner'),document.getElementById('mod-owner'),document.getElementById('mat-member')].filter(Boolean);
+        fixed.forEach(sel=>{sel.innerHTML='';const o=document.createElement('option');o.value=currentMemberId;o.textContent=me?me.name:'My account';sel.appendChild(o);sel.value=currentMemberId;sel.disabled=true;});
+      }
+      updateEnhancedIdentityUI();
+    }
+
+    function renderAttMemberSelect(){
+      const sel=document.getElementById('att-member'); if(!sel)return;
+      sel.innerHTML='';
+      if(isAdmin){sel.innerHTML='<option value="">Select member…</option>';sortedMembers().forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.name;sel.appendChild(o)});}
+      else{const m=memberForCurrentUser();const o=document.createElement('option');o.value=currentMemberId;o.textContent=m?m.name:'My account';sel.appendChild(o);sel.value=currentMemberId;sel.disabled=true;}
+      renderAttHero();
+    }
+
+    async function handleAuthChange(user){
+      if(!user){document.body.classList.add('locked');return;}
+      currentUserUid=user.uid; currentUserEmail=(user.email||'').toLowerCase();
+      if(currentUserEmail===ADMIN_EMAIL.toLowerCase()){
+        isAdmin=true; currentMemberId=null; currentName='Admin'; ensureEnhancedUI(); unlockApp(); return;
+      }
+      try{
+        const snap=await db.collection('members').where('email','==',currentUserEmail).limit(1).get();
+        if(snap.empty){await auth.signOut();document.body.classList.add('locked');setLockError('This email is not registered as a team member. Ask the admin to add your email first.');return;}
+        const d=snap.docs[0];const data=d.data();
+        isAdmin=false;currentMemberId=d.id;currentName=data.name||currentUserEmail;
+        await db.collection('members').doc(d.id).set({authUid:user.uid,lastLoginAt:Date.now()},{merge:true});
+        ensureEnhancedUI();unlockApp();
+      }catch(e){console.error(e);await auth.signOut().catch(()=>{});document.body.classList.add('locked');setLockError('Could not verify your team-member account.');}
+    }
+
+    function setLockRole(role){
+      lockRole=role;
+      document.getElementById('tab-admin').classList.toggle('active',role==='admin');
+      document.getElementById('tab-member').classList.toggle('active',role==='member');
+      document.getElementById('lock-admin-fields').style.display=role==='admin'?'block':'none';
+      document.getElementById('lock-member-fields').style.display=role==='member'?'block':'none';
+      setLockError('');
+      const id=role==='admin'?'lock-user':'lock-member-email';setTimeout(()=>document.getElementById(id)?.focus(),0);
+    }
+    function authErrorMessage2(e){
+      const c=e?.code||'';
+      if(c==='auth/user-not-found'||c==='auth/invalid-credential'||c==='auth/invalid-login-credentials')return 'Email or password is incorrect.';
+      if(c==='auth/wrong-password')return 'Email or password is incorrect.';
+      if(c==='auth/too-many-requests')return 'Too many attempts. Try again later.';
+      if(c==='auth/operation-not-allowed')return 'Enable Email/Password in Firebase Authentication → Sign-in method.';
+      return 'Could not log in: '+(e?.message||c||'unknown error');
+    }
+    async function tryLogin(){
+      if(!auth){setLockError('Firebase is not configured yet.');return;}
+      const email=(lockRole==='admin'?document.getElementById('lock-user').value:document.getElementById('lock-member-email').value).trim().toLowerCase();
+      const pass=document.getElementById(lockRole==='admin'?'lock-pass':'lock-member-pass').value;
+      if(!email||!pass){setLockError('Enter your email and password.');return;}
+      const btn=document.getElementById('lock-submit');btn.disabled=true;setLockError('');
+      try{await auth.signInWithEmailAndPassword(email,pass);failedAttempts=0;}
+      catch(e){failedAttempts++;setLockError(authErrorMessage2(e));}
+      finally{btn.disabled=false;}
+    }
+
+    async function init(){
+      ensureEnhancedUI();
+      legacyInit();
+      // legacyInit has the original live listeners; personal arrays are filtered before every render.
+      updateEnhancedIdentityUI();
+    }
+
+    function updateAdminUI(){
+      const admin=!!isAdmin;
+      const add=document.getElementById('mem-add-panel');if(add)add.style.display=admin?'block':'none';
+      const note=document.getElementById('members-note');if(note)note.style.display=admin?'none':'block';
+      const sub=document.getElementById('members-subtitle');if(sub)sub.textContent=admin?'Manage team accounts and roles.':'Your account is restricted to your own work.';
+      const label=document.getElementById('admin-nav-label');if(label)label.textContent='🔓 Logout ('+(currentName||'user')+')';
+      const purchaseAdmin=document.getElementById('purchase-admin-add');if(purchaseAdmin)purchaseAdmin.style.display=admin?'block':'none';
+      const sheetAdmin=document.getElementById('sheet-admin-form');if(sheetAdmin)sheetAdmin.style.display=admin?'block':'none';
+      const sheetNote=document.getElementById('sheet-member-note');if(sheetNote)sheetNote.style.display=admin?'none':'block';
+      renderMemberSelects();renderAttMemberSelect();renderMemberList();renderAttendance();updateEnhancedIdentityUI();
+      // Hide destructive/global controls from members.
+      document.querySelectorAll('.danger-link').forEach(b=>{if(!admin && !b.dataset.ownerOnly)b.style.display='none';});
+    }
+
+    async function submitTask(){
+      if(!requireMember('task'))return;
+      const memberId=isAdmin?document.getElementById('log-member').value:currentMemberId;
+      const date=document.getElementById('log-date').value||todayStr(),status=document.getElementById('log-status').value,task=document.getElementById('log-task').value.trim(),err=document.getElementById('log-error');err.textContent='';
+      if(!memberId||!task){err.textContent='Select yourself and describe the task.';return;}
+      const m=members.find(x=>x.id===memberId);try{const ref=await db.collection('tasks').add({memberId,memberName:m?.name||currentName,date,status,task,timestamp:Date.now(),ownerUid:isAdmin?null:currentUserUid,createdByUid:currentUserUid});document.getElementById('log-task').value='';notify('task',ref.id);showToast('Update posted');}catch(e){err.textContent='Could not save. Check Firestore rules.';}
+    }
+
+    async function attCheckIn(){
+      const id=isAdmin?document.getElementById('att-member').value:currentMemberId,m=members.find(x=>x.id===id);if(!m||(!isAdmin&&!isOwner(id,''))){showToast('You can only check in yourself.');return;}if(!db)return;
+      const date=localDate(),ref=db.collection('attendance').doc(attKey(id,date));document.getElementById('att-in').disabled=true;
+      try{await db.runTransaction(async tx=>{const snap=await tx.get(ref);if(snap.exists)throw new Error('exists');tx.set(ref,{memberId:id,memberName:m.name,date,inTime:firebase.firestore.FieldValue.serverTimestamp(),outTime:null,inBy:currentUserUid,outBy:'',ownerUid:isAdmin?null:currentUserUid});});showToast(m.name+' checked in');}catch(e){showToast(e.message==='exists'?m.name+' has already checked in today':'Could not save attendance.');}renderAttHero();
+    }
+    async function attCheckOut(){
+      const id=isAdmin?document.getElementById('att-member').value:currentMemberId;if(!id||(!isAdmin&&!isOwner(id,''))){showToast('You can only check out yourself.');return;}const map=attMap(),today=localDate(),yest=localDate(new Date(Date.now()-86400000));let rec=map[id+'|'+today]||map[id+'|'+yest];if(!rec||rec.outTime){showToast('No open check-in found.');return;}document.getElementById('att-out').disabled=true;
+      try{await db.collection('attendance').doc(rec.id).update({outTime:firebase.firestore.FieldValue.serverTimestamp(),outBy:currentUserUid});showToast('Checked out successfully');}catch(e){showToast('Could not save attendance.');}renderAttHero();
+    }
+
+    async function addInventoryItem(){
+      if(!requireMember('inventory'))return;const itemName=document.getElementById('inv-item').value.trim(),price=document.getElementById('inv-price').value.trim(),buyerId=isAdmin?document.getElementById('inv-buyer').value:currentMemberId,date=document.getElementById('inv-date').value||todayStr(),notes=document.getElementById('inv-notes').value.trim(),err=document.getElementById('inv-error');err.textContent='';if(!itemName||!buyerId){err.textContent='Enter the item and use your own account.';return;}const buyer=members.find(m=>m.id===buyerId);try{await db.collection('inventory').add({itemName,price,buyerId,buyerName:buyer?.name||currentName,date,notes,timestamp:Date.now(),ownerUid:isAdmin?null:currentUserUid});['inv-item','inv-price','inv-notes'].forEach(id=>document.getElementById(id).value='');showToast('Item added');}catch(e){err.textContent='Could not save. Check Firestore rules.';}
+    }
+
+    async function addMaterial(){
+      if(!requireMember('material'))return;const title=document.getElementById('mat-title').value.trim(),link=document.getElementById('mat-link').value.trim(),type=document.getElementById('mat-type').value,memberId=isAdmin?document.getElementById('mat-member').value:currentMemberId,notes=document.getElementById('mat-notes').value.trim(),err=document.getElementById('mat-error');err.textContent='';if(!title){err.textContent='Title is required.';return;}if(link&&!/^https?:\/\/\S+$/i.test(link)){err.textContent='Link must start with http:// or https://';return;}const m=members.find(x=>x.id===memberId);try{await db.collection('materials').add({title,link,type,notes,memberId,memberName:m?.name||currentName,timestamp:Date.now(),ownerUid:isAdmin?null:currentUserUid});['mat-title','mat-link','mat-notes'].forEach(id=>document.getElementById(id).value='');showToast('Resource added');}catch(e){err.textContent='Could not save. Check Firestore rules.';}
+    }
+    async function addBlogPost(){
+      if(!requireMember('blog'))return;const title=document.getElementById('blog-title').value.trim(),authorId=isAdmin?document.getElementById('blog-author').value:currentMemberId,date=document.getElementById('blog-date').value||todayStr(),summary=document.getElementById('blog-summary').value.trim(),err=document.getElementById('blog-error');err.textContent='';if(!title||!summary){err.textContent='Project title and summary are required.';return;}const a=members.find(m=>m.id===authorId);try{await db.collection('blogPosts').add({title,summary,date,authorId,authorName:a?.name||currentName,timestamp:Date.now(),ownerUid:isAdmin?null:currentUserUid});['blog-title','blog-summary'].forEach(id=>document.getElementById(id).value='');showToast('Post published');}catch(e){err.textContent='Could not save. Check Firestore rules.';}
+    }
+    async function createTrip(){
+      if(!requireMember('pass'))return;const err=document.getElementById('ps-error');err.textContent='';const items=psDraftItems.filter(it=>it.desc.trim()&&Number(it.qty)>0).map(it=>({id:newId(),desc:it.desc.trim(),qty:Number(it.qty),remarks:(it.remarks||'').trim(),returnedQty:null,reason:''}));if(!items.length){err.textContent='Add at least one item.';return;}const v=id=>document.getElementById(id).value.trim(),date=document.getElementById('ps-date').value||todayStr(),proj=projects.find(p=>p.id===document.getElementById('ps-project').value),projName=v('ps-projname')||(proj?.name||''),refNo='OUT-'+date.replace(/-/g,'')+'-'+(Math.floor(Math.random()*900)+100);try{await db.collection('passes').add({refNo,date,projectId:proj?.id||null,projectName:projName,mainContractor:v('ps-main'),subContractor:v('ps-sub'),transporter:v('ps-trans'),plot:v('ps-plot'),driver:v('ps-driver'),vehicle:v('ps-vehicle'),invoice:v('ps-invoice'),from:v('ps-from'),to:v('ps-to'),filledName:v('ps-filled-name')||currentName,filledDesignation:v('ps-filled-des'),approvedName:v('ps-appr-name'),approvedDesignation:v('ps-appr-des'),items,createdBy:currentName,createdByUid:currentUserUid,ownerUid:isAdmin?null:currentUserUid,closedDate:null,timestamp:Date.now()});psDraftItems=[{id:newId(),desc:'',qty:'',remarks:''}];renderDraftItems();showToast('Out pass '+refNo+' created');}catch(e){err.textContent='Could not save. Check Firestore rules.';}
+    }
+
+    async function addProject(status,nameId,ownerId,descId,errId){
+      const name=document.getElementById(nameId).value.trim(),description=document.getElementById(descId).value.trim(),err=document.getElementById(errId);err.textContent='';const ownerSel=isAdmin?document.getElementById(ownerId).value:currentMemberId;if(!name){err.textContent='Project name is required.';return;}if(status==='ongoing'&&!ownerSel){err.textContent='Select yourself.';return;}const owner=members.find(m=>m.id===ownerSel);try{await db.collection('projects').add({name,description,status,ownerId:ownerSel||null,ownerName:owner?.name||currentName,createdByUid:currentUserUid,createdAt:Date.now(),timestamp:Date.now()});document.getElementById(nameId).value='';document.getElementById(descId).value='';showToast('Project added');}catch(e){err.textContent='Could not save. Check Firestore rules.';}
+    }
+    async function addModuleUpdate(){
+      if(!requireMember('module update'))return;const moduleId=document.getElementById('up2-module').value,type=document.getElementById('up2-type').value,date=document.getElementById('up2-date').value||todayStr(),status=document.getElementById('up2-status').value,description=document.getElementById('up2-desc').value.trim(),err=document.getElementById('up2-error');err.textContent='';if(!moduleId||!description){err.textContent='Select a module and describe the change.';return;}const mod=modules.find(m=>m.id===moduleId);if(!mod){err.textContent='That module is not assigned to your account.';return;}try{await db.collection('moduleUpdates').add({moduleId,moduleName:mod.name,type,date,description,done:status==='done',timestamp:Date.now(),ownerUid:currentUserUid,memberId:currentMemberId});document.getElementById('up2-desc').value='';showToast('Upgrade logged');}catch(e){err.textContent='Could not save. Check Firestore rules.';}
+    }
+
+    async function addModule(){
+      if(!isAdmin&&!currentMemberId){showToast('Account not linked');return;}const name=document.getElementById('mod-name').value.trim(),ownerId=isAdmin?document.getElementById('mod-owner').value:currentMemberId,parentId=document.getElementById('mod-parent').value,description=document.getElementById('mod-desc').value.trim(),err=document.getElementById('mod-error');err.textContent='';if(!name){err.textContent='Module name is required.';return;}const owner=members.find(m=>m.id===ownerId),parent=projects.find(p=>p.id===parentId);try{await db.collection('modules').add({name,description,ownerId:ownerId||null,ownerName:owner?.name||currentName,parentProjectId:parent?.id||null,parentProjectName:parent?.name||'',timestamp:Date.now(),createdByUid:currentUserUid});['mod-name','mod-desc'].forEach(id=>document.getElementById(id).value='');showToast('Module added');}catch(e){err.textContent='Could not save. Check Firestore rules.';}
+    }
+
+    async function createDroneTicket(){
+      if(!requireMember('drone ticket'))return;const err=document.getElementById('dt-error');err.textContent='';const droneId=document.getElementById('dt-drone-id').value.trim(),serial=document.getElementById('dt-serial').value.trim(),source=document.getElementById('dt-source').value.trim(),date=document.getElementById('dt-date').value||todayStr(),condition=document.getElementById('dt-condition').value,priority=document.getElementById('dt-priority').value,damage=document.getElementById('dt-damage').value.trim(),missing=document.getElementById('dt-missing').value.trim(),issues=document.getElementById('dt-issues').value.trim(),feedback=document.getElementById('dt-feedback').value.trim();if(!droneId){err.textContent='Drone / Asset ID is required.';return;}try{const n=Date.now();const ticketNo='DRN-'+new Date(n).toISOString().slice(0,10).replace(/-/g,'')+'-'+String(n).slice(-5);await db.collection('droneTickets').add({ticketNo,droneId,serial,source,date,condition,priority,damage,missing,issues,feedback,receiverId:currentMemberId,receiverName:currentName,ownerUid:currentUserUid,status:'open',createdAt:n,updatedAt:n});['dt-drone-id','dt-serial','dt-source','dt-damage','dt-missing','dt-issues','dt-feedback'].forEach(id=>document.getElementById(id).value='');document.getElementById('dt-date').value=todayStr();showToast('Drone ticket '+ticketNo+' created');}catch(e){console.error(e);err.textContent='Could not create ticket. Check Firestore rules.';}
+    }
+    async function closeDroneTicket(id){
+      const t=(window.__droneTickets||[]).find(x=>x.id===id);if(!t)return;if(!isAdmin&&t.ownerUid!==currentUserUid){showToast('Only the receiving member can close this ticket.');return;}try{await db.collection('droneTickets').doc(id).update({status:'done',updatedAt:Date.now(),closedByUid:currentUserUid});showToast('Ticket marked as done');}catch(e){showToast('Could not update ticket.');}
+    }
+    window.closeDroneTicket=closeDroneTicket;
+    async function deleteDroneTicket(id){const t=(window.__droneTickets||[]).find(x=>x.id===id);if(!t||(!isAdmin&&t.ownerUid!==currentUserUid)){showToast('You can only remove your own ticket.');return;}if(!confirm('Delete this receiving ticket?'))return;try{await db.collection('droneTickets').doc(id).delete();showToast('Ticket deleted');}catch(e){showToast('Could not delete ticket.');}}
+    window.deleteDroneTicket=deleteDroneTicket;
+    function renderDroneTickets(list){
+      const el=document.getElementById('dt-list');if(!el)return;const mine=isAdmin?list:(list||[]).filter(t=>t.ownerUid===currentUserUid);window.__droneTickets=mine||[];if(!mine?.length){el.innerHTML='<div class="empty">No drone receiving tickets yet.</div>';return;}el.innerHTML=mine.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).map(t=>{const cls=t.status==='done'?'done':(t.condition==='working'?'open':'issue');return `<div class="pt-ticket-card ${cls}"><div class="pt-ticket-head"><div><div class="pt-ticket-title">${escapeHtml(t.ticketNo)} · ${escapeHtml(t.droneId)}</div><div class="pt-ticket-meta">Received by ${escapeHtml(t.receiverName||'Unknown')} · ${escapeHtml(t.date||'')}</div></div><span class="status-pill ${t.status==='done'?'status-done':'status-inprogress'}">${t.status==='done'?'Done':'Open'}</span></div><div class="row-2"><div><div class="pt-ticket-section">Condition</div><div class="pt-ticket-value">${escapeHtml(t.condition||'—')}</div></div><div><div class="pt-ticket-section">Priority</div><div class="pt-ticket-value">${escapeHtml(t.priority||'normal')}</div></div></div>${t.serial?`<div class="pt-ticket-section">Serial</div><div class="pt-ticket-value">${escapeHtml(t.serial)}</div>`:''}${t.source?`<div class="pt-ticket-section">Received from</div><div class="pt-ticket-value">${escapeHtml(t.source)}</div>`:''}${t.damage?`<div class="pt-ticket-section">Damaged parts</div><div class="pt-ticket-value">${escapeHtml(t.damage)}</div>`:''}${t.missing?`<div class="pt-ticket-section">Missing parts</div><div class="pt-ticket-value">${escapeHtml(t.missing)}</div>`:''}${t.issues?`<div class="pt-ticket-section">Issues</div><div class="pt-ticket-value">${escapeHtml(t.issues)}</div>`:''}${t.feedback?`<div class="pt-ticket-section">Feedback / action</div><div class="pt-ticket-value">${escapeHtml(t.feedback)}</div>`:''}<div class="pt-ticket-actions">${t.status!=='done'?`<button class="btn btn-sm" onclick="closeDroneTicket('${t.id}')">Mark done</button>`:''}<button class="btn btn-sm pt-clear-btn" onclick="deleteDroneTicket('${t.id}')">Delete</button></div></div>`}).join('');applyPageSearch();
+    }
+
+    function switchView(view){
+      currentView=view;
+      document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.view===view));
+      document.querySelectorAll('.main>[id^="view-"]').forEach(v=>v.style.display='none');
+      const target=document.getElementById('view-'+view);if(target)target.style.display='block';
+      if(view==='tickets')renderDroneTickets(window.__droneTickets||[]);
+      else if(view==='log'){renderMyUpdates();renderAttendance();}
+      else if(view==='inventory')renderInventory();else if(view==='report')renderReport();else if(view==='upcoming')renderUpcoming();else if(view==='modules'){renderModuleParent();renderModuleProgress();renderModuleList();renderModuleUpdates();}else if(view==='matlist'){renderProjectPickers();renderCatalogSelect();renderMaterialTracking();}else if(view==='pass'){renderProjectPickers();renderDraftItems();renderPassList();}else if(view==='materials')renderMaterialList();else if(view==='blog')renderBlogList();else if(view==='feed')renderFeed();else if(view==='members')renderMemberList();else if(view==='sheets'){renderSheetData();renderSheetStatus();fillSheetForm();}
+      const q=document.getElementById('pt-page-search');if(q)q.value='';applyPageSearch();updateEnhancedIdentityUI();
+      target?.classList.add('view-enter');
+    }
+
     // ---- Start: only the lock screen is shown; the app and data load after a valid login ----
     document.getElementById('lock-submit').addEventListener('click', tryLogin);
     document.getElementById('tab-admin').addEventListener('click', () => setLockRole('admin'));
     document.getElementById('tab-member').addEventListener('click', () => setLockRole('member'));
-    ['lock-user', 'lock-pass', 'lock-member-pass'].forEach(id => {
-      document.getElementById(id).addEventListener('keydown', e => {if (e.key === 'Enter') tryLogin();});
+    ['lock-user', 'lock-pass', 'lock-member-email', 'lock-member-pass'].forEach(id => {
+      const el=document.getElementById(id); if(el) el.addEventListener('keydown', e => {if (e.key === 'Enter') tryLogin();});
     });
     if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY") {
       setLockError('Firebase is not configured yet. Paste your firebaseConfig in index.html.');
@@ -4908,7 +5239,7 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       db.settings({experimentalForceLongPolling: true, useFetchStreams: false});
       auth.setPersistence(firebase.auth.Auth.Persistence.SESSION).catch(() => {});
       auth.onAuthStateChanged(handleAuthChange);
-      document.getElementById('lock-user').focus();
+      document.getElementById('lock-user')?.focus();
     }
   </script>
 </body>
