@@ -1949,7 +1949,8 @@ svg text{fill:#18324E!important}
 
 </style>
 <style>
-.nav-item[data-view=tickets]:before{content:"\1F681";font-size:14px}
+.nav-item[data-view=tickets]:before{content:"\2708\FE0E"}
+#admin-toggle:before{content:"\23FB\FE0E"}
 #purchase-preview{width:100%;min-height:230px;border:none!important;border-radius:0!important;padding:13px!important;resize:vertical;font:12.5px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace!important;box-shadow:none!important;display:block}
 .email-preview-head .purchase-mini-btn{float:right;margin-top:-4px}
 </style>
@@ -1998,7 +1999,7 @@ svg text{fill:#18324E!important}
       <div class="nav-item" data-view="feed">Team Activity</div>
       <div class="nav-item" data-view="members">Team Members</div>
       <div class="nav-item" data-view="sheets">Google Sheets</div>
-      <div class="nav-item" id="admin-toggle"><span id="admin-nav-label">🔓 Logout</span></div>
+      <div class="nav-item" id="admin-toggle"><span id="admin-nav-label">Logout</span></div>
       <div class="sidebar-foot">Live-synced across everyone using this site.</div>
     </div>
 
@@ -4452,7 +4453,7 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       document.getElementById('members-subtitle').textContent = isAdmin
         ? 'Add everyone on your team so they can log their own updates.'
         : 'Everyone on the team.';
-      document.getElementById('admin-nav-label').textContent = '🔓 Logout (' + (currentName || 'user') + ')';
+      document.getElementById('admin-nav-label').textContent = 'Logout (' + (currentName || 'user') + ')';
       const purchaseAdmin = document.getElementById('purchase-admin-add'); if (purchaseAdmin) purchaseAdmin.style.display = isAdmin ? 'block' : 'none';
       document.getElementById('sheet-admin-form').style.display = isAdmin ? 'block' : 'none';
       document.getElementById('sheet-member-note').style.display = isAdmin ? 'none' : 'block';
@@ -5178,7 +5179,7 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       const add=document.getElementById('mem-add-panel');if(add)add.style.display=admin?'block':'none';
       const note=document.getElementById('members-note');if(note)note.style.display=admin?'none':'block';
       const sub=document.getElementById('members-subtitle');if(sub)sub.textContent=admin?'Manage team accounts and roles.':'Your account is restricted to your own work.';
-      const label=document.getElementById('admin-nav-label');if(label)label.textContent='🔓 Logout ('+(currentName||'user')+')';
+      const label=document.getElementById('admin-nav-label');if(label)label.textContent='Logout ('+(currentName||'user')+')';
       const purchaseAdmin=document.getElementById('purchase-admin-add');if(purchaseAdmin)purchaseAdmin.style.display=admin?'block':'none';
       const sheetAdmin=document.getElementById('sheet-admin-form');if(sheetAdmin)sheetAdmin.style.display=admin?'block':'none';
       const sheetNote=document.getElementById('sheet-member-note');if(sheetNote)sheetNote.style.display=admin?'none':'block';
