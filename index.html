@@ -1976,6 +1976,7 @@ svg text{fill:#18324E!important}
         <input type="email" id="lock-member-email" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="your.name@company.com">
         <label for="lock-member-pass">Password</label>
         <input type="password" id="lock-member-pass" autocomplete="current-password">
+        <div style="font-size:11px;color:#60738A;margin-top:7px;line-height:1.45;">Use the same email that the admin saved in <strong>Firestore → members</strong>. The account must also exist in <strong>Authentication → Users</strong>.</div>
       </div>
       <button class="btn lock-btn" id="lock-submit">Log in</button>
       <div id="lock-error"></div>
@@ -4756,11 +4757,15 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       } catch (e) {}
       attLastDay = localDate();
 
-      db.collection('members').onSnapshot(snap => {
+      (isAdmin ? db.collection('members') : db.collection('members').where('authUid', '==', currentUserUid)).onSnapshot(snap => {
         members = snap.docs.map(d => ({id: d.id, ...d.data()}));
+        if(!isAdmin && currentMemberId && !members.some(m => m.id === currentMemberId)){
+          showToast('Your member record is not linked to this Firebase account.');
+          return;
+        }
         renderMemberSelects(); renderMemberList(); renderMyUpdates(); renderUpcoming(); refreshSheetsIfOpen();
         renderAttMemberSelect(); renderAttendance();
-      }, () => showToast('Could not load members'));
+      }, () => showToast('Could not load your member account. Make sure members.email matches your Firebase login email.'));
 
       (isAdmin ? db.collection('attendance') : db.collection('attendance').where('memberId', '==', currentMemberId)).onSnapshot(snap => {
         attendance = snap.docs.map(d => {
@@ -4780,21 +4785,21 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
         renderInventory(); refreshSheetsIfOpen();
       }, () => showToast('Could not load inventory'));
 
-      db.collection('projects').onSnapshot(snap => {
+      (isAdmin ? db.collection('projects') : db.collection('projects').where('ownerId', '==', currentMemberId)).onSnapshot(snap => {
         projects = snap.docs.map(d => ({id: d.id, ...d.data()})); filterPersonalArrays();
         renderReport(); renderUpcoming(); renderModuleParent(); renderModuleList();
         renderProjectPickers(); renderMaterialTracking(); refreshSheetsIfOpen();
-      }, () => showToast('Could not load projects'));
+      }, () => showToast('Could not load your projects'));
 
-      db.collection('modules').onSnapshot(snap => {
+      (isAdmin ? db.collection('modules') : db.collection('modules').where('ownerId', '==', currentMemberId)).onSnapshot(snap => {
         modules = snap.docs.map(d => ({id: d.id, ...d.data()})); filterPersonalArrays();
         renderModuleSelects(); renderModuleList(); renderModuleUpdates(); renderModuleProgress(); refreshSheetsIfOpen();
-      }, () => showToast('Could not load modules'));
+      }, () => showToast('Could not load your modules'));
 
-      db.collection('moduleUpdates').onSnapshot(snap => {
+      (isAdmin ? db.collection('moduleUpdates') : db.collection('moduleUpdates').where('ownerUid', '==', currentUserUid)).onSnapshot(snap => {
         moduleUpdates = snap.docs.map(d => ({id: d.id, ...d.data()})); filterPersonalArrays();
         renderModuleList(); renderModuleUpdates(); renderModuleProgress(); refreshSheetsIfOpen();
-      }, () => showToast('Could not load module upgrades'));
+      }, () => showToast('Could not load your module upgrades'));
 
       db.collection('materialCatalog').onSnapshot(snap => {
         catalog = snap.docs.map(d => ({id: d.id, ...d.data()}));
@@ -4822,10 +4827,10 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
         renderBlogList();
       }, () => showToast('Could not load blog posts'));
 
-      if (db) db.collection('droneTickets').onSnapshot(snap => {
+      if (db) (isAdmin ? db.collection('droneTickets') : db.collection('droneTickets').where('ownerUid', '==', currentUserUid)).onSnapshot(snap => {
         const list=snap.docs.map(d=>({id:d.id,...d.data()}));
         renderDroneTickets(list);
-      },()=>showToast('Could not load drone receiving tickets'));
+      },()=>showToast('Could not load your drone receiving tickets'));
 
       updateAdminUI();
       initPurchaseUI();
@@ -5100,8 +5105,14 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
         const snap=await db.collection('members').where('email','==',currentUserEmail).limit(1).get();
         if(snap.empty){await auth.signOut();document.body.classList.add('locked');setLockError('This email is not registered as a team member. Ask the admin to add your email first.');return;}
         const d=snap.docs[0];const data=d.data();
+        if(data.authUid && data.authUid !== user.uid){
+          await auth.signOut();
+          document.body.classList.add('locked');
+          setLockError('This team-member record is already linked to another Firebase account. Ask the admin to correct the member email/UID link.');
+          return;
+        }
         isAdmin=false;currentMemberId=d.id;currentName=data.name||currentUserEmail;
-        await db.collection('members').doc(d.id).set({authUid:user.uid,lastLoginAt:Date.now()},{merge:true});
+        await db.collection('members').doc(d.id).set({authUid:user.uid,lastLoginAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
         ensureEnhancedUI();unlockApp();
       }catch(e){console.error(e);await auth.signOut().catch(()=>{});document.body.classList.add('locked');setLockError('Could not verify your team-member account.');}
     }
@@ -5120,6 +5131,9 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       if(c==='auth/user-not-found'||c==='auth/invalid-credential'||c==='auth/invalid-login-credentials')return 'Email or password is incorrect.';
       if(c==='auth/wrong-password')return 'Email or password is incorrect.';
       if(c==='auth/too-many-requests')return 'Too many attempts. Try again later.';
+      if(c==='auth/network-request-failed')return 'Network error. Check your internet connection.';
+      if(c==='auth/invalid-email')return 'Enter a valid email address.';
+      if(c==='auth/user-disabled')return 'This Firebase account is disabled. Ask the admin to enable it.';
       if(c==='auth/operation-not-allowed')return 'Enable Email/Password in Firebase Authentication → Sign-in method.';
       return 'Could not log in: '+(e?.message||c||'unknown error');
     }
@@ -5170,7 +5184,7 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
     }
     async function attCheckOut(){
       const id=isAdmin?document.getElementById('att-member').value:currentMemberId;if(!id||(!isAdmin&&!isOwner(id,''))){showToast('You can only check out yourself.');return;}const map=attMap(),today=localDate(),yest=localDate(new Date(Date.now()-86400000));let rec=map[id+'|'+today]||map[id+'|'+yest];if(!rec||rec.outTime){showToast('No open check-in found.');return;}document.getElementById('att-out').disabled=true;
-      try{await db.collection('attendance').doc(rec.id).update({outTime:firebase.firestore.FieldValue.serverTimestamp(),outBy:currentUserUid});showToast('Checked out successfully');}catch(e){showToast('Could not save attendance.');}renderAttHero();
+      try{await db.collection('attendance').doc(rec.id).update({outTime:firebase.firestore.FieldValue.serverTimestamp(),outBy:currentUserUid,ownerUid:currentUserUid});showToast('Checked out successfully');}catch(e){showToast('Could not save attendance.');}renderAttHero();
     }
 
     async function addInventoryItem(){
