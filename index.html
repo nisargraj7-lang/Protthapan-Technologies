@@ -1533,7 +1533,6 @@ table{border-collapse:separate;border-spacing:0;overflow:hidden;border:1px solid
 @media(max-width:1000px){.app{grid-template-columns:82px 1fr}.brand{font-size:0;text-align:center}.brand:before{content:"P";font:bold 24px Georgia;color:var(--gold)}.brand span,.brand:after{display:none}.nav-item{font-size:0;padding-left:0;text-align:center;height:44px}.nav-item:before{left:50%;transform:translate(-50%,-50%)}.sidebar-foot{font-size:0;text-align:center}.sidebar-foot:before{content:"●";font-size:12px;color:#5a7568}.purchase-grid{grid-template-columns:1fr}}
 @media(max-width:680px){.app{display:block}.sidebar{position:fixed;bottom:0;top:auto;left:0;right:0;height:64px;display:flex;flex-direction:row;overflow:auto;padding:6px 7px;border-right:0;border-top:1px solid var(--line)}.brand,.sidebar-foot{display:none}.nav-item{min-width:58px;margin:0;height:52px;padding:31px 2px 2px;font-size:8px;overflow:hidden;text-overflow:ellipsis}.nav-item:before{top:11px}.main{padding:20px 14px 85px}.row-2,.row-3,.purchase-fields{grid-template-columns:1fr}.purchase-actions{grid-template-columns:1fr}.purchase-hero{padding:21px}.purchase-title{font-size:25px}.panel{padding:17px;border-radius:15px}h1{font-size:28px}.ui-topbar{margin-bottom:16px}.purchase-grid{gap:12px}}
 
-
 /* =========================================================
    CLEAN MINIMALIST BLUE & WHITE THEME
    UI-only palette override — application logic unchanged
@@ -1785,8 +1784,6 @@ svg .axis,.chart-axis{color:#60738A}
   .panel,.purchase-card{box-shadow:0 6px 20px rgba(35,77,116,.06)}
 }
 
-
-
 /* =========================================================
    FINAL BLUE + INDIGO ACCESSIBILITY OVERRIDE
    Visual-only: no JavaScript / Firebase / IDs changed.
@@ -1949,7 +1946,6 @@ svg text{fill:#18324E!important}
 
 /* Mobile */
 @media(max-width:760px){.panel,.purchase-card{box-shadow:0 7px 22px rgba(35,77,116,.07)!important}}
-
 
 </style>
 </head>
@@ -2706,13 +2702,30 @@ svg text{fill:#18324E!important}
       });
       el.innerHTML = html + '</table>';
     }
+    function canEditTask(t){return isAdmin || (!!currentMemberId && t.memberId===currentMemberId);}
+    async function updateTaskStatus(id,status){
+      const t=tasks.find(x=>x.id===id); if(!t||!canEditTask(t)){showToast('You can only update your own work.');return;}
+      try{await db.collection('tasks').doc(id).update({status});showToast('Status updated');}catch(e){showToast('Could not update. Check Firestore rules.');}
+    }
+    async function deleteTask(id){
+      const t=tasks.find(x=>x.id===id); if(!t||!canEditTask(t)){showToast('You can only delete your own work.');return;}
+      if(!confirm('Delete this update?'))return;
+      try{await db.collection('tasks').doc(id).delete();showToast('Update deleted');}catch(e){showToast('Could not delete. Check Firestore rules.');}
+    }
+    function canManageProject(pid){if(isAdmin)return true;const p=projects.find(x=>x.id===pid);return !!p&&!!currentMemberId&&p.ownerId===currentMemberId;}
+    function canEditSub(pid,sid){if(isAdmin)return true;const p=projects.find(x=>x.id===pid);const s=p&&(p.subProjects||[]).find(x=>x.id===sid);return !!s&&!!currentMemberId&&s.memberId===currentMemberId;}
     function renderTaskTable(list, showMember) {
-      let html = '<table><tr><th>Date</th>' + (showMember ? '<th>Member</th>' : '') + '<th>Task</th><th>Status</th></tr>';
+      let html = '<table><tr><th>Date</th>' + (showMember ? '<th>Member</th>' : '') + '<th>Task</th><th>Status</th><th></th></tr>';
       list.forEach(t => {
-        html += '<tr>';
-        html += `<td class="task-date">${formatDate(t.date)}</td>`;
+        html += '<tr><td class="task-date">' + formatDate(t.date) + '</td>';
         if (showMember) html += `<td><span class="member-tag">${escapeHtml(t.memberName)}</span></td>`;
-        html += `<td>${escapeHtml(t.task)}</td><td><span class="status-pill ${STATUS_CLASS[t.status]}">${STATUS_LABEL[t.status]}</span></td>`;
+        html += `<td>${escapeHtml(t.task)}</td>`;
+        if (canEditTask(t)) {
+          const opts = ['inprogress','done','blocked'].map(k => `<option value="${k}" ${t.status===k?'selected':''}>${STATUS_LABEL[k]}</option>`).join('');
+          html += `<td><select style="width:auto" onchange="updateTaskStatus('${t.id}',this.value)">${opts}</select></td><td><button class="mini-remove" onclick="deleteTask('${t.id}')">Delete</button></td>`;
+        } else {
+          html += `<td><span class="status-pill ${STATUS_CLASS[t.status]}">${STATUS_LABEL[t.status]}</span></td><td></td>`;
+        }
         html += '</tr>';
       });
       return html + '</table>';
@@ -2880,7 +2893,7 @@ svg text{fill:#18324E!important}
         if (ts.length === 0) h += '<div class="empty" style="padding:6px 0; text-align:left;">No work items yet.</div>';
         ts.forEach(t => {
           h += `<div class="task-row ${t.done ? 'done' : ''}">
-            <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleSubTask('${p.id}','${s.id}','${t.id}')">
+            <input type="checkbox" ${t.done ? 'checked' : ''} ${canEditSub(p.id,s.id)?'':'disabled'} onchange="toggleSubTask('${p.id}','${s.id}','${t.id}')">
             <span class="task-text">${escapeHtml(t.text)}</span>
             <button class="mini-remove" onclick="removeSubTask('${p.id}','${s.id}','${t.id}')">✕</button>
           </div>`;
@@ -2935,11 +2948,11 @@ svg text{fill:#18324E!important}
       openProjectId = openProjectId === id ? null : id;
       renderOngoing();
     }
-    async function removeProject(id) {
+    async function removeProject(id) {if(!canManageProject(id)){showToast('Only the project lead or admin can do this.');return;}
       if (!confirm('Remove this project and all its sub-projects?')) return;
       try {await db.collection('projects').doc(id).delete();} catch (e) {showToast('Could not remove project');}
     }
-    function addSubProject(pid) {
+    function addSubProject(pid) {if(!canManageProject(pid)){showToast('Only the project lead or admin can do this.');return;}
       const name = document.getElementById('sp-name-' + pid).value.trim();
       const memberId = document.getElementById('sp-member-' + pid).value;
       if (!name) {showToast('Enter a sub-project name'); return;}
@@ -2948,11 +2961,11 @@ svg text{fill:#18324E!important}
       subs.push({id: newId(), name, memberId: memberId || null, memberName: m ? m.name : '', tasks: []});
       saveSubProjects(pid, subs);
     }
-    function removeSubProject(pid, sid) {
+    function removeSubProject(pid, sid) {if(!canManageProject(pid)){showToast('Only the project lead or admin can do this.');return;}
       if (!confirm('Remove this sub-project and its work items?')) return;
       saveSubProjects(pid, getSubs(pid).filter(s => s.id !== sid));
     }
-    function addSubTask(pid, sid) {
+    function addSubTask(pid, sid) {if(!canEditSub(pid,sid)){showToast('Only the member assigned to this sub-project can change its work.');return;}
       const input = document.getElementById('st-' + sid);
       const text = input.value.trim();
       if (!text) {showToast('Write the work item first'); return;}
@@ -2963,7 +2976,7 @@ svg text{fill:#18324E!important}
       s.tasks.push({id: newId(), text, done: false});
       saveSubProjects(pid, subs);
     }
-    function toggleSubTask(pid, sid, tid) {
+    function toggleSubTask(pid, sid, tid) {if(!canEditSub(pid,sid)){showToast('Only the member assigned to this sub-project can change its work.');return;}
       const subs = getSubs(pid);
       const s = subs.find(x => x.id === sid);
       const t = s && (s.tasks || []).find(x => x.id === tid);
@@ -2971,7 +2984,7 @@ svg text{fill:#18324E!important}
       t.done = !t.done;
       saveSubProjects(pid, subs);
     }
-    function removeSubTask(pid, sid, tid) {
+    function removeSubTask(pid, sid, tid) {if(!canEditSub(pid,sid)){showToast('Only the member assigned to this sub-project can change its work.');return;}
       const subs = getSubs(pid);
       const s = subs.find(x => x.id === sid);
       if (!s) return;
@@ -3122,7 +3135,7 @@ svg text{fill:#18324E!important}
       });
       el.innerHTML = html + '</table>';
     }
-    async function toggleUpgradeDone(id) {
+    async function toggleUpgradeDone(id) {const _u=moduleUpdates.find(x=>x.id===id);if(!isAdmin&&(!_u||_u.ownerUid!==currentUserUid)){showToast('You can only update your own upgrades.');return;}
       const u = moduleUpdates.find(x => x.id === id);
       if (!u) return;
       try {await db.collection('moduleUpdates').doc(id).update({done: !isUpgradeDone(u)});}
@@ -3477,7 +3490,7 @@ svg text{fill:#18324E!important}
       });
       refreshTripCheck(tripId);
     }
-    async function saveReturnCheck(tripId) {
+    async function saveReturnCheck(tripId) {const _t=trips.find(x=>x.id===tripId);if(!isAdmin&&(!_t||_t.createdByUid!==currentUserUid)){showToast('Only the member who created this pass can update its return check.');return;}
       const t = trips.find(x => x.id === tripId);
       if (!t) return;
       const errEl = document.getElementById('ps-err-' + tripId);
@@ -3510,7 +3523,7 @@ svg text{fill:#18324E!important}
         errEl.textContent = 'Could not save. Check your Firebase setup.';
       }
     }
-    async function deleteTrip(id) {
+    async function deleteTrip(id) {const _t=trips.find(x=>x.id===id);if(!isAdmin&&(!_t||_t.createdByUid!==currentUserUid)){showToast('You can only delete your own trips.');return;}
       if (!confirm('Delete this trip and its pass records?')) return;
       try {await db.collection('passes').doc(id).delete();} catch (e) {showToast('Could not delete trip');}
     }
@@ -3633,8 +3646,6 @@ th{background:#EEF2EE;}
 .notes{font-size:10.5px;color:#29513F;margin-top:12px;}
 .bad th{color:#A6432F;text-align:center;}
 @media print{body{margin:10mm;}}
-
-
 
 </style></head><body>
 <div class="top"><div><div class="org">PROTTHAPAN TECHNOLOGIES</div><h1>ENTRY / EXIT PASS FOR MATERIAL OR EQUIPMENT</h1><div>(CONSTRUCTION GATE)</div></div>
@@ -4378,7 +4389,7 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
         showToast('Resource added');
       } catch (e) {errEl.textContent = 'Could not save. Check your Firebase setup.';}
     }
-    async function removeMaterial(id) {
+    async function removeMaterial(id) {const _m=materials.find(x=>x.id===id);if(!isAdmin&&(!_m||_m.memberId!==currentMemberId)){showToast('You can only remove your own resources.');return;}
       if (!confirm('Remove this resource?')) return;
       try {await db.collection('materials').doc(id).delete();} catch (e) {showToast('Could not remove resource');}
     }
@@ -4762,7 +4773,7 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
         renderAttMemberSelect(); renderAttendance();
       }, () => showToast('Could not load members'));
 
-      (isAdmin ? db.collection('attendance') : db.collection('attendance').where('memberId', '==', currentMemberId)).onSnapshot(snap => {
+      db.collection('attendance').onSnapshot(snap => {
         attendance = snap.docs.map(d => {
           const x = d.data({serverTimestamps: 'estimate'});
           return {id: d.id, ...x, inTime: toMs(x.inTime), outTime: toMs(x.outTime)};
@@ -4770,12 +4781,12 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
         renderAttendance(); refreshSheetsIfOpen();
       }, () => showToast('Could not load attendance (check the Firestore rules)'));
 
-      (isAdmin ? db.collection('tasks') : db.collection('tasks').where('memberId', '==', currentMemberId)).onSnapshot(snap => {
+      db.collection('tasks').onSnapshot(snap => {
         tasks = snap.docs.map(d => ({id: d.id, ...d.data()})); filterPersonalArrays();
         renderMyUpdates(); renderFeed(); refreshSheetsIfOpen();
       }, () => showToast('Could not load tasks'));
 
-      (isAdmin ? db.collection('inventory') : db.collection('inventory').where('buyerId', '==', currentMemberId)).onSnapshot(snap => {
+      db.collection('inventory').onSnapshot(snap => {
         inventory = snap.docs.map(d => ({id: d.id, ...d.data()})); filterPersonalArrays();
         renderInventory(); refreshSheetsIfOpen();
       }, () => showToast('Could not load inventory'));
@@ -4801,23 +4812,23 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
         renderCatalogSelect(); renderMaterialTracking();
       }, () => showToast('Could not load the material dropdown'));
 
-      (isAdmin ? db.collection('passes') : db.collection('passes').where('createdByUid', '==', currentUserUid)).onSnapshot(snap => {
+      db.collection('passes').onSnapshot(snap => {
         trips = snap.docs.map(d => ({id: d.id, ...d.data()})); filterPersonalArrays();
         renderPassList(); refreshSheetsIfOpen();
       }, () => showToast('Could not load passes'));
 
-      db.collection('settings').doc('sheets').onSnapshot(doc => {
+      (isAdmin ? db.collection('settings').doc('sheets') : {onSnapshot:()=>{}}).onSnapshot(doc => {
         const d = doc.exists ? doc.data() : {};
         sheetCfg = {url: d.url || '', key: d.key || '', enabled: !!d.enabled};
         renderSheetStatus(); fillSheetForm();
       }, () => showToast('Could not load Google Sheet settings (check the Firestore rules)'));
 
-      (isAdmin ? db.collection('materials') : db.collection('materials').where('memberId', '==', currentMemberId)).onSnapshot(snap => {
+      db.collection('materials').onSnapshot(snap => {
         materials = snap.docs.map(d => ({id: d.id, ...d.data()})); filterPersonalArrays();
         renderMaterialList();
       }, () => showToast('Could not load materials'));
 
-      (isAdmin ? db.collection('blogPosts') : db.collection('blogPosts').where('authorId', '==', currentMemberId)).onSnapshot(snap => {
+      db.collection('blogPosts').onSnapshot(snap => {
         blogPosts = snap.docs.map(d => ({id: d.id, ...d.data()})); filterPersonalArrays();
         renderBlogList();
       }, () => showToast('Could not load blog posts'));
@@ -4890,7 +4901,6 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       document.getElementById('mat-submit').addEventListener('click', addMaterial);
       document.getElementById('blog-submit').addEventListener('click', addBlogPost);
     }
-
 
     /* ================================================================
        PROTTHAPAN ACCESS / HISTORY / DRONE TICKET UPGRADE
@@ -4985,10 +4995,10 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
               <label>Issues / observations</label><textarea id="dt-issues" placeholder="Flight issue, motor issue, GPS issue, physical condition..."></textarea>
               <label>Receiving feedback / action required</label><textarea id="dt-feedback" placeholder="What should the team do next?"></textarea>
               <button class="btn" id="dt-submit">Generate ticket</button><span id="dt-error" style="color:var(--danger);font-size:13px;margin-left:12px"></span>
-              <div class="pt-owner-lock">🔒 Receiver: <strong id="dt-receiver">—</strong>. Only this signed-in member can edit/close the ticket. Admin can supervise all tickets.</div>
+              <div class="pt-owner-lock">🔒 Receiver: <strong id="dt-receiver">—</strong>. Everyone can view tickets, but only the receiver (or admin) can edit/close them.</div>
             </div>
             <div class="panel">
-              <h2>My receiving history</h2>
+              <h2>Receiving history <span style="color:var(--ink-soft);font-weight:400;">— everyone's tickets</span></h2>
               <div id="dt-list"><div class="empty">No drone tickets yet.</div></div>
             </div>
           </div>`;
@@ -5053,7 +5063,8 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       catch(e){console.error(e);showToast('Could not clear history. Check Firestore rules.');}
     }
 
-    function filterPersonalArrays(){
+    function filterPersonalArrays(){ return; }
+    function _filterPersonalArraysOld(){
       if(isAdmin)return;
       tasks=tasks.filter(x=>x.memberId===currentMemberId);
       inventory=inventory.filter(x=>x.buyerId===currentMemberId);
@@ -5076,8 +5087,9 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
         const optional=[document.getElementById('up-owner'),document.getElementById('mod-owner'),document.getElementById('mat-member')].filter(Boolean);optional.forEach(sel=>{const keep=sel.value;sel.innerHTML='<option value="">Unassigned</option>';members.forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.name;sel.appendChild(o)});sel.value=keep||'';});
       }else{
         const me=memberForCurrentUser();
-        const fixed=[document.getElementById('log-member'),document.getElementById('inv-buyer'),document.getElementById('proj-owner'),document.getElementById('blog-author'),document.getElementById('feed-filter-member'),document.getElementById('up-owner'),document.getElementById('mod-owner'),document.getElementById('mat-member')].filter(Boolean);
+        const fixed=[document.getElementById('log-member'),document.getElementById('inv-buyer'),document.getElementById('proj-owner'),document.getElementById('blog-author'),document.getElementById('up-owner'),document.getElementById('mod-owner'),document.getElementById('mat-member')].filter(Boolean);
         fixed.forEach(sel=>{sel.innerHTML='';const o=document.createElement('option');o.value=currentMemberId;o.textContent=me?me.name:'My account';sel.appendChild(o);sel.value=currentMemberId;sel.disabled=true;});
+        const fs=document.getElementById('feed-filter-member');if(fs){const k=fs.value;fs.innerHTML='<option value="">All members</option>';members.forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.name;fs.appendChild(o)});fs.value=k||'';}
       }
       updateEnhancedIdentityUI();
     }
@@ -5191,7 +5203,7 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       const name=document.getElementById(nameId).value.trim(),description=document.getElementById(descId).value.trim(),err=document.getElementById(errId);err.textContent='';const ownerSel=isAdmin?document.getElementById(ownerId).value:currentMemberId;if(!name){err.textContent='Project name is required.';return;}if(status==='ongoing'&&!ownerSel){err.textContent='Select yourself.';return;}const owner=members.find(m=>m.id===ownerSel);try{await db.collection('projects').add({name,description,status,ownerId:ownerSel||null,ownerName:owner?.name||currentName,createdByUid:currentUserUid,createdAt:Date.now(),timestamp:Date.now()});document.getElementById(nameId).value='';document.getElementById(descId).value='';showToast('Project added');}catch(e){err.textContent='Could not save. Check Firestore rules.';}
     }
     async function addModuleUpdate(){
-      if(!requireMember('module update'))return;const moduleId=document.getElementById('up2-module').value,type=document.getElementById('up2-type').value,date=document.getElementById('up2-date').value||todayStr(),status=document.getElementById('up2-status').value,description=document.getElementById('up2-desc').value.trim(),err=document.getElementById('up2-error');err.textContent='';if(!moduleId||!description){err.textContent='Select a module and describe the change.';return;}const mod=modules.find(m=>m.id===moduleId);if(!mod){err.textContent='That module is not assigned to your account.';return;}try{await db.collection('moduleUpdates').add({moduleId,moduleName:mod.name,type,date,description,done:status==='done',timestamp:Date.now(),ownerUid:currentUserUid,memberId:currentMemberId});document.getElementById('up2-desc').value='';showToast('Upgrade logged');}catch(e){err.textContent='Could not save. Check Firestore rules.';}
+      if(!requireMember('module update'))return;const moduleId=document.getElementById('up2-module').value,type=document.getElementById('up2-type').value,date=document.getElementById('up2-date').value||todayStr(),status=document.getElementById('up2-status').value,description=document.getElementById('up2-desc').value.trim(),err=document.getElementById('up2-error');err.textContent='';if(!moduleId||!description){err.textContent='Select a module and describe the change.';return;}const mod=modules.find(m=>m.id===moduleId);if(!mod||(!isAdmin&&mod.ownerId!==currentMemberId)){err.textContent='You can only log upgrades for modules you lead.';return;}try{await db.collection('moduleUpdates').add({moduleId,moduleName:mod.name,type,date,description,done:status==='done',timestamp:Date.now(),ownerUid:currentUserUid,memberId:currentMemberId});document.getElementById('up2-desc').value='';showToast('Upgrade logged');}catch(e){err.textContent='Could not save. Check Firestore rules.';}
     }
 
     async function addModule(){
@@ -5208,7 +5220,7 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
     async function deleteDroneTicket(id){const t=(window.__droneTickets||[]).find(x=>x.id===id);if(!t||(!isAdmin&&t.ownerUid!==currentUserUid)){showToast('You can only remove your own ticket.');return;}if(!confirm('Delete this receiving ticket?'))return;try{await db.collection('droneTickets').doc(id).delete();showToast('Ticket deleted');}catch(e){showToast('Could not delete ticket.');}}
     window.deleteDroneTicket=deleteDroneTicket;
     function renderDroneTickets(list){
-      const el=document.getElementById('dt-list');if(!el)return;const mine=isAdmin?list:(list||[]).filter(t=>t.ownerUid===currentUserUid);window.__droneTickets=mine||[];if(!mine?.length){el.innerHTML='<div class="empty">No drone receiving tickets yet.</div>';return;}el.innerHTML=mine.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).map(t=>{const cls=t.status==='done'?'done':(t.condition==='working'?'open':'issue');return `<div class="pt-ticket-card ${cls}"><div class="pt-ticket-head"><div><div class="pt-ticket-title">${escapeHtml(t.ticketNo)} · ${escapeHtml(t.droneId)}</div><div class="pt-ticket-meta">Received by ${escapeHtml(t.receiverName||'Unknown')} · ${escapeHtml(t.date||'')}</div></div><span class="status-pill ${t.status==='done'?'status-done':'status-inprogress'}">${t.status==='done'?'Done':'Open'}</span></div><div class="row-2"><div><div class="pt-ticket-section">Condition</div><div class="pt-ticket-value">${escapeHtml(t.condition||'—')}</div></div><div><div class="pt-ticket-section">Priority</div><div class="pt-ticket-value">${escapeHtml(t.priority||'normal')}</div></div></div>${t.serial?`<div class="pt-ticket-section">Serial</div><div class="pt-ticket-value">${escapeHtml(t.serial)}</div>`:''}${t.source?`<div class="pt-ticket-section">Received from</div><div class="pt-ticket-value">${escapeHtml(t.source)}</div>`:''}${t.damage?`<div class="pt-ticket-section">Damaged parts</div><div class="pt-ticket-value">${escapeHtml(t.damage)}</div>`:''}${t.missing?`<div class="pt-ticket-section">Missing parts</div><div class="pt-ticket-value">${escapeHtml(t.missing)}</div>`:''}${t.issues?`<div class="pt-ticket-section">Issues</div><div class="pt-ticket-value">${escapeHtml(t.issues)}</div>`:''}${t.feedback?`<div class="pt-ticket-section">Feedback / action</div><div class="pt-ticket-value">${escapeHtml(t.feedback)}</div>`:''}<div class="pt-ticket-actions">${t.status!=='done'?`<button class="btn btn-sm" onclick="closeDroneTicket('${t.id}')">Mark done</button>`:''}<button class="btn btn-sm pt-clear-btn" onclick="deleteDroneTicket('${t.id}')">Delete</button></div></div>`}).join('');applyPageSearch();
+      const el=document.getElementById('dt-list');if(!el)return;const mine=list||[];window.__droneTickets=mine||[];if(!mine?.length){el.innerHTML='<div class="empty">No drone receiving tickets yet.</div>';return;}el.innerHTML=mine.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).map(t=>{const cls=t.status==='done'?'done':(t.condition==='working'?'open':'issue');return `<div class="pt-ticket-card ${cls}"><div class="pt-ticket-head"><div><div class="pt-ticket-title">${escapeHtml(t.ticketNo)} · ${escapeHtml(t.droneId)}</div><div class="pt-ticket-meta">Received by ${escapeHtml(t.receiverName||'Unknown')} · ${escapeHtml(t.date||'')}</div></div><span class="status-pill ${t.status==='done'?'status-done':'status-inprogress'}">${t.status==='done'?'Done':'Open'}</span></div><div class="row-2"><div><div class="pt-ticket-section">Condition</div><div class="pt-ticket-value">${escapeHtml(t.condition||'—')}</div></div><div><div class="pt-ticket-section">Priority</div><div class="pt-ticket-value">${escapeHtml(t.priority||'normal')}</div></div></div>${t.serial?`<div class="pt-ticket-section">Serial</div><div class="pt-ticket-value">${escapeHtml(t.serial)}</div>`:''}${t.source?`<div class="pt-ticket-section">Received from</div><div class="pt-ticket-value">${escapeHtml(t.source)}</div>`:''}${t.damage?`<div class="pt-ticket-section">Damaged parts</div><div class="pt-ticket-value">${escapeHtml(t.damage)}</div>`:''}${t.missing?`<div class="pt-ticket-section">Missing parts</div><div class="pt-ticket-value">${escapeHtml(t.missing)}</div>`:''}${t.issues?`<div class="pt-ticket-section">Issues</div><div class="pt-ticket-value">${escapeHtml(t.issues)}</div>`:''}${t.feedback?`<div class="pt-ticket-section">Feedback / action</div><div class="pt-ticket-value">${escapeHtml(t.feedback)}</div>`:''}<div class="pt-ticket-actions" style="${(isAdmin||t.ownerUid===currentUserUid)?'':'display:none'}">${t.status!=='done'?`<button class="btn btn-sm" onclick="closeDroneTicket('${t.id}')">Mark done</button>`:''}<button class="btn btn-sm pt-clear-btn" onclick="deleteDroneTicket('${t.id}')">Delete</button></div></div>`}).join('');applyPageSearch();
     }
 
     function switchView(view){
