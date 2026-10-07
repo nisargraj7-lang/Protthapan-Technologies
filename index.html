@@ -2091,14 +2091,14 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
 .pd-linkgrid .full{grid-column:1/-1}
 .pd-linkgrid label{margin-top:0!important}
 .pd-hint{font-size:11.5px;color:#71847b;margin-top:6px}
-.pd-row{display:grid;grid-template-columns:1fr 92px 64px 26px;gap:8px;align-items:center;padding:8px 10px;border:1px solid #D9E5F2;border-radius:10px;margin-bottom:7px;background:#F8FBFF}
+.pd-row{display:grid;grid-template-columns:1.3fr 1fr 88px 60px 26px;gap:8px;align-items:center;padding:8px 10px;border:1px solid #D9E5F2;border-radius:10px;margin-bottom:7px;background:#F8FBFF}
 .pd-row-name{font-size:13px;font-weight:600;word-break:break-word}
 .pd-row-link{font-size:11px;color:#1769D2;word-break:break-all;display:block}
 .pd-row input{padding:6px 7px!important;font-size:13px!important}
-.pd-row-head{display:grid;grid-template-columns:1fr 92px 64px 26px;gap:8px;font-size:10.5px;letter-spacing:.05em;color:#71847b;padding:0 10px 4px}
+.pd-row-head{display:grid;grid-template-columns:1.3fr 1fr 88px 60px 26px;gap:8px;font-size:10.5px;letter-spacing:.05em;color:#71847b;padding:0 10px 4px}
 .pd-total{text-align:right;font-weight:700;font-size:13px;margin:4px 2px 8px}
 .pd-manual-note{font-size:12px;color:#71847b;margin:0 0 8px}
-@media(max-width:560px){.pd-linkgrid{grid-template-columns:1fr}.pd-row,.pd-row-head{grid-template-columns:1fr 78px 56px 24px}}
+@media(max-width:560px){.pd-linkgrid{grid-template-columns:1fr}.pd-row{grid-template-columns:1fr 64px 24px}.pd-row>div:first-child,.pd-row input[data-proj-id]{grid-column:1/-1}.pd-row-head{display:none}}
 </style>
 </head>
 
@@ -2354,6 +2354,7 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
                 <div class="pd-linkgrid">
                   <div class="full"><label for="pd-link">Product link (optional)</label><input type="text" id="pd-link" placeholder="https://www.example.com/product/..."></div>
                   <div class="full"><label for="pd-name">Product name</label><input type="text" id="pd-name" placeholder="e.g. CADDX Retel 2 FPV Camera"></div>
+                  <div class="full"><label for="pd-project">Project name (which project uses this item)</label><input type="text" id="pd-project" placeholder="Leave empty to use the Project / purpose above"></div>
                   <div><label for="pd-price">Price (₹)</label><input type="number" id="pd-price" min="0" step="any" placeholder="3499"></div>
                   <div><label for="pd-qty">Quantity</label><input type="number" id="pd-qty" min="1" value="1"></div>
                 </div>
@@ -2857,6 +2858,7 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
     let purchaseMode = 'auto';
     let purchaseLinkItems = [];
     let purchasePrices = {};
+    let purchaseProjects = {};
     let invQuery = '';        // Inventory search text
     let ptV2Inited = false;
     let openProjectId = null; // which OnGoing project is currently opened
@@ -4906,9 +4908,11 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       if (purchaseCatalog.length) return purchaseCatalog;
       return catalog.map(x => ({id:'cat-'+x.id, name:x.name, unit:x.unit || 'unit'}));
     }
+    function pdGlobalProject(){return (document.getElementById('purchase-project')?.value||'').trim();}
     function purchaseItems(){
-      const cat=Object.keys(purchaseSelection).map(id => { const item=purchaseSource().find(x=>x.id===id); return item ? {...item, qty:Math.max(1,Number(purchaseSelection[id])||1), price:Number(purchasePrices[id])||0, link:''} : null; }).filter(Boolean);
-      const lnk=purchaseLinkItems.map(x=>({...x, qty:Math.max(1,Number(x.qty)||1), price:Number(x.price)||0, unit:x.unit||'unit'}));
+      const gp=pdGlobalProject();
+      const cat=Object.keys(purchaseSelection).map(id => { const item=purchaseSource().find(x=>x.id===id); if(!item)return null; const own=(purchaseProjects[id]||'').trim(); return {...item, qty:Math.max(1,Number(purchaseSelection[id])||1), price:Number(purchasePrices[id])||0, link:'', proj:own, project:own||gp}; }).filter(Boolean);
+      const lnk=purchaseLinkItems.map(x=>{const own=(x.proj||'').trim(); return {...x, qty:Math.max(1,Number(x.qty)||1), price:Number(x.price)||0, unit:x.unit||'unit', proj:own, project:own||gp};});
       return cat.concat(lnk);
     }
     function pdMoney(n){return '₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2});}
@@ -4921,8 +4925,8 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       if(link&&!/^https?:\/\//i.test(link))link='https://'+link;
       if(!name&&link)name=pdGuessName(link);
       if(!name){purchaseSetMessage('Enter a product name (or paste a product link).',true);return;}
-      purchaseLinkItems.push({id:'lnk-'+Date.now()+'-'+Math.floor(Math.random()*1000),name,link,price,qty,unit:'pcs'});
-      ['pd-link','pd-name','pd-price'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+      purchaseLinkItems.push({id:'lnk-'+Date.now()+'-'+Math.floor(Math.random()*1000),name,link,price,qty,unit:'pcs',proj:g('pd-project')});
+      ['pd-link','pd-name','pd-price','pd-project'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
       const q=document.getElementById('pd-qty'); if(q)q.value='1';
       purchaseSetMessage('Item added to the request.');
       renderPurchaseRequest();
@@ -4984,12 +4988,17 @@ function savePurchasePrefs(quiet){
       if(id.indexOf('lnk-')===0){const it=purchaseLinkItems.find(x=>x.id===id); if(it)it.qty=q;} else purchaseSelection[id]=q;
       renderPurchaseRequest();renderPurchaseStats();
     }
+    function changePurchaseProject(id,val){
+      const v=String(val||'').trim();
+      if(id.indexOf('lnk-')===0){const it=purchaseLinkItems.find(x=>x.id===id); if(it)it.proj=v;} else purchaseProjects[id]=v;
+      renderPurchaseRequest();
+    }
     function changePurchasePrice(id,val){
       const pr=Math.max(0,parseFloat(val)||0);
       if(id.indexOf('lnk-')===0){const it=purchaseLinkItems.find(x=>x.id===id); if(it)it.price=pr;} else purchasePrices[id]=pr;
       renderPurchaseRequest();
     }
-    function removePurchaseItem(id){if(id.indexOf('lnk-')===0)purchaseLinkItems=purchaseLinkItems.filter(x=>x.id!==id);else{delete purchaseSelection[id];delete purchasePrices[id];}renderPurchaseCatalog();renderPurchaseRequest();}
+    function removePurchaseItem(id){if(id.indexOf('lnk-')===0)purchaseLinkItems=purchaseLinkItems.filter(x=>x.id!==id);else{delete purchaseSelection[id];delete purchasePrices[id];delete purchaseProjects[id];}renderPurchaseCatalog();renderPurchaseRequest();}
     function purchaseMessage(){const t=document.getElementById('purchase-preview');return (purchaseMsgEdited&&t)?t.value:purchaseDraft();}
     function purchaseDraft(){
       const items=purchaseItems(); const requester=(document.getElementById('purchase-requester')?.value||currentName||'Team member').trim(); const project=(document.getElementById('purchase-project')?.value||'').trim(); const note=(document.getElementById('purchase-note')?.value||'').trim();
@@ -4998,6 +5007,7 @@ function savePurchasePrefs(quiet){
       items.forEach((x,i)=>{
         const line=x.price*x.qty; grand+=line;
         out+=(i+1)+'. '+x.name+'\n';
+        out+='   Project: '+(x.project||'Not specified')+'\n';
         out+='   Quantity: '+x.qty+(x.price?('  |  Price: '+pdMoney(x.price)+'  |  Total: '+pdMoney(line)):'')+'\n';
         if(x.link)out+='   Link: '+x.link+'\n';
         out+='\n';
@@ -5010,9 +5020,10 @@ function savePurchasePrefs(quiet){
       if(!items.length) el.innerHTML='<div class="empty">No items selected yet.</div>';
       else {
         let grand=0; items.forEach(x=>grand+=x.price*x.qty);
-        el.innerHTML='<div class="pd-row-head"><span>PRODUCT</span><span>PRICE (₹)</span><span>QTY</span><span></span></div>'+items.map(x=>`<div class="pd-row"><div><div class="pd-row-name">${escapeHtml(x.name)}</div>${x.link?`<a class="pd-row-link" href="${escapeHtml(x.link)}" target="_blank" rel="noopener">${escapeHtml(x.link.length>46?x.link.slice(0,46)+'…':x.link)}</a>`:''}</div><input type="number" min="0" step="any" value="${x.price||''}" placeholder="0" data-price-id="${escapeHtml(x.id)}"><input class="qty-input" type="number" min="1" value="${x.qty}" data-qty-id="${escapeHtml(x.id)}"><button class="icon-btn" data-remove-id="${escapeHtml(x.id)}" title="Remove">×</button></div>`).join('')+(grand?`<div class="pd-total">Estimated total: ${pdMoney(grand)}</div>`:'');
+        el.innerHTML='<div class="pd-row-head"><span>PRODUCT</span><span>PROJECT</span><span>PRICE (₹)</span><span>QTY</span><span></span></div>'+items.map(x=>`<div class="pd-row"><div><div class="pd-row-name">${escapeHtml(x.name)}</div>${x.link?`<a class="pd-row-link" href="${escapeHtml(x.link)}" target="_blank" rel="noopener">${escapeHtml(x.link.length>40?x.link.slice(0,40)+'…':x.link)}</a>`:''}</div><input type="text" value="${escapeHtml(x.proj||'')}" placeholder="${escapeHtml(pdGlobalProject()||'Project name')}" data-proj-id="${escapeHtml(x.id)}"><input type="number" min="0" step="any" value="${x.price||''}" placeholder="0" data-price-id="${escapeHtml(x.id)}"><input class="qty-input" type="number" min="1" value="${x.qty}" data-qty-id="${escapeHtml(x.id)}"><button class="icon-btn" data-remove-id="${escapeHtml(x.id)}" title="Remove">×</button></div>`).join('')+(grand?`<div class="pd-total">Estimated total: ${pdMoney(grand)}</div>`:'');
       }
       el.querySelectorAll('[data-qty-id]').forEach(n=>n.addEventListener('change',()=>changePurchaseQty(n.dataset.qtyId,n.value)));
+      el.querySelectorAll('[data-proj-id]').forEach(n=>n.addEventListener('change',()=>changePurchaseProject(n.dataset.projId,n.value)));
       el.querySelectorAll('[data-price-id]').forEach(n=>n.addEventListener('change',()=>changePurchasePrice(n.dataset.priceId,n.value)));
       el.querySelectorAll('[data-remove-id]').forEach(n=>n.addEventListener('click',()=>removePurchaseItem(n.dataset.removeId)));
       if(preview&&!purchaseMsgEdited)preview.value=purchaseDraft(); renderPurchaseStats();
@@ -5032,14 +5043,14 @@ function pdTextToHtml(text){
       const rows=items.map((x,i)=>{
         const line=(x.price||0)*x.qty; grand+=line;
         const nm=x.link?('<a href="'+escapeHtml(x.link)+'" style="color:#1769D2;text-decoration:none">'+escapeHtml(x.name)+'</a>'):escapeHtml(x.name);
-        return '<tr><td style="'+td+';text-align:center">'+(i+1)+'</td><td style="'+td+'"><strong>'+nm+'</strong></td><td style="'+td+';text-align:center">'+x.qty+'</td><td style="'+td+';text-align:right">'+(x.price?pdMoney(x.price):'-')+'</td><td style="'+td+';text-align:right">'+(x.price?pdMoney(line):'-')+'</td></tr>';
+        return '<tr><td style="'+td+';text-align:center">'+(i+1)+'</td><td style="'+td+'"><strong>'+nm+'</strong></td><td style="'+td+'">'+escapeHtml(x.project||'-')+'</td><td style="'+td+';text-align:center">'+x.qty+'</td><td style="'+td+';text-align:right">'+(x.price?pdMoney(x.price):'-')+'</td><td style="'+td+';text-align:right">'+(x.price?pdMoney(line):'-')+'</td></tr>';
       }).join('');
       return '<div style="font-family:Arial,sans-serif;font-size:14px;color:#222;line-height:1.6">'
         +'<p>Hello Purchase Department,</p><p>We would like to request the following items:</p>'
         +'<table cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:640px">'
-        +'<thead><tr><th style="'+th+';text-align:center">#</th><th style="'+th+'">Product Name</th><th style="'+th+';text-align:center">Quantity</th><th style="'+th+';text-align:right">Price</th><th style="'+th+';text-align:right">Total</th></tr></thead>'
+        +'<thead><tr><th style="'+th+';text-align:center">#</th><th style="'+th+'">Product Name</th><th style="'+th+'">Project</th><th style="'+th+';text-align:center">Quantity</th><th style="'+th+';text-align:right">Price</th><th style="'+th+';text-align:right">Total</th></tr></thead>'
         +'<tbody>'+rows+'</tbody>'
-        +(grand?'<tfoot><tr><td colspan="4" style="'+td+';text-align:right"><strong>Estimated grand total</strong></td><td style="'+td+';text-align:right"><strong>'+pdMoney(grand)+'</strong></td></tr></tfoot>':'')
+        +(grand?'<tfoot><tr><td colspan="5" style="'+td+';text-align:right"><strong>Estimated grand total</strong></td><td style="'+td+';text-align:right"><strong>'+pdMoney(grand)+'</strong></td></tr></tfoot>':'')
         +'</table>'
         +'<p style="margin-top:16px"><strong>Project / Purpose:</strong> '+escapeHtml(project||'Not specified')+'<br><strong>Requested by:</strong> '+escapeHtml(requester)+'</p>'
         +(note?'<p><strong>Additional note:</strong><br>'+escapeHtml(note).replace(/\n/g,'<br>')+'</p>':'')
@@ -5078,7 +5089,7 @@ async function sendPurchaseEmail(){
       document.getElementById('pd-link')?.addEventListener('input',e=>{const n=document.getElementById('pd-name'); if(n&&!n.dataset.touched){n.value=pdGuessName(e.target.value);}});
       document.getElementById('pd-name')?.addEventListener('input',e=>{e.target.dataset.touched=e.target.value?'1':'';});
       loadPurchasePrefs(); renderPurchaseCatalog();renderPurchaseRequest();
-      document.getElementById('purchase-search')?.addEventListener('input',renderPurchaseCatalog); document.getElementById('purchase-clear')?.addEventListener('click',()=>{purchaseSelection={};purchaseLinkItems=[];purchasePrices={};renderPurchaseCatalog();renderPurchaseRequest();}); document.getElementById('purchase-save-contact')?.addEventListener('click',savePurchasePrefs); document.getElementById('purchase-add-catalog')?.addEventListener('click',addPurchaseCatalogItem); document.getElementById('purchase-email')?.addEventListener('click',sendPurchaseEmail); document.getElementById('purchase-whatsapp')?.addEventListener('click',sendPurchaseWhatsApp);
+      document.getElementById('purchase-search')?.addEventListener('input',renderPurchaseCatalog); document.getElementById('purchase-clear')?.addEventListener('click',()=>{purchaseSelection={};purchaseLinkItems=[];purchasePrices={};purchaseProjects={};renderPurchaseCatalog();renderPurchaseRequest();}); document.getElementById('purchase-save-contact')?.addEventListener('click',savePurchasePrefs); document.getElementById('purchase-add-catalog')?.addEventListener('click',addPurchaseCatalogItem); document.getElementById('purchase-email')?.addEventListener('click',sendPurchaseEmail); document.getElementById('purchase-whatsapp')?.addEventListener('click',sendPurchaseWhatsApp);
       ['purchase-requester','purchase-project','purchase-note'].forEach(id=>document.getElementById(id)?.addEventListener('input',renderPurchaseRequest));
       if(db) db.collection('inventoryCatalog').onSnapshot(snap=>{purchaseCatalog=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.name||'').localeCompare(b.name||''));renderPurchaseCatalog();renderPurchaseRequest();},()=>{purchaseCatalog=[];renderPurchaseCatalog();renderPurchaseRequest();});
       if(db) db.collection('settings').doc('purchase').onSnapshot(doc=>{if(!doc.exists)return;const d=doc.data()||{};purchaseCfg={email:d.email||purchaseCfg.email,phone:d.phone||purchaseCfg.phone,from:purchaseCfg.from||''};loadPurchasePrefs();},()=>{});
