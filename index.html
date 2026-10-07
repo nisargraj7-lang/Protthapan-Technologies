@@ -2079,6 +2079,27 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
   #pt-bg{display:none}
 }
 </style>
+
+<style>
+/* ===== Purchase Desk: email modes + add-by-link ===== */
+.pd-modes{display:flex;gap:6px;margin:14px 0 10px;padding:4px;background:#EEF3F9;border:1px solid #D5E2F0;border-radius:12px}
+.pd-mode{flex:1;border:none;background:transparent;padding:9px 10px;border-radius:9px;font:600 13px inherit;font-family:inherit;color:#5B6B7F;cursor:pointer;transition:all .15s ease}
+.pd-mode.active{background:#fff;color:#1769D2;box-shadow:0 2px 8px rgba(31,78,121,.12)}
+.pd-linkbox{border:1px dashed #B8CDE5;border-radius:12px;padding:12px;margin:10px 0;background:#F8FBFF}
+.pd-linkbox-title{font-size:12px;font-weight:700;letter-spacing:.04em;color:#4E6580;margin-bottom:8px}
+.pd-linkgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pd-linkgrid .full{grid-column:1/-1}
+.pd-linkgrid label{margin-top:0!important}
+.pd-hint{font-size:11.5px;color:#71847b;margin-top:6px}
+.pd-row{display:grid;grid-template-columns:1fr 92px 64px 26px;gap:8px;align-items:center;padding:8px 10px;border:1px solid #D9E5F2;border-radius:10px;margin-bottom:7px;background:#F8FBFF}
+.pd-row-name{font-size:13px;font-weight:600;word-break:break-word}
+.pd-row-link{font-size:11px;color:#1769D2;word-break:break-all;display:block}
+.pd-row input{padding:6px 7px!important;font-size:13px!important}
+.pd-row-head{display:grid;grid-template-columns:1fr 92px 64px 26px;gap:8px;font-size:10.5px;letter-spacing:.05em;color:#71847b;padding:0 10px 4px}
+.pd-total{text-align:right;font-weight:700;font-size:13px;margin:4px 2px 8px}
+.pd-manual-note{font-size:12px;color:#71847b;margin:0 0 8px}
+@media(max-width:560px){.pd-linkgrid{grid-template-columns:1fr}.pd-row,.pd-row-head{grid-template-columns:1fr 78px 56px 24px}}
+</style>
 </head>
 
 <body class="locked">
@@ -2323,8 +2344,25 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
               <div class="full"><label for="purchase-phone">Receiver phone / WhatsApp</label><input type="text" id="purchase-phone" placeholder="+91XXXXXXXXXX"></div>
               <div class="full"><label for="purchase-subject">Email subject</label><input type="text" id="purchase-subject" value="Purchase Request — Protthapan Technologies"></div>
             </div>
+            <div class="pd-modes" id="pd-modes">
+              <button type="button" class="pd-mode active" data-mode="auto">🛒 Auto-generate from items</button>
+              <button type="button" class="pd-mode" data-mode="manual">✍ Write manually</button>
+            </div>
+            <div id="pd-auto-tools">
+              <div class="pd-linkbox">
+                <div class="pd-linkbox-title">➕ ADD AN ITEM BY LINK (any website)</div>
+                <div class="pd-linkgrid">
+                  <div class="full"><label for="pd-link">Product link (optional)</label><input type="text" id="pd-link" placeholder="https://www.example.com/product/..."></div>
+                  <div class="full"><label for="pd-name">Product name</label><input type="text" id="pd-name" placeholder="e.g. CADDX Retel 2 FPV Camera"></div>
+                  <div><label for="pd-price">Price (₹)</label><input type="number" id="pd-price" min="0" step="any" placeholder="3499"></div>
+                  <div><label for="pd-qty">Quantity</label><input type="number" id="pd-qty" min="1" value="1"></div>
+                </div>
+                <button type="button" class="purchase-mini-btn" id="pd-add" style="margin-top:9px;">+ Add to request</button>
+                <div class="pd-hint">You can also tick items from the catalog on the left. Set price &amp; quantity for each item in the list above — the email is written automatically.</div>
+              </div>
+            </div>
             <div class="email-preview">
-              <div class="email-preview-head">✏️ Write / edit your message <button type="button" class="purchase-mini-btn" id="purchase-reset-draft">↺ Reset to auto draft</button></div>
+              <div class="email-preview-head"><span id="pd-preview-title">✏️ Email message (auto-generated, you can still edit)</span> <button type="button" class="purchase-mini-btn" id="purchase-reset-draft">↺ Reset to auto draft</button></div>
               <textarea id="purchase-preview" placeholder="Type your message to the Purchase Department..."></textarea>
             </div>
             <div style="margin-top:10px;"><button type="button" class="purchase-mini-btn" id="purchase-save-contact">💾 Save sender / receiver</button><span style="font-size:11px;color:#71847b;margin-left:10px;">Email passwords are never stored in this page.</span></div>
@@ -2816,6 +2854,9 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
     let purchaseSelection = {};
     let purchaseCfg = {email:'', phone:''};
     let purchaseMsgEdited = false;
+    let purchaseMode = 'auto';
+    let purchaseLinkItems = [];
+    let purchasePrices = {};
     let invQuery = '';        // Inventory search text
     let ptV2Inited = false;
     let openProjectId = null; // which OnGoing project is currently opened
@@ -4865,7 +4906,45 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       if (purchaseCatalog.length) return purchaseCatalog;
       return catalog.map(x => ({id:'cat-'+x.id, name:x.name, unit:x.unit || 'unit'}));
     }
-    function purchaseItems(){ return Object.keys(purchaseSelection).map(id => { const item=purchaseSource().find(x=>x.id===id); return item ? {...item, qty:Math.max(1,Number(purchaseSelection[id])||1)} : null; }).filter(Boolean); }
+    function purchaseItems(){
+      const cat=Object.keys(purchaseSelection).map(id => { const item=purchaseSource().find(x=>x.id===id); return item ? {...item, qty:Math.max(1,Number(purchaseSelection[id])||1), price:Number(purchasePrices[id])||0, link:''} : null; }).filter(Boolean);
+      const lnk=purchaseLinkItems.map(x=>({...x, qty:Math.max(1,Number(x.qty)||1), price:Number(x.price)||0, unit:x.unit||'unit'}));
+      return cat.concat(lnk);
+    }
+    function pdMoney(n){return '₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2});}
+    function pdGuessName(url){
+      try{const u=new URL(url);const seg=u.pathname.split('/').filter(Boolean).pop()||u.hostname;return decodeURIComponent(seg).replace(/\.(html?|php|aspx?)$/i,'').replace(/[-_+]+/g,' ').replace(/\s+/g,' ').trim().replace(/\b\w/g,c=>c.toUpperCase());}catch(e){return '';}
+    }
+    function addPurchaseLinkItem(){
+      const g=id=>(document.getElementById(id)?.value||'').trim();
+      let link=g('pd-link'), name=g('pd-name'), price=parseFloat(g('pd-price'))||0, qty=Math.max(1,parseInt(g('pd-qty'),10)||1);
+      if(link&&!/^https?:\/\//i.test(link))link='https://'+link;
+      if(!name&&link)name=pdGuessName(link);
+      if(!name){purchaseSetMessage('Enter a product name (or paste a product link).',true);return;}
+      purchaseLinkItems.push({id:'lnk-'+Date.now()+'-'+Math.floor(Math.random()*1000),name,link,price,qty,unit:'pcs'});
+      ['pd-link','pd-name','pd-price'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+      const q=document.getElementById('pd-qty'); if(q)q.value='1';
+      purchaseSetMessage('Item added to the request.');
+      renderPurchaseRequest();
+    }
+    function setPurchaseMode(mode){
+      purchaseMode=mode;
+      document.querySelectorAll('#pd-modes .pd-mode').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+      const tools=document.getElementById('pd-auto-tools'); if(tools)tools.style.display=mode==='auto'?'block':'none';
+      const title=document.getElementById('pd-preview-title'), reset=document.getElementById('purchase-reset-draft'), pv=document.getElementById('purchase-preview');
+      if(mode==='manual'){
+        purchaseMsgEdited=true;
+        if(title)title.textContent='✍ Write your own email message';
+        if(reset){reset.textContent='↺ Fill from selected items';}
+        if(pv&&!pv.value.trim()) pv.value='Hello Purchase Department,\n\n';
+        if(pv)pv.focus();
+      } else {
+        purchaseMsgEdited=false;
+        if(title)title.textContent='✏️ Email message (auto-generated, you can still edit)';
+        if(reset)reset.textContent='↺ Reset to auto draft';
+        renderPurchaseRequest();
+      }
+    }
     function purchaseSetMessage(msg,error){ const el=document.getElementById('purchase-message'); if(!el)return; el.textContent=msg||''; el.classList.toggle('error',!!error); }
 function savePurchasePrefs(quiet){
       const v=id=>(document.getElementById(id)?.value||'').trim();
@@ -4900,18 +4979,42 @@ function savePurchasePrefs(quiet){
       if(Object.prototype.hasOwnProperty.call(purchaseSelection,id)) delete purchaseSelection[id]; else purchaseSelection[id]=1;
       renderPurchaseCatalog();renderPurchaseRequest();
     }
-    function changePurchaseQty(id,val){ purchaseSelection[id]=Math.max(1,parseInt(val,10)||1);renderPurchaseRequest();renderPurchaseStats(); }
-    function removePurchaseItem(id){delete purchaseSelection[id];renderPurchaseCatalog();renderPurchaseRequest();}
+    function changePurchaseQty(id,val){
+      const q=Math.max(1,parseInt(val,10)||1);
+      if(id.indexOf('lnk-')===0){const it=purchaseLinkItems.find(x=>x.id===id); if(it)it.qty=q;} else purchaseSelection[id]=q;
+      renderPurchaseRequest();renderPurchaseStats();
+    }
+    function changePurchasePrice(id,val){
+      const pr=Math.max(0,parseFloat(val)||0);
+      if(id.indexOf('lnk-')===0){const it=purchaseLinkItems.find(x=>x.id===id); if(it)it.price=pr;} else purchasePrices[id]=pr;
+      renderPurchaseRequest();
+    }
+    function removePurchaseItem(id){if(id.indexOf('lnk-')===0)purchaseLinkItems=purchaseLinkItems.filter(x=>x.id!==id);else{delete purchaseSelection[id];delete purchasePrices[id];}renderPurchaseCatalog();renderPurchaseRequest();}
     function purchaseMessage(){const t=document.getElementById('purchase-preview');return (purchaseMsgEdited&&t)?t.value:purchaseDraft();}
     function purchaseDraft(){
       const items=purchaseItems(); const requester=(document.getElementById('purchase-requester')?.value||currentName||'Team member').trim(); const project=(document.getElementById('purchase-project')?.value||'').trim(); const note=(document.getElementById('purchase-note')?.value||'').trim();
       if(!items.length)return 'Hello Purchase Department,\n\nWe would like to request the following items:\n\nNo items selected yet.';
-      let out='Hello Purchase Department,\n\nWe would like to request the following items:\n\n'; items.forEach((x,i)=>out+=(i+1)+'. '+x.name+' — '+x.qty+' '+(x.unit||'unit')+'\n'); out+='\nRequested by: '+requester+'\nProject / Purpose: '+(project||'Not specified')+'\n'; if(note)out+='\nAdditional note:\n'+note+'\n'; out+='\nPlease confirm availability, expected delivery time and quotation.\n\nRegards,\nProtthapan Technologies'; return out;
+      let out='Hello Purchase Department,\n\nWe would like to request the following items:\n\n', grand=0;
+      items.forEach((x,i)=>{
+        const line=x.price*x.qty; grand+=line;
+        out+=(i+1)+'. '+x.name+'\n';
+        out+='   Quantity: '+x.qty+(x.price?('  |  Price: '+pdMoney(x.price)+'  |  Total: '+pdMoney(line)):'')+'\n';
+        if(x.link)out+='   Link: '+x.link+'\n';
+        out+='\n';
+      });
+      if(grand)out+='Estimated grand total: '+pdMoney(grand)+'\n';
+      out+='\nRequested by: '+requester+'\nProject / Purpose: '+(project||'Not specified')+'\n'; if(note)out+='\nAdditional note:\n'+note+'\n'; out+='\nPlease confirm availability, expected delivery time and quotation.\n\nRegards,\nProtthapan Technologies'; return out;
     }
     function renderPurchaseRequest(){
       const el=document.getElementById('purchase-request-list'), preview=document.getElementById('purchase-preview'); if(!el)return; const items=purchaseItems();
-      if(!items.length)el.innerHTML='<div class="empty">No items selected yet.</div>'; else el.innerHTML=items.map(x=>`<div class="request-row"><div><div class="request-row-name">${escapeHtml(x.name)}</div><span class="request-row-unit">${escapeHtml(x.unit||'unit')}</span></div><input class="qty-input" type="number" min="1" value="${x.qty}" data-qty-id="${escapeHtml(x.id)}"><button class="icon-btn" data-remove-id="${escapeHtml(x.id)}" title="Remove">×</button></div>`).join('');
-      el.querySelectorAll('[data-qty-id]').forEach(n=>n.addEventListener('change',()=>changePurchaseQty(n.dataset.qtyId,n.value))); el.querySelectorAll('[data-remove-id]').forEach(n=>n.addEventListener('click',()=>removePurchaseItem(n.dataset.removeId)));
+      if(!items.length) el.innerHTML='<div class="empty">No items selected yet.</div>';
+      else {
+        let grand=0; items.forEach(x=>grand+=x.price*x.qty);
+        el.innerHTML='<div class="pd-row-head"><span>PRODUCT</span><span>PRICE (₹)</span><span>QTY</span><span></span></div>'+items.map(x=>`<div class="pd-row"><div><div class="pd-row-name">${escapeHtml(x.name)}</div>${x.link?`<a class="pd-row-link" href="${escapeHtml(x.link)}" target="_blank" rel="noopener">${escapeHtml(x.link.length>46?x.link.slice(0,46)+'…':x.link)}</a>`:''}</div><input type="number" min="0" step="any" value="${x.price||''}" placeholder="0" data-price-id="${escapeHtml(x.id)}"><input class="qty-input" type="number" min="1" value="${x.qty}" data-qty-id="${escapeHtml(x.id)}"><button class="icon-btn" data-remove-id="${escapeHtml(x.id)}" title="Remove">×</button></div>`).join('')+(grand?`<div class="pd-total">Estimated total: ${pdMoney(grand)}</div>`:'');
+      }
+      el.querySelectorAll('[data-qty-id]').forEach(n=>n.addEventListener('change',()=>changePurchaseQty(n.dataset.qtyId,n.value)));
+      el.querySelectorAll('[data-price-id]').forEach(n=>n.addEventListener('change',()=>changePurchasePrice(n.dataset.priceId,n.value)));
+      el.querySelectorAll('[data-remove-id]').forEach(n=>n.addEventListener('click',()=>removePurchaseItem(n.dataset.removeId)));
       if(preview&&!purchaseMsgEdited)preview.value=purchaseDraft(); renderPurchaseStats();
     }
     async function addPurchaseCatalogItem(){
@@ -4943,9 +5046,13 @@ async function sendPurchaseEmail(){
     function initPurchaseUI(){
       const rq=document.getElementById('purchase-requester'); if(rq&&!rq.value) rq.value=currentName||'';
       document.getElementById('purchase-preview')?.addEventListener('input',()=>{purchaseMsgEdited=true;});
-      document.getElementById('purchase-reset-draft')?.addEventListener('click',()=>{purchaseMsgEdited=false;renderPurchaseRequest();});
+      document.getElementById('purchase-reset-draft')?.addEventListener('click',()=>{const pv=document.getElementById('purchase-preview'); if(purchaseMode==='manual'){if(pv)pv.value=purchaseDraft();purchaseMsgEdited=true;} else {purchaseMsgEdited=false;renderPurchaseRequest();}});
+      document.querySelectorAll('#pd-modes .pd-mode').forEach(b=>b.addEventListener('click',()=>setPurchaseMode(b.dataset.mode)));
+      document.getElementById('pd-add')?.addEventListener('click',addPurchaseLinkItem);
+      document.getElementById('pd-link')?.addEventListener('input',e=>{const n=document.getElementById('pd-name'); if(n&&!n.dataset.touched){n.value=pdGuessName(e.target.value);}});
+      document.getElementById('pd-name')?.addEventListener('input',e=>{e.target.dataset.touched=e.target.value?'1':'';});
       loadPurchasePrefs(); renderPurchaseCatalog();renderPurchaseRequest();
-      document.getElementById('purchase-search')?.addEventListener('input',renderPurchaseCatalog); document.getElementById('purchase-clear')?.addEventListener('click',()=>{purchaseSelection={};renderPurchaseCatalog();renderPurchaseRequest();}); document.getElementById('purchase-save-contact')?.addEventListener('click',savePurchasePrefs); document.getElementById('purchase-add-catalog')?.addEventListener('click',addPurchaseCatalogItem); document.getElementById('purchase-email')?.addEventListener('click',sendPurchaseEmail); document.getElementById('purchase-whatsapp')?.addEventListener('click',sendPurchaseWhatsApp);
+      document.getElementById('purchase-search')?.addEventListener('input',renderPurchaseCatalog); document.getElementById('purchase-clear')?.addEventListener('click',()=>{purchaseSelection={};purchaseLinkItems=[];purchasePrices={};renderPurchaseCatalog();renderPurchaseRequest();}); document.getElementById('purchase-save-contact')?.addEventListener('click',savePurchasePrefs); document.getElementById('purchase-add-catalog')?.addEventListener('click',addPurchaseCatalogItem); document.getElementById('purchase-email')?.addEventListener('click',sendPurchaseEmail); document.getElementById('purchase-whatsapp')?.addEventListener('click',sendPurchaseWhatsApp);
       ['purchase-requester','purchase-project','purchase-note'].forEach(id=>document.getElementById(id)?.addEventListener('input',renderPurchaseRequest));
       if(db) db.collection('inventoryCatalog').onSnapshot(snap=>{purchaseCatalog=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.name||'').localeCompare(b.name||''));renderPurchaseCatalog();renderPurchaseRequest();},()=>{purchaseCatalog=[];renderPurchaseCatalog();renderPurchaseRequest();});
       if(db) db.collection('settings').doc('purchase').onSnapshot(doc=>{if(!doc.exists)return;const d=doc.data()||{};purchaseCfg={email:d.email||purchaseCfg.email,phone:d.phone||purchaseCfg.phone,from:purchaseCfg.from||''};loadPurchasePrefs();},()=>{});
