@@ -5022,6 +5022,29 @@ function savePurchasePrefs(quiet){
       const name=document.getElementById('purchase-new-name').value.trim(), unit=document.getElementById('purchase-new-unit').value.trim()||'unit'; if(!name){purchaseSetMessage('Enter an item name.',true);return;}
       if(!db){purchaseSetMessage('Firebase is not configured.',true);return;} try{await db.collection('inventoryCatalog').add({name,unit,createdBy:currentName,createdAt:Date.now()});document.getElementById('purchase-new-name').value='';document.getElementById('purchase-new-unit').value='';purchaseSetMessage('Catalog item added.');}catch(e){purchaseSetMessage('Could not add catalog item. Check Firestore rules.',true);}
     }
+function pdTextToHtml(text){
+      return '<div style="white-space:pre-wrap;font-family:Arial,sans-serif;font-size:14px;line-height:1.6">'+escapeHtml(text).replace(/\n/g,'<br>')+'</div>';
+    }
+    function pdBuildHtml(items,requester,project,note){
+      const th='padding:9px 12px;border:1px solid #cfd8e3;background:#f1f5fa;text-align:left;font-size:13px';
+      const td='padding:9px 12px;border:1px solid #cfd8e3;font-size:13px;vertical-align:top';
+      let grand=0;
+      const rows=items.map((x,i)=>{
+        const line=(x.price||0)*x.qty; grand+=line;
+        const nm=x.link?('<a href="'+escapeHtml(x.link)+'" style="color:#1769D2;text-decoration:none">'+escapeHtml(x.name)+'</a>'):escapeHtml(x.name);
+        return '<tr><td style="'+td+';text-align:center">'+(i+1)+'</td><td style="'+td+'"><strong>'+nm+'</strong></td><td style="'+td+';text-align:center">'+x.qty+'</td><td style="'+td+';text-align:right">'+(x.price?pdMoney(x.price):'-')+'</td><td style="'+td+';text-align:right">'+(x.price?pdMoney(line):'-')+'</td></tr>';
+      }).join('');
+      return '<div style="font-family:Arial,sans-serif;font-size:14px;color:#222;line-height:1.6">'
+        +'<p>Hello Purchase Department,</p><p>We would like to request the following items:</p>'
+        +'<table cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:640px">'
+        +'<thead><tr><th style="'+th+';text-align:center">#</th><th style="'+th+'">Product Name</th><th style="'+th+';text-align:center">Quantity</th><th style="'+th+';text-align:right">Price</th><th style="'+th+';text-align:right">Total</th></tr></thead>'
+        +'<tbody>'+rows+'</tbody>'
+        +(grand?'<tfoot><tr><td colspan="4" style="'+td+';text-align:right"><strong>Estimated grand total</strong></td><td style="'+td+';text-align:right"><strong>'+pdMoney(grand)+'</strong></td></tr></tfoot>':'')
+        +'</table>'
+        +'<p style="margin-top:16px"><strong>Project / Purpose:</strong> '+escapeHtml(project||'Not specified')+'<br><strong>Requested by:</strong> '+escapeHtml(requester)+'</p>'
+        +(note?'<p><strong>Additional note:</strong><br>'+escapeHtml(note).replace(/\n/g,'<br>')+'</p>':'')
+        +'<p>Please confirm availability, expected delivery time and quotation.</p><p>Regards,<br>Protthapan Technologies</p></div>';
+    }
 async function sendPurchaseEmail(){
       const msg=purchaseMessage().trim(); if(!msg){purchaseSetMessage('Write a message first.',true);return;}
       const val=id=>(document.getElementById(id)?.value||'').trim();
@@ -5032,7 +5055,10 @@ async function sendPurchaseEmail(){
       const requester=val('purchase-requester')||currentName||'Team member';
       const btn=document.getElementById('purchase-email');btn.disabled=true;btn.textContent='Sending…';btn.classList.add('pt-spin');purchaseSetMessage('Sending…');
       try{
-        await sendEmailCore({to,from,fromName:requester,subject,message:msg,items:purchaseItems()});
+        const itemsNow=purchaseItems();
+        const useTable=(purchaseMode==='auto'&&!purchaseMsgEdited&&itemsNow.length>0);
+        const html=useTable?pdBuildHtml(itemsNow,requester,val('purchase-project'),val('purchase-note')):pdTextToHtml(msg);
+        await sendEmailCore({to,from,fromName:requester,subject,message:msg,html,items:itemsNow});
         purchaseSetMessage('✓ Email sent from '+from+' to '+to+'.');
         savePurchasePrefs(true);
       }catch(e){
@@ -5780,14 +5806,16 @@ function stockBar(r){
     async function sendEmailCore(o){
       const c=emailJsCfg();
       const body=(o.from?('Sent by: '+(o.fromName||o.from)+' <'+o.from+'>\n\n'):'')+o.message;
+      const sentBy=o.from?('<div style="font-family:Arial,sans-serif;font-size:12px;color:#667;margin-bottom:12px">Sent by: '+escapeHtml(o.fromName||o.from)+' &lt;'+escapeHtml(o.from)+'&gt;</div>'):'';
+      const bodyHtml=sentBy+(o.html||('<div style="white-space:pre-wrap">'+escapeHtml(o.message).replace(/\n/g,'<br>')+'</div>'));
       if(emailJsReady()){
         const res=await fetch('https://api.emailjs.com/api/v1.0/email/send',{method:'POST',headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({service_id:c.service,template_id:c.template,user_id:c.key,template_params:{to_email:o.to,from_email:o.from,reply_to:o.from,from_name:o.fromName||o.from,subject:o.subject,message:body}})});
+          body:JSON.stringify({service_id:c.service,template_id:c.template,user_id:c.key,template_params:{to_email:o.to,from_email:o.from,reply_to:o.from,from_name:o.fromName||o.from,subject:o.subject,message:body,message_html:bodyHtml}})});
         if(!res.ok){const t=await res.text().catch(()=>'');throw new Error(t||('Email service error '+res.status));}
         return;
       }
       let res;
-      try{res=await fetch('/api/send-purchase-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:o.to,from:o.from,requester:o.fromName,subject:o.subject,message:body,items:o.items||[]})});}
+      try{res=await fetch('/api/send-purchase-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:o.to,from:o.from,requester:o.fromName,subject:o.subject,message:body,html:bodyHtml,items:o.items||[]})});}
       catch(e){throw new Error('NO_SERVICE');}
       if(!res.ok)throw new Error('NO_SERVICE');
     }
