@@ -1991,6 +1991,94 @@ svg text{fill:#18324E!important}
 .purchase-actions{grid-template-columns:1fr 1fr!important}
 @media(max-width:680px){.purchase-actions{grid-template-columns:1fr!important}}
 </style>
+<style id="pt-anim-style">
+/* ---------- animated background ---------- */
+#pt-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#pt-bg i{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5;animation:ptFloat 22s ease-in-out infinite}
+#pt-bg i:nth-child(1){width:420px;height:420px;left:-80px;top:-60px;background:#8FC1FF}
+#pt-bg i:nth-child(2){width:380px;height:380px;right:-60px;top:25%;background:#C4B5FD;animation-duration:28s;animation-delay:-8s}
+#pt-bg i:nth-child(3){width:340px;height:340px;left:35%;bottom:-120px;background:#9BE7D2;animation-duration:25s;animation-delay:-15s}
+@keyframes ptFloat{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(70px,50px) scale(1.12)}66%{transform:translate(-50px,80px) scale(.94)}}
+.app{position:relative;z-index:1}
+/* ---------- glass panels ---------- */
+.panel,.purchase-card{background:rgba(255,255,255,.74)!important;backdrop-filter:blur(14px) saturate(1.35);-webkit-backdrop-filter:blur(14px) saturate(1.35);border-color:rgba(255,255,255,.8)!important}
+.inv-search-panel{position:relative;z-index:30;overflow:visible!important}
+/* ---------- page + card + row entrance ---------- */
+@keyframes ptView{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
+@keyframes ptRise{from{opacity:0;transform:translateY(22px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes ptRow{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+body .view-enter{animation:ptView .45s cubic-bezier(.2,.8,.2,1)}
+.view-enter>.panel,.view-enter>.purchase-hero,.view-enter>.purchase-grid>.purchase-card,.view-enter>div>.panel{animation:ptRise .6s cubic-bezier(.2,.8,.2,1) backwards}
+.view-enter>.purchase-grid>.purchase-card:nth-child(2){animation-delay:.12s}
+.view-enter>.panel:nth-child(1),.view-enter>.purchase-grid>.purchase-card:nth-child(1),.view-enter>div:nth-child(1)>.panel{animation-delay:0.04s}
+.view-enter>.panel:nth-child(2),.view-enter>.purchase-grid>.purchase-card:nth-child(2),.view-enter>div:nth-child(2)>.panel{animation-delay:0.08s}
+.view-enter>.panel:nth-child(3),.view-enter>.purchase-grid>.purchase-card:nth-child(3),.view-enter>div:nth-child(3)>.panel{animation-delay:0.12s}
+.view-enter>.panel:nth-child(4),.view-enter>.purchase-grid>.purchase-card:nth-child(4),.view-enter>div:nth-child(4)>.panel{animation-delay:0.16s}
+.view-enter>.panel:nth-child(5),.view-enter>.purchase-grid>.purchase-card:nth-child(5),.view-enter>div:nth-child(5)>.panel{animation-delay:0.20s}
+.view-enter>.panel:nth-child(6),.view-enter>.purchase-grid>.purchase-card:nth-child(6),.view-enter>div:nth-child(6)>.panel{animation-delay:0.24s}
+.view-enter>.panel:nth-child(7),.view-enter>.purchase-grid>.purchase-card:nth-child(7),.view-enter>div:nth-child(7)>.panel{animation-delay:0.28s}
+.view-enter>.panel:nth-child(8),.view-enter>.purchase-grid>.purchase-card:nth-child(8),.view-enter>div:nth-child(8)>.panel{animation-delay:0.32s}
+.view-enter>.panel:nth-child(9),.view-enter>.purchase-grid>.purchase-card:nth-child(9),.view-enter>div:nth-child(9)>.panel{animation-delay:0.36s}
+.view-enter>.panel:nth-child(10),.view-enter>.purchase-grid>.purchase-card:nth-child(10),.view-enter>div:nth-child(10)>.panel{animation-delay:0.40s}
+.view-enter>.panel:nth-child(11),.view-enter>.purchase-grid>.purchase-card:nth-child(11),.view-enter>div:nth-child(11)>.panel{animation-delay:0.44s}
+.view-enter>.panel:nth-child(12),.view-enter>.purchase-grid>.purchase-card:nth-child(12),.view-enter>div:nth-child(12)>.panel{animation-delay:0.48s}
+.view-enter>.panel:nth-child(13),.view-enter>.purchase-grid>.purchase-card:nth-child(13),.view-enter>div:nth-child(13)>.panel{animation-delay:0.52s}
+.view-enter>.panel:nth-child(14),.view-enter>.purchase-grid>.purchase-card:nth-child(14),.view-enter>div:nth-child(14)>.panel{animation-delay:0.56s}
+.view-enter table tr{animation:ptRow .4s ease backwards}
+.view-enter table tr:nth-child(1){animation-delay:0.03s}
+.view-enter table tr:nth-child(2){animation-delay:0.06s}
+.view-enter table tr:nth-child(3){animation-delay:0.09s}
+.view-enter table tr:nth-child(4){animation-delay:0.12s}
+.view-enter table tr:nth-child(5){animation-delay:0.15s}
+.view-enter table tr:nth-child(6){animation-delay:0.18s}
+.view-enter table tr:nth-child(7){animation-delay:0.21s}
+.view-enter table tr:nth-child(8){animation-delay:0.24s}
+.view-enter table tr:nth-child(9){animation-delay:0.27s}
+.view-enter table tr:nth-child(10){animation-delay:0.30s}
+.view-enter table tr:nth-child(11){animation-delay:0.33s}
+.view-enter table tr:nth-child(12){animation-delay:0.36s}
+.view-enter table tr:nth-child(13){animation-delay:0.39s}
+/* ---------- buttons: ripple + spinner ---------- */
+.btn,.purchase-action,.purchase-mini-btn,.pt-clear-go,.rem-actions button{position:relative;overflow:hidden}
+.pt-ripple{position:absolute;border-radius:50%;background:rgba(120,160,255,.38);transform:scale(0);animation:ptRipple .6s ease-out;pointer-events:none}
+.btn .pt-ripple,.purchase-action.primary .pt-ripple{background:rgba(255,255,255,.45)}
+@keyframes ptRipple{to{transform:scale(2.6);opacity:0}}
+.pt-spin::after{content:"";display:inline-block;width:13px;height:13px;margin-left:8px;vertical-align:-2px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:ptSpin .7s linear infinite}
+@keyframes ptSpin{to{transform:rotate(360deg)}}
+/* ---------- toast ---------- */
+.toast{z-index:10000;transform:translateX(34px) scale(.95)!important;transition:opacity .3s ease,transform .5s cubic-bezier(.2,1.25,.3,1)!important}
+.toast.show{transform:none!important}
+.toast.show::before{content:"\2713";display:inline-grid;place-items:center;width:20px;height:20px;margin-right:10px;border-radius:50%;background:#2DBB78;color:#fff;font-size:12px;font-weight:800;animation:ptPop .55s .1s backwards}
+@keyframes ptPop{0%{transform:scale(0) rotate(-90deg)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
+/* ---------- sidebar icon hover ---------- */
+.nav-item:hover:before{animation:ptBounce .55s ease;text-shadow:0 0 12px rgba(255,255,255,.9);opacity:1}
+@keyframes ptBounce{0%,100%{transform:translateY(-50%)}35%{transform:translateY(-95%) scale(1.18)}65%{transform:translateY(-35%)}}
+@keyframes ptBounceC{0%,100%{transform:translate(-50%,-50%)}35%{transform:translate(-50%,-95%) scale(1.18)}65%{transform:translate(-50%,-35%)}}
+@media(max-width:1000px){.nav-item:hover:before{animation-name:ptBounceC}}
+/* ---------- stock bars ---------- */
+.stock-low{background:#FFF1DB;color:#8A5A00}
+.stock-bar{height:7px;min-width:96px;margin-top:8px;border-radius:7px;background:#E3EBF5;overflow:hidden}
+.stock-bar i{display:block;height:100%;border-radius:7px;transform-origin:left;animation:ptBar 1s cubic-bezier(.2,.8,.2,1) backwards}
+.stock-bar.ok i{background:linear-gradient(90deg,#2DBB78,#16A06A)}
+.stock-bar.low i{background:linear-gradient(90deg,#FFB547,#F28C28)}
+.stock-bar.bad i{background:linear-gradient(90deg,#F26A7A,#C43D52)}
+@keyframes ptBar{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+/* ---------- skeleton loaders ---------- */
+.empty.loading-shimmer{position:relative;color:transparent!important;min-height:92px;border-radius:12px;background:linear-gradient(90deg,#E7EEF8 25%,#F6F9FD 50%,#E7EEF8 75%)!important;background-size:200% 100%!important;animation:ptShimmer 1.3s linear infinite!important}
+.empty.loading-shimmer::before{content:"";position:absolute;left:16px;right:16px;top:18px;height:10px;border-radius:6px;background:rgba(255,255,255,.75);box-shadow:0 24px 0 rgba(255,255,255,.75),0 48px 0 rgba(255,255,255,.75)}
+@keyframes ptShimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+/* ---------- dark / light switch ---------- */
+html.pt-anim{transition:filter .6s ease}
+html.pt-dark{filter:invert(.93) hue-rotate(180deg)}
+html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-keep,html.pt-dark .sidebar{filter:invert(1) hue-rotate(180deg)}
+#pt-theme{position:fixed;right:18px;bottom:84px;z-index:9000;width:44px;height:44px;border-radius:50%;border:1px solid #C9DCEE;background:#fff;color:#0B3B82;font-size:19px;cursor:pointer;box-shadow:0 8px 22px rgba(11,59,130,.22);transition:transform .25s ease}
+#pt-theme:hover{transform:rotate(25deg) scale(1.1)}
+/* ---------- respect "reduce motion" ---------- */
+@media (prefers-reduced-motion:reduce){
+  *,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;animation-delay:0s!important;transition-duration:.01ms!important}
+  #pt-bg{display:none}
+}
+</style>
 </head>
 
 <body class="locked">
@@ -4839,7 +4927,7 @@ async function sendPurchaseEmail(){
       if(!validEmail(to)){purchaseSetMessage('Enter the Receiver email ID (who should get the email).',true);return;}
       const subject=val('purchase-subject')||'Purchase Request — Protthapan Technologies';
       const requester=val('purchase-requester')||currentName||'Team member';
-      const btn=document.getElementById('purchase-email');btn.disabled=true;btn.textContent='Sending…';purchaseSetMessage('Sending…');
+      const btn=document.getElementById('purchase-email');btn.disabled=true;btn.textContent='Sending…';btn.classList.add('pt-spin');purchaseSetMessage('Sending…');
       try{
         await sendEmailCore({to,from,fromName:requester,subject,message:msg,items:purchaseItems()});
         purchaseSetMessage('✓ Email sent from '+from+' to '+to+'.');
@@ -4849,7 +4937,7 @@ async function sendPurchaseEmail(){
           purchaseSetMessage('Email service is not connected yet. Open "Email sending setup" below, paste your EmailJS keys once, then press Send Email again.',true);
           const d=document.getElementById('email-setup'); if(d)d.open=true;
         } else purchaseSetMessage('Could not send the email: '+e.message,true);
-      }finally{btn.disabled=false;btn.textContent='✉ Send Email';}
+      }finally{btn.disabled=false;btn.classList.remove('pt-spin');btn.textContent='✉ Send Email';}
     }
         function sendPurchaseWhatsApp(){const phone=(document.getElementById('purchase-phone').value||purchaseCfg.phone||'').replace(/\D/g,'');if(!phone){purchaseSetMessage('Add the Purchase Department phone number first.',true);return;}window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(purchaseMessage()),'_blank','noopener');}
     function initPurchaseUI(){
@@ -5326,7 +5414,14 @@ function stockUsage(){
     function stockPill(r){
       if(!r.inInv) return '<span class="stock-pill stock-none">Not in inventory</span>';
       if(r.left<=0) return '<span class="stock-pill stock-none">Empty — no items left</span>';
-      return '<span class="stock-pill stock-ok">'+fmtNum(r.left)+' item'+(r.left===1?'':'s')+' left</span>';
+      const low=r.bought>0&&r.left/r.bought<=0.5;
+      return '<span class="stock-pill '+(low?'stock-low':'stock-ok')+'">'+fmtNum(r.left)+' item'+(r.left===1?'':'s')+' left</span>';
+    }
+function stockBar(r){
+      if(!r.inInv)return '';
+      const ratio=r.bought>0?Math.max(0,Math.min(1,r.left/r.bought)):0;
+      const lvl=ratio>0.5?'ok':(ratio>0.2?'low':'bad');
+      return '<div class="stock-bar '+lvl+'" title="'+Math.round(ratio*100)+'% left"><i style="width:'+Math.round(ratio*100)+'%"></i></div>';
     }
     function invLeftBadge(name){
       const k=stockKey(name), r=stockRows().find(x=>x.key===k);
@@ -5351,7 +5446,7 @@ function stockUsage(){
       el.innerHTML='<table><tr><th>Product</th><th>Bought</th><th>Used in projects</th><th>Left in inventory</th><th>Last bought</th></tr>'+list.map(r=>{
         const usedTxt=r.used>0?('<strong>'+fmtNum(r.used)+'</strong><div class="stock-sub">'+r.projects.map(p=>escapeHtml(p.name)+' ×'+fmtNum(p.qty)).join(', ')+'</div>'):'<span class="stock-sub">Not used yet</span>';
         const over=r.over>0&&r.inInv?'<div class="stock-sub" style="color:var(--danger)">Used '+fmtNum(r.over)+' more than bought</div>':'';
-        return `<tr data-stockkey="${escapeAttr(r.key)}"><td><strong>${escapeHtml(r.name)}</strong></td><td><span class="member-tag">${r.inInv?fmtNum(r.bought):'—'}</span></td><td>${usedTxt}</td><td>${stockPill(r)}${over}</td><td class="task-date">${r.last?formatDate(r.last):'—'}</td></tr>`;
+        return `<tr data-stockkey="${escapeAttr(r.key)}"><td><strong>${escapeHtml(r.name)}</strong></td><td><span class="member-tag">${r.inInv?fmtNum(r.bought):'—'}</span></td><td>${usedTxt}</td><td>${stockPill(r)}${stockBar(r)}${over}</td><td class="task-date">${r.last?formatDate(r.last):'—'}</td></tr>`;
       }).join('')+'</table>';
     }
         function loadImg(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{URL.revokeObjectURL(u);res(im);};im.onerror=()=>rej(new Error('Could not read this image.'));im.src=u;});}
@@ -5561,7 +5656,7 @@ function stockUsage(){
       else if(view==='log'){renderMyUpdates();renderAttendance();}
       else if(view==='inventory')renderInventory();else if(view==='report')renderReport();else if(view==='upcoming')renderUpcoming();else if(view==='modules'){renderModuleParent();renderModuleProgress();renderModuleList();renderModuleUpdates();}else if(view==='matlist'){renderProjectPickers();renderCatalogSelect();renderMaterialTracking();}else if(view==='pass'){renderProjectPickers();renderDraftItems();renderPassList();}else if(view==='materials')renderMaterialList();else if(view==='blog')renderBlogList();else if(view==='feed')renderFeed();else if(view==='members')renderMemberList();else if(view==='sheets'){renderSheetData();renderSheetStatus();fillSheetForm();}
       const q=document.getElementById('pt-page-search');if(q)q.value='';applyPageSearch();updateEnhancedIdentityUI();
-      target?.classList.add('view-enter');
+      if(target){target.classList.remove('view-enter');void target.offsetWidth;target.classList.add('view-enter');}
     }
 
     /* ================================================================
@@ -5912,6 +6007,74 @@ function stockUsage(){
       const cfg=PT_LISTS.find(c=>{const x=document.getElementById(c.el);return x&&x.contains(b);}); if(cfg)ptClearSelected(cfg.el);
     });
     new MutationObserver(()=>{clearTimeout(ptTimer);ptTimer=setTimeout(ptEnhanceAll,60);}).observe(document.body,{childList:true,subtree:true});
+
+
+    /* ================================================================
+       ANIMATIONS: background, count-up numbers, ripple, confetti, dark mode
+       ================================================================ */
+    (function(){
+      const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+      // animated background blobs
+      const bg=document.createElement('div');bg.id='pt-bg';bg.innerHTML='<i></i><i></i><i></i>';document.body.insertBefore(bg,document.body.firstChild);
+      // count-up numbers
+      const last={};let t=0;
+      function countUp(){
+        document.querySelectorAll('.purchase-stat strong,.ml-stat strong,.stat-card strong').forEach(el=>{
+          const raw=el.textContent.trim();
+          if(el.dataset.ptAnim||el.dataset.ptc===raw||!/^\d+(\.\d+)?$/.test(raw))return;
+          const holder=el.closest('.purchase-stat,.ml-stat,.stat-card');
+          const key=(holder?holder.textContent.replace(/[\d.]+/g,'').trim():'')+'|'+(holder&&holder.parentNode?(holder.parentNode.id||holder.parentNode.className):'');
+          const to=parseFloat(raw),from=last[key]||0;last[key]=to;el.dataset.ptc=raw;
+          if(reduce||from===to)return;
+          const dec=(raw.split('.')[1]||'').length,t0=performance.now(),dur=750;el.dataset.ptAnim='1';
+          (function step(now){const p=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-p,3);
+            if(p<1){el.textContent=(from+(to-from)*e).toFixed(dec);requestAnimationFrame(step);}
+            else{el.textContent=raw;delete el.dataset.ptAnim;}})(t0);
+        });
+      }
+      new MutationObserver(()=>{clearTimeout(t);t=setTimeout(countUp,80);}).observe(document.body,{childList:true,subtree:true});
+      // button ripple
+      document.addEventListener('pointerdown',e=>{
+        if(reduce)return;
+        const b=e.target.closest&&e.target.closest('.btn,.purchase-action,.purchase-mini-btn,.pt-clear-go,.rem-actions button');
+        if(!b||b.disabled)return;
+        const r=b.getBoundingClientRect(),d=Math.max(r.width,r.height),s=document.createElement('span');
+        s.className='pt-ripple';s.style.cssText='width:'+d+'px;height:'+d+'px;left:'+(e.clientX-r.left-d/2)+'px;top:'+(e.clientY-r.top-d/2)+'px';
+        b.appendChild(s);setTimeout(()=>s.remove(),650);
+      });
+      // confetti
+      window.ptConfetti=function(){
+        if(reduce)return;
+        let c=document.getElementById('pt-confetti');
+        if(!c){c=document.createElement('canvas');c.id='pt-confetti';c.style.cssText='position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:10001';document.body.appendChild(c);}
+        c.width=innerWidth;c.height=innerHeight;const x=c.getContext('2d');
+        const cols=['#1769D2','#7357D9','#2DBB78','#FFB547','#F26A7A','#35C3F3'];
+        const ps=Array.from({length:150},()=>({x:innerWidth/2+(Math.random()-.5)*240,y:innerHeight*.42,vx:(Math.random()-.5)*15,vy:-Math.random()*15-4,s:5+Math.random()*7,r:Math.random()*6,vr:(Math.random()-.5)*.45,c:cols[Math.floor(Math.random()*cols.length)]}));
+        let f=0;
+        (function draw(){
+          x.clearRect(0,0,c.width,c.height);
+          ps.forEach(p=>{p.vy+=.38;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.globalAlpha=Math.max(0,1-f/170);x.fillStyle=p.c;x.fillRect(-p.s/2,-p.s/3,p.s,p.s*.6);x.restore();});
+          if(++f<170)requestAnimationFrame(draw);else c.remove();
+        })();
+      };
+      // confetti when something is marked done
+      document.addEventListener('change',e=>{
+        const el=e.target,h=(el.getAttribute&&el.getAttribute('onchange'))||'';
+        if(el.tagName==='SELECT'&&/updateTaskStatus/.test(h)&&el.value==='done')ptConfetti();
+        else if(el.type==='checkbox'&&el.checked&&/toggleSubTask|toggleUpgradeDone/.test(h))ptConfetti();
+      });
+      // dark / light switch
+      const root=document.documentElement,btn=document.createElement('button');
+      btn.id='pt-theme';btn.type='button';btn.title='Switch dark / light mode';btn.className='pt-keep';
+      function paint(){btn.textContent=root.classList.contains('pt-dark')?'☀️':'🌙';}
+      try{if(localStorage.getItem('ptTheme')==='dark')root.classList.add('pt-dark');}catch(e){}
+      btn.addEventListener('click',()=>{
+        root.classList.add('pt-anim');root.classList.toggle('pt-dark');
+        try{localStorage.setItem('ptTheme',root.classList.contains('pt-dark')?'dark':'light');}catch(e){}
+        paint();
+      });
+      paint();document.body.appendChild(btn);
+    })();
 
     // ---- Start: only the lock screen is shown; the app and data load after a valid login ----
     document.getElementById('lock-submit').addEventListener('click', tryLogin);
