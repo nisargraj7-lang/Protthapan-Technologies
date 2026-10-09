@@ -6241,6 +6241,364 @@ function stockBar(r){
       document.getElementById('lock-user')?.focus();
     }
   </script>
+  <!-- =====================================================================
+     ORDER TRACKER + BULK EXCEL-SHEET ORDER  (add-on for Protthapan index.html)
+     HOW TO ADD: open your index.html, scroll to the very bottom, and paste this
+     whole block on the line just ABOVE  </body>   then save. Nothing else changes.
+     ===================================================================== -->
+<style id="pt-orders-style">
+/* ---------- Order tracker ---------- */
+#order-panel .ord-sub{color:#60738A;font-weight:400}
+.ord-card{border:1px solid #D5E2F0;border-radius:14px;background:#fff;padding:14px;margin-top:12px;border-left:4px solid #D9A441}
+.ord-card.st-received{border-left-color:#16A06A}.ord-card.st-ontheway{border-left-color:#1769D2}
+.ord-card.st-partial{border-left-color:#7357D9}.ord-card.st-cancelled{border-left-color:#9AA7B8;opacity:.8}
+.ord-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.ord-no{font-weight:800;color:#102A49;font-size:14px}
+.ord-date{font-size:12px;color:#60738A;margin-top:2px}
+.ord-meta{font-size:12px;color:#60738A;margin:8px 0 2px}
+.ord-pill{display:inline-block;padding:4px 11px;border-radius:20px;font-size:12px;font-weight:800;white-space:nowrap}
+.ord-pill.pending{background:#FFF3DA;color:#8A5A00}.ord-pill.ontheway{background:#E4EFFF;color:#1257AE}
+.ord-pill.received{background:#E1F5EC;color:#16704E}.ord-pill.partial{background:#EEEAFF;color:#5B46B8}
+.ord-pill.cancelled{background:#ECEFF3;color:#60738A}
+.ord-wrap{overflow-x:auto;margin-top:8px}
+table.ord-table{min-width:560px;width:100%}
+.ord-table td,.ord-table th{padding:9px 10px;font-size:13px}
+.ord-iname{font-weight:700}.ord-iname a{color:#1257AE;text-decoration:none}.ord-iname a:hover{text-decoration:underline}
+.ord-link{font-size:11px;color:#7A8CA3;word-break:break-all;margin-top:2px}
+.ord-iproj{font-size:11px;color:#60738A;margin-top:2px}
+select.ord-sel{width:auto!important;min-width:128px;padding:6px 8px!important;font-size:12.5px!important;font-weight:700;border-radius:9px!important}
+select.ord-sel.pending{background:#FFF3DA!important;color:#8A5A00!important;border-color:#F0D9A0!important}
+select.ord-sel.ontheway{background:#E4EFFF!important;color:#1257AE!important;border-color:#B9D3F5!important}
+select.ord-sel.received{background:#E1F5EC!important;color:#16704E!important;border-color:#B6E0CB!important}
+select.ord-sel.cancelled{background:#ECEFF3!important;color:#60738A!important}
+.ord-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:10px;font-size:13px}
+.ord-foot .ord-btns{display:flex;gap:8px;flex-wrap:wrap}
+.ord-note{margin-top:8px;padding:9px 11px;background:#F4F8FF;border-radius:10px;font-size:12px;color:#46586D;white-space:pre-wrap}
+.ord-recv{font-size:12px;color:#16704E;font-weight:700}
+/* ---------- Bulk sheet ---------- */
+#pd-bulk-tools .bk-box{border:1px dashed #B8CDE5;border-radius:12px;padding:12px;margin:10px 0;background:#F8FBFF}
+.bk-title{font-size:12px;font-weight:800;letter-spacing:.05em;color:#4E6580;margin-bottom:6px}
+.bk-help{font-size:12px;color:#60738A;margin-bottom:9px;line-height:1.55}
+.bk-help kbd{background:#EAF1FA;border:1px solid #C9DAEC;border-radius:5px;padding:0 5px;font-size:11px}
+.bk-wrap{max-height:340px;overflow:auto;border:1px solid #BCD0E6;border-radius:8px;background:#fff}
+table.bk-table{width:100%;table-layout:fixed;border-collapse:collapse;border:0!important;border-radius:0!important;background:#fff!important;min-width:0}
+.bk-table th{position:sticky;top:0;z-index:2;background:#E6F0FB!important;color:#2C4A6B!important;font-size:11px!important;text-transform:uppercase;letter-spacing:.05em;padding:8px!important;border:1px solid #C9DAEC!important}
+.bk-table td{padding:0!important;border:1px solid #DCE7F3!important;background:#fff!important}
+.bk-table td.bk-n{width:30px;text-align:center;font-size:11px;color:#7A8CA3;background:#F1F6FC!important}
+.bk-table td.bk-d{width:30px;text-align:center}
+.bk-table tr:hover td{background:#fff!important}.bk-table tr:hover td.bk-n{background:#F1F6FC!important}
+input.bk-in{width:100%!important;min-width:0;text-overflow:ellipsis;border:0!important;border-radius:0!important;box-shadow:none!important;background:transparent!important;padding:9px 10px!important;font-size:13px!important}
+input.bk-in:focus{outline:2px solid #1769D2!important;outline-offset:-2px;background:#F5F9FF!important}
+input.bk-num{text-align:right!important}
+.bk-table col.c-link{width:auto}.bk-table col.c-price{width:88px}.bk-table col.c-qty{width:64px}
+.bk-x{border:0;background:transparent;color:#C43D52;cursor:pointer;font-size:13px;padding:6px}
+.bk-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:9px}
+.bk-count{font-size:12.5px;color:#46586D;margin-left:auto;font-weight:700}
+.bk-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.bk-actions .purchase-mini-btn{padding:9px 13px;font-weight:700}
+.bk-actions .bk-primary{background:linear-gradient(135deg,#1769D2,#0B3B82)!important;color:#fff!important;border-color:transparent!important}
+.bk-msg{font-size:12.5px;margin-top:8px;min-height:16px;color:#16704E}.bk-msg.err{color:#C43D52}
+/* readable small buttons on the white theme */
+#order-panel .purchase-mini-btn,#pd-bulk-tools .purchase-mini-btn{background:#fff!important;color:#1257AE!important;border:1px solid #C9DCEE!important;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer}
+#order-panel .purchase-mini-btn:hover,#pd-bulk-tools .purchase-mini-btn:hover{background:#EEF5FF!important;border-color:#1769D2!important}
+#order-panel .ord-btns .purchase-mini-btn[data-orddel]{color:#C43D52!important;border-color:#E9C3C9!important}
+#pd-bulk-tools .bk-actions .bk-primary{background:linear-gradient(135deg,#1769D2,#0B3B82)!important;color:#fff!important;border-color:transparent!important}
+.ord-head,.ord-meta,.ord-foot{color:#14263D}
+</style>
+
+<script id="pt-orders-script">
+(function(){
+  'use strict';
+  if(window.__ptOrdersAddon)return; window.__ptOrdersAddon=true;
+
+  const $=id=>document.getElementById(id);
+  const E=s=>escapeHtml(s), A=s=>escapeAttr(s);
+  const toast=m=>{try{showToast(m);}catch(e){console.log(m);}};
+  const money=n=>(typeof pdMoney==='function')?pdMoney(n):('₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2}));
+  const safeUrl=u=>{u=String(u||'').trim();return /^https?:\/\/\S+$/i.test(u)?u:'';};
+  const num=v=>parseFloat(String(v==null?'':v).replace(/[^\d.]/g,''))||0;
+  const newId=()=>'i'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+  const fmtDT=ms=>ms?new Date(ms).toLocaleString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
+  const fmtD=ms=>ms?new Date(ms).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'—';
+  const STATUS={pending:'⏳ Pending',ontheway:'🚚 On the way',received:'✅ Received',cancelled:'✖ Cancelled'};
+  const OVERALL={pending:'⏳ Pending',ontheway:'🚚 On the way',received:'✅ All received',partial:'📦 Partly received',cancelled:'✖ Cancelled'};
+
+  let orders=[], mode='cloud', started=false, fStatus='', fText='';
+
+  /* ============ storage: Firestore "orders" (falls back to this device if rules block it) ============ */
+  const readLocal=()=>{try{return JSON.parse(localStorage.getItem('ptOrders')||'[]')||[];}catch(e){return [];}};
+  const writeLocal=()=>{try{localStorage.setItem('ptOrders',JSON.stringify(orders));}catch(e){}};
+  function start(){
+    if(started)return; started=true;
+    const local=()=>{mode='local';orders=readLocal();render();};
+    try{
+      db.collection('orders').onSnapshot(s=>{if(mode==='local')return;mode='cloud';orders=s.docs.map(d=>({id:d.id,...d.data()}));render();},err=>{console.warn('orders:',err);local();});
+    }catch(e){local();}
+  }
+  async function save(o){
+    if(mode==='cloud'){try{await db.collection('orders').add(o);return true;}catch(e){console.warn(e);mode='local';orders=readLocal();toast('Orders are saved on this device only. Add the "orders" Firestore rule to share them with the team.');}}
+    o.id='l'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);orders.push(o);writeLocal();render();return true;
+  }
+  async function patch(id,p){
+    if(mode==='cloud'){try{await db.collection('orders').doc(id).update(p);return true;}catch(e){toast('Could not update. Check the Firestore rules for "orders".');return false;}}
+    const o=orders.find(x=>x.id===id);if(!o)return false;Object.assign(o,p);writeLocal();render();return true;
+  }
+  async function removeOrder(id){
+    if(mode==='cloud'){try{await db.collection('orders').doc(id).delete();return true;}catch(e){toast('Could not delete. Check the Firestore rules for "orders".');return false;}}
+    orders=orders.filter(x=>x.id!==id);writeLocal();render();return true;
+  }
+  const canEdit=o=>(typeof isAdmin!=='undefined'&&isAdmin)||mode==='local'||(typeof currentUserUid!=='undefined'&&o.ownerUid&&o.ownerUid===currentUserUid);
+
+  /* ============ build + record an order ============ */
+  function overallOf(items){
+    if(!items.length)return 'pending';
+    const act=items.filter(i=>i.status!=='cancelled');
+    if(!act.length)return 'cancelled';
+    if(act.every(i=>i.status==='received'))return 'received';
+    if(act.some(i=>i.status==='received'))return 'partial';
+    if(act.some(i=>i.status==='ontheway'))return 'ontheway';
+    return 'pending';
+  }
+  function buildOrder(src,via){
+    const items=(src.items||[]).map(x=>({id:newId(),name:String(x.name||'Item').slice(0,200),price:num(x.price),qty:Math.max(1,Number(x.qty)||1),link:safeUrl(x.link||x.url),project:String(x.project||x.proj||'').slice(0,120),status:'pending',statusAt:null}));
+    const now=Date.now(),d=new Date(now),p=n=>String(n).padStart(2,'0');
+    return {
+      orderNo:'ORD-'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'-'+(Math.floor(Math.random()*900)+100),
+      createdAt:now,via,items,status:overallOf(items),
+      toEmail:src.to||'',fromEmail:src.from||'',subject:src.subject||'',project:src.project||'',note:src.note||'',
+      orderedBy:(typeof currentName!=='undefined'&&currentName)||'',ownerUid:(typeof currentUserUid!=='undefined'&&currentUserUid)||'',
+      total:items.reduce((a,i)=>a+i.price*i.qty,0)
+    };
+  }
+  async function recordEmailOrder(o){
+    const projEl=$('purchase-project'); const project=projEl?projEl.value.trim():'';
+    let items=Array.isArray(o.items)?o.items:[];
+    let note='';
+    if(!items.length){items=[{name:'Manual email order (see message)',qty:1,price:0}];note=String(o.message||'').slice(0,800);}
+    const ord=buildOrder({items,to:o.to,from:o.from,subject:o.subject,project,note},items.length&&!note?'email':'manual-email');
+    await save(ord);
+    toast('Order '+ord.orderNo+' saved in the Order tracker');
+  }
+
+  /* The purchase email is recorded automatically the moment it is sent successfully */
+  if(typeof sendEmailCore==='function'){
+    const origSend=sendEmailCore;
+    window.sendEmailCore=async function(o){
+      const r=await origSend.apply(this,arguments);
+      try{ if(o&&Array.isArray(o.items))await recordEmailOrder(o); }catch(e){console.warn('order record failed',e);}
+      return r;
+    };
+  }
+
+  /* ============ Order tracker UI ============ */
+  function itemMatchesFilter(i){return !fStatus||i.status===fStatus;}
+  function orderMatchesText(o){
+    const t=fText.trim().toLowerCase(); if(!t)return true;
+    return [o.orderNo,o.toEmail,o.project,o.orderedBy,o.subject].concat((o.items||[]).flatMap(i=>[i.name,i.link,i.project])).join(' ').toLowerCase().includes(t);
+  }
+  function renderStats(){
+    const el=$('ord-stats'); if(!el)return;
+    let p=0,w=0,r=0,pv=0;
+    orders.forEach(o=>(o.items||[]).forEach(i=>{ if(i.status==='pending'){p++;pv+=i.price*i.qty;} else if(i.status==='ontheway'){w++;pv+=i.price*i.qty;} else if(i.status==='received')r++; }));
+    el.innerHTML='<div class="ml-stat"><strong>'+orders.length+'</strong>Orders placed</div><div class="ml-stat"><strong>'+p+'</strong>Items pending</div><div class="ml-stat"><strong>'+w+'</strong>On the way</div><div class="ml-stat"><strong>'+r+'</strong>Items received</div><div class="ml-stat"><strong style="font-size:18px">'+E(money(pv))+'</strong>Value not yet received</div>';
+  }
+  function render(){
+    const list=$('order-list'); if(!list)return;
+    renderStats();
+    if(!orders.length){list.innerHTML='<div class="empty">No orders yet. Every purchase email you send is saved here automatically, and you can paste a bulk list from Excel.</div>';return;}
+    const shown=orders.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).filter(o=>orderMatchesText(o)&&(!fStatus||(o.items||[]).some(itemMatchesFilter)));
+    if(!shown.length){list.innerHTML='<div class="empty">No orders match this filter.</div>';return;}
+    list.innerHTML=shown.map(o=>{
+      const items=o.items||[], ov=overallOf(items), edit=canEdit(o);
+      const rows=items.filter(itemMatchesFilter).map(i=>{
+        const link=safeUrl(i.link), line=i.price*i.qty;
+        const stCell=edit?'<select class="ord-sel '+A(i.status)+'" data-oid="'+A(o.id)+'" data-iid="'+A(i.id)+'">'+Object.keys(STATUS).map(k=>'<option value="'+k+'"'+(i.status===k?' selected':'')+'>'+STATUS[k]+'</option>').join('')+'</select>':'<span class="ord-pill '+A(i.status)+'">'+STATUS[i.status]+'</span>';
+        return '<tr><td><div class="ord-iname">'+(link?'<a href="'+A(link)+'" target="_blank" rel="noopener noreferrer">'+E(i.name)+'</a>':E(i.name))+'</div>'+(link?'<div class="ord-link">'+E(link.length>60?link.slice(0,60)+'…':link)+'</div>':'')+(i.project?'<div class="ord-iproj">Project: '+E(i.project)+'</div>':'')+'</td>'
+          +'<td>'+(i.price?E(money(i.price)):'—')+'</td><td>'+i.qty+'</td><td>'+(i.price?'<strong>'+E(money(line))+'</strong>':'—')+'</td><td>'+stCell+'</td>'
+          +'<td>'+(i.status==='received'&&i.statusAt?'<span class="ord-recv">'+E(fmtD(i.statusAt))+'</span>':'—')+'</td></tr>';
+      }).join('');
+      const viaTxt=o.via==='bulk-sheet'?'Saved from bulk sheet (no email sent)':(o.via==='manual-email'?'Sent by email (written manually)':'Sent by email');
+      return '<div class="ord-card st-'+A(ov)+'" data-oid="'+A(o.id)+'">'
+        +'<div class="ord-head"><div><div class="ord-no">'+E(o.orderNo||'Order')+'</div><div class="ord-date">Ordered on '+E(fmtDT(o.createdAt))+(o.orderedBy?' · by '+E(o.orderedBy):'')+'</div></div><span class="ord-pill '+A(ov)+'">'+OVERALL[ov]+'</span></div>'
+        +'<div class="ord-meta">'+E(viaTxt)+(o.toEmail?' · To: '+E(o.toEmail):'')+(o.project?' · Project: '+E(o.project):'')+'</div>'
+        +'<div class="ord-wrap"><table class="ord-table"><tr><th>Product</th><th>Price</th><th>Qty</th><th>Total</th><th>Status</th><th>Received on</th></tr>'+rows+'</table></div>'
+        +(o.note?'<div class="ord-note">'+E(o.note)+'</div>':'')
+        +'<div class="ord-foot"><div>Order total: <strong>'+(o.total?E(money(o.total)):'—')+'</strong></div>'
+        +(edit?'<div class="ord-btns"><button type="button" class="purchase-mini-btn" data-allrecv="'+A(o.id)+'">✅ Mark all received</button><button type="button" class="purchase-mini-btn" data-orddel="'+A(o.id)+'" style="color:#C43D52">🗑 Delete</button></div>':'')
+        +'</div></div>';
+    }).join('');
+  }
+
+  /* ============ Bulk Excel-style sheet ============ */
+  function parseTSV(t){
+    t=String(t).replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+    const rows=[];let row=[],cell='',q=false;
+    for(let i=0;i<t.length;i++){const ch=t[i];
+      if(q){if(ch==='"'){if(t[i+1]==='"'){cell+='"';i++;}else q=false;}else cell+=ch;}
+      else if(ch==='"'&&cell===''){q=true;}
+      else if(ch==='\t'){row.push(cell);cell='';}
+      else if(ch==='\n'){row.push(cell);rows.push(row);row=[];cell='';}
+      else cell+=ch;}
+    if(cell!==''||row.length){row.push(cell);rows.push(row);}
+    return rows.filter(r=>r.some(c=>String(c).trim()!==''));
+  }
+  const looksHeader=r=>{const non=v=>{v=String(v||'').trim();return v!==''&&isNaN(parseFloat(v.replace(/[^\d.]/g,'')));};return (non(r[1])||non(r[2]))&&/(price|cost|rate|amount|qty|quantity|link|name|product|item)/i.test(r.join(' '));};
+  function guessName(link){
+    try{ if(typeof pdGuessName==='function'){const g=pdGuessName(link);if(g)return g;} }catch(e){}
+    try{const u=new URL(link);return decodeURIComponent(u.pathname.split('/').filter(Boolean).pop()||u.hostname).replace(/[-_+]+/g,' ').trim()||u.hostname;}catch(e){return 'Product';}
+  }
+  function parseItem(raw,price,qty){
+    raw=String(raw||'').trim();
+    const m=raw.match(/(https?:\/\/\S+|www\.\S+)/i);
+    let link='',name=raw;
+    if(m){
+      link=m[1].replace(/[),.;]+$/,''); if(!/^https?:/i.test(link))link='https://'+link;
+      name=raw.replace(m[1],'').replace(/^[\s|,\-–—:]+|[\s|,\-–—:]+$/g,'').trim();
+      if(!name)name=guessName(link);
+    }
+    return {name:name||'Product',link,price:num(price),qty:Math.max(1,parseInt(num(qty),10)||1)};
+  }
+  const body=()=>$('bk-body');
+  function rowHtml(n){
+    return '<tr><td class="bk-n">'+n+'</td><td><input class="bk-in" data-c="0" type="text" placeholder="Paste product link or name" autocomplete="off"></td><td><input class="bk-in bk-num" data-c="1" type="text" inputmode="decimal" placeholder="0" autocomplete="off"></td><td><input class="bk-in bk-num" data-c="2" type="text" inputmode="numeric" placeholder="1" autocomplete="off"></td><td class="bk-d"><button type="button" class="bk-x" title="Clear this row">✕</button></td></tr>';
+  }
+  function addRows(n){
+    const b=body(); if(!b)return;
+    let cur=b.rows.length;
+    b.insertAdjacentHTML('beforeend',Array.from({length:n},(_,i)=>rowHtml(cur+i+1)).join(''));
+  }
+  function renumber(){[...body().rows].forEach((tr,i)=>{tr.cells[0].textContent=i+1;});}
+  function readRows(){
+    const out=[];
+    [...body().rows].forEach(tr=>{
+      const v=[...tr.querySelectorAll('.bk-in')].map(i=>i.value);
+      if(!v[0].trim())return;
+      out.push(parseItem(v[0],v[1],v[2]));
+    });
+    return out;
+  }
+  function updateCount(){
+    const items=readRows(), total=items.reduce((a,i)=>a+i.price*i.qty,0), el=$('bk-count'); if(!el)return;
+    el.textContent=items.length?(items.length+' item'+(items.length===1?'':'s')+' ready · Total '+money(total)):'Sheet is empty';
+  }
+  function bkMsg(t,err){const m=$('bk-msg');if(m){m.textContent=t||'';m.className='bk-msg'+(err?' err':'');}}
+  function clearSheet(){const b=body();if(!b)return;b.innerHTML='';addRows(8);updateCount();}
+  function handlePaste(e){
+    const inp=e.target.closest&&e.target.closest('.bk-in'); if(!inp)return;
+    const text=(e.clipboardData||window.clipboardData).getData('text')||'';
+    if(!/[\t\n]/.test(text.replace(/\n$/,'').replace(/\r\n?$/,'')))return;      // one single value: normal paste
+    e.preventDefault();
+    let rows=parseTSV(text); if(!rows.length)return;
+    const tr=inp.closest('tr'), r0=[...body().rows].indexOf(tr), c0=Number(inp.dataset.c);
+    if(rows.length&&looksHeader(rows[0]))rows=rows.slice(1);
+    const need=r0+rows.length-body().rows.length; if(need>0)addRows(need+2);
+    rows.forEach((cells,i)=>{
+      const trow=body().rows[r0+i];
+      cells.forEach((val,j)=>{const c=c0+j; if(c>2)return; const el=trow.querySelector('.bk-in[data-c="'+c+'"]'); if(el)el.value=String(val).trim();});
+    });
+    updateCount();
+    bkMsg('✓ Pasted '+rows.length+' row'+(rows.length===1?'':'s')+'. Check the sheet, then choose what to do with it below.');
+  }
+  function sheetEvents(){
+    const b=body(); if(!b)return;
+    b.addEventListener('paste',handlePaste);
+    b.addEventListener('input',()=>{updateCount();});
+    b.addEventListener('click',e=>{const x=e.target.closest('.bk-x'); if(!x)return; x.closest('tr').querySelectorAll('.bk-in').forEach(i=>i.value='');updateCount();});
+    b.addEventListener('keydown',e=>{
+      if(e.key!=='Enter')return; const inp=e.target.closest('.bk-in'); if(!inp)return; e.preventDefault();
+      const tr=inp.closest('tr'); let nxt=tr.nextElementSibling; if(!nxt){addRows(3);nxt=tr.nextElementSibling;}
+      const f=nxt&&nxt.querySelector('.bk-in[data-c="'+inp.dataset.c+'"]'); if(f)f.focus();
+    });
+    $('bk-more').addEventListener('click',()=>{addRows(5);updateCount();});
+    $('bk-clear').addEventListener('click',()=>{clearSheet();bkMsg('');});
+    $('bk-email').addEventListener('click',()=>{
+      const items=readRows(); if(!items.length){bkMsg('Paste at least one product first.',true);return;}
+      if(typeof purchaseLinkItems==='undefined'){bkMsg('Purchase Desk is not ready yet.',true);return;}
+      items.forEach(i=>purchaseLinkItems.push({id:'lnk-'+Date.now()+'-'+Math.floor(Math.random()*100000),name:i.name,link:i.link,price:i.price,qty:i.qty,unit:'pcs',proj:''}));
+      try{renderPurchaseRequest();}catch(e){}
+      clearSheet(); bkMsg('✓ '+items.length+' item'+(items.length===1?'':'s')+' added to the email request (see the list at the top of this card). Press Send Email when you are ready — the order is saved in the Order tracker automatically.');
+    });
+    $('bk-save').addEventListener('click',async()=>{
+      const items=readRows(); if(!items.length){bkMsg('Paste at least one product first.',true);return;}
+      const projEl=$('purchase-project');
+      const ord=buildOrder({items,project:projEl?projEl.value.trim():''},'bulk-sheet');
+      await save(ord); clearSheet();
+      bkMsg('✓ '+items.length+' item'+(items.length===1?'':'s')+' saved to the order list as '+ord.orderNo+' (status: Pending).');
+      toast('Saved '+items.length+' items to the Order tracker');
+      const p=$('order-panel'); if(p&&p.scrollIntoView)p.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  }
+
+  /* ============ inject the UI into the page ============ */
+  function inject(){
+    // 1) Order tracker panel (above Reminders)
+    const panel=document.createElement('div'); panel.className='panel'; panel.id='order-panel';
+    panel.innerHTML='<h2>📦 Order tracker <span class="ord-sub">— what we ordered, when, and whether it has arrived</span></h2>'
+      +'<div class="ml-stats" id="ord-stats"></div>'
+      +'<div class="filter-bar"><select id="ord-filter"><option value="">All items</option><option value="pending">⏳ Pending</option><option value="ontheway">🚚 On the way</option><option value="received">✅ Received</option><option value="cancelled">✖ Cancelled</option></select><input type="text" id="ord-search" placeholder="Search product, project, order no…" style="max-width:260px"></div>'
+      +'<div id="order-list"><div class="empty">No orders yet. Every purchase email you send is saved here automatically, and you can paste a bulk list from Excel.</div></div>';
+    const rem=$('reminder-panel');
+    if(rem&&rem.parentNode)rem.parentNode.insertBefore(panel,rem); else {const v=$('view-inventory'); if(v)v.appendChild(panel);}
+    $('ord-filter').addEventListener('change',e=>{fStatus=e.target.value;render();});
+    $('ord-search').addEventListener('input',e=>{fText=e.target.value;render();});
+    panel.addEventListener('change',async e=>{
+      const s=e.target.closest&&e.target.closest('select[data-iid]'); if(!s)return;
+      const o=orders.find(x=>x.id===s.dataset.oid); if(!o)return;
+      const items=(o.items||[]).map(i=>i.id===s.dataset.iid?{...i,status:s.value,statusAt:s.value==='pending'?null:Date.now()}:i);
+      await patch(o.id,{items,status:overallOf(items)});
+      if(s.value==='received'&&typeof ptConfetti==='function'){try{ptConfetti();}catch(e2){}}
+    });
+    panel.addEventListener('click',async e=>{
+      const ar=e.target.closest&&e.target.closest('[data-allrecv]'), dl=e.target.closest&&e.target.closest('[data-orddel]');
+      if(ar){const o=orders.find(x=>x.id===ar.dataset.allrecv); if(!o)return;
+        const items=(o.items||[]).map(i=>i.status==='cancelled'?i:{...i,status:'received',statusAt:i.statusAt||Date.now()});
+        if(await patch(o.id,{items,status:overallOf(items)})){toast('All items marked as received');if(typeof ptConfetti==='function'){try{ptConfetti();}catch(e2){}}}}
+      else if(dl){const o=orders.find(x=>x.id===dl.dataset.orddel); if(!o)return;
+        if(!confirm('Delete order '+(o.orderNo||'')+' from the tracker? This cannot be undone.'))return;
+        if(await removeOrder(o.id))toast('Order deleted');}
+    });
+
+    // 2) "Bulk (paste from Excel)" option next to the other two email options
+    const modes=$('pd-modes');
+    if(modes){
+      const b=document.createElement('button'); b.type='button'; b.className='pd-mode'; b.dataset.mode='bulk'; b.textContent='📊 Bulk (paste from Excel)';
+      b.addEventListener('click',()=>window.setPurchaseMode&&window.setPurchaseMode('bulk'));
+      modes.appendChild(b);
+    }
+    const tools=$('pd-auto-tools');
+    if(tools){
+      const d=document.createElement('div'); d.id='pd-bulk-tools'; d.style.display='none';
+      d.innerHTML='<div class="bk-box"><div class="bk-title">📊 BULK ORDER — PASTE FROM EXCEL / GOOGLE SHEETS</div>'
+        +'<div class="bk-help">Copy your rows from Excel or Google Sheets (3 columns: <b>Link or product name</b> · <b>Price</b> · <b>Quantity</b>), click the first cell below and press <kbd>Ctrl</kbd> + <kbd>V</kbd>. All rows fill in automatically. You can also type or edit any cell.</div>'
+        +'<div class="bk-wrap"><table class="bk-table"><colgroup><col style="width:30px"><col class="c-link"><col class="c-price"><col class="c-qty"><col style="width:30px"></colgroup><thead><tr><th>#</th><th>Link / Product name</th><th>Price (₹)</th><th>Qty</th><th></th></tr></thead><tbody id="bk-body"></tbody></table></div>'
+        +'<div class="bk-bar"><button type="button" class="purchase-mini-btn" id="bk-more">+ 5 rows</button><button type="button" class="purchase-mini-btn" id="bk-clear">Clear sheet</button><span class="bk-count" id="bk-count">Sheet is empty</span></div>'
+        +'<div class="bk-actions"><button type="button" class="purchase-mini-btn bk-primary" id="bk-email">✉ Add to email request</button><button type="button" class="purchase-mini-btn" id="bk-save">📋 Save to order list (no email)</button></div>'
+        +'<div class="bk-msg" id="bk-msg"></div></div>';
+      tools.parentNode.insertBefore(d,tools.nextSibling);
+      addRows(8); sheetEvents();
+    }
+    // keep the existing mode switcher, and make "bulk" show the sheet (the email still uses the auto table)
+    if(typeof window.setPurchaseMode==='function'){
+      const orig=window.setPurchaseMode;
+      window.setPurchaseMode=function(m){
+        const bulk=(m==='bulk');
+        orig.call(this,bulk?'auto':m);
+        const bt=$('pd-bulk-tools'); if(bt)bt.style.display=bulk?'block':'none';
+        if(bulk){
+          document.querySelectorAll('#pd-modes .pd-mode').forEach(x=>x.classList.toggle('active',x.dataset.mode==='bulk'));
+          const at=$('pd-auto-tools'); if(at)at.style.display='none';
+          setTimeout(()=>{const f=document.querySelector('#bk-body .bk-in'); if(f)f.focus();},60);
+        }
+      };
+    }
+  }
+
+  inject();
+  // start reading orders once the user is logged in
+  const wait=setInterval(()=>{ try{ if(typeof auth!=='undefined'&&auth&&auth.currentUser&&typeof db!=='undefined'&&db){clearInterval(wait);start();} }catch(e){} },700);
+})();
+</script>
+
 </body>
 
 </html>
