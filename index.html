@@ -1951,8 +1951,7 @@ svg text{fill:#18324E!important}
 <style>
 .nav-item[data-view=tickets]:before{content:"\2708\FE0E"}
 #admin-toggle:before{content:"\23FB\FE0E"}
-#purchase-preview{width:100%;min-height:320px;max-height:70vh;overflow-y:auto;border:none!important;border-radius:0!important;padding:13px!important;resize:vertical;font:12.5px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace!important;box-shadow:none!important;display:block}
-#purchase-message-count{border-radius:0 0 10px 10px}
+#purchase-preview{width:100%;min-height:230px;border:none!important;border-radius:0!important;padding:13px!important;resize:vertical;font:12.5px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace!important;box-shadow:none!important;display:block}
 .email-preview-head .purchase-mini-btn{float:right;margin-top:-4px}
 </style>
 
@@ -2365,8 +2364,7 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
             </div>
             <div class="email-preview">
               <div class="email-preview-head"><span id="pd-preview-title">✏️ Email message (auto-generated, you can still edit)</span> <button type="button" class="purchase-mini-btn" id="purchase-reset-draft">↺ Reset to auto draft</button></div>
-              <textarea id="purchase-preview" maxlength="2097152" placeholder="Type your message to the Purchase Department..." oninput="updatePurchaseMessageCount()"></textarea>
-              <div id="purchase-message-count" style="padding:6px 13px;font-size:11px;color:#71847b;text-align:right;background:#fff;border-top:1px solid #e5edf5;">0 / 2,097,152 characters (up to about 2 MB)</div>
+              <textarea id="purchase-preview" placeholder="Type your message to the Purchase Department..."></textarea>
             </div>
             <div style="margin-top:10px;"><button type="button" class="purchase-mini-btn" id="purchase-save-contact">💾 Save sender / receiver</button><span style="font-size:11px;color:#71847b;margin-left:10px;">Email passwords are never stored in this page.</span></div>
             <details class="email-setup" id="email-setup">
@@ -4993,13 +4991,6 @@ function savePurchasePrefs(quiet){
       renderPurchaseRequest();
     }
     function removePurchaseItem(id){if(id.indexOf('lnk-')===0)purchaseLinkItems=purchaseLinkItems.filter(x=>x.id!==id);else{delete purchaseSelection[id];delete purchasePrices[id];delete purchaseProjects[id];}renderPurchaseCatalog();renderPurchaseRequest();}
-    function updatePurchaseMessageCount(){
-      const field=document.getElementById('purchase-preview');
-      const counter=document.getElementById('purchase-message-count');
-      if(!field||!counter)return;
-      counter.textContent=field.value.length.toLocaleString()+' / 2,097,152 characters (up to about 2 MB)';
-      counter.style.color=field.value.length>=2097152?'#b42318':'#71847b';
-    }
     function purchaseMessage(){const t=document.getElementById('purchase-preview');return (purchaseMsgEdited&&t)?t.value:purchaseDraft();}
     function purchaseDraft(){
       const items=purchaseItems(); const requester=(document.getElementById('purchase-requester')?.value||currentName||'Team member').trim(); const project=(document.getElementById('purchase-project')?.value||'').trim(); const note=(document.getElementById('purchase-note')?.value||'').trim();
