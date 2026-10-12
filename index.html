@@ -6598,6 +6598,366 @@ input.bk-num{text-align:right!important}
   const wait=setInterval(()=>{ try{ if(typeof auth!=='undefined'&&auth&&auth.currentUser&&typeof db!=='undefined'&&db){clearInterval(wait);start();} }catch(e){} },700);
 })();
 </script>
+  <!-- =====================================================================
+     ADD-ON 2:  (1) Repeating reminders every 4 hours + "Done" button
+                (2) New "Daily Work" page, report emailed to info@protthapan.com
+     HOW TO ADD: open your index.html, go to the very bottom and paste this whole
+     block on the line just ABOVE  </body>  (below the Order-tracker add-on). Save.
+     ===================================================================== -->
+<style id="pt-dw-style">
+/* ---------- reminders: repeat + done ---------- */
+.rem-repeat-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0 4px;padding:10px 12px;border:1px dashed #B8CDE5;border-radius:12px;background:#F8FBFF}
+.rem-repeat-row label{display:flex!important;align-items:center;gap:8px;margin:0!important;text-transform:none!important;letter-spacing:0!important;font-size:13.5px!important;font-weight:600!important;color:#2C4A6B!important}
+.rem-repeat-row input[type=checkbox]{width:17px;height:17px;accent-color:#1769D2}
+.rem-repeat-row input#rem-repeat-h{width:72px!important;padding:6px 8px!important;text-align:center}
+.rem-repeat-row .purchase-mini-btn,button.rem-done{background:#fff!important;color:#1257AE!important;border:1px solid #C9DCEE!important;border-radius:10px;padding:7px 11px;font-weight:700;cursor:pointer;font-size:12px}
+button.rem-done{color:#16704E!important;border-color:#B6E0CB!important}
+button.rem-done:hover{background:#E8F7F0!important}
+.rem-rep-tag{display:inline-block;margin-top:4px;padding:2px 9px;border-radius:20px;background:#EEEAFF;color:#5B46B8;font-size:11.5px;font-weight:700}
+/* ---------- Daily Work page ---------- */
+.nav-item[data-view=dailywork]:before{content:"\270E\FE0E"}
+.dw-to{margin-top:16px;padding:12px 14px;border:1px solid #D5E2F0;border-radius:12px;background:#F8FBFF}
+.dw-to-title{font-size:12px;font-weight:800;letter-spacing:.05em;color:#4E6580;margin-bottom:8px}
+.dw-chip{display:inline-block;padding:6px 12px;border-radius:20px;background:#E1F5EC;color:#16704E;font-weight:700;font-size:13px}
+.dw-chip small{font-weight:500;color:#4E8A6E}
+.dw-today{font-size:13px;color:#46586D;margin:0 0 12px}
+.dw-work{white-space:pre-wrap;max-height:4.6em;overflow:hidden;cursor:pointer;position:relative}
+.dw-work.open{max-height:none}
+.dw-email-ok{color:#16704E;font-weight:700;font-size:12px}.dw-email-bad{color:#B13243;font-weight:700;font-size:12px}
+button.dw-resend{background:#fff!important;color:#1257AE!important;border:1px solid #C9DCEE!important;border-radius:9px;padding:5px 9px;font-weight:700;font-size:12px;cursor:pointer;margin-top:4px}
+#dw-msg{font-size:13px;margin-left:12px}
+#dw-msg.ok{color:#16704E}#dw-msg.err{color:#C43D52}
+</style>
+
+<script id="pt-dw-script">
+(function(){
+  'use strict';
+  if(window.__ptDwAddon)return; window.__ptDwAddon=true;
+
+  const $=id=>document.getElementById(id);
+  const E=s=>escapeHtml(s), A=s=>escapeAttr(s);
+  const toast=m=>{try{showToast(m);}catch(e){console.log(m);}};
+  const COMPANY_EMAIL='info@protthapan.com';
+
+  /* =====================================================================
+     PART 1 — REMINDERS: repeat every N hours until "Done", Done button, alerts
+     ===================================================================== */
+  function fixAutofill(){
+    // the browser sometimes pastes the EmailJS "service_xxx / template_xxx" ids into these boxes
+    ['rem-title','rem-to-phone','rem-note','rem-from','rem-to-email','ejs-service','ejs-template','ejs-key'].forEach(id=>{
+      const el=$(id); if(!el)return;
+      el.setAttribute('autocomplete','off'); el.setAttribute('data-lpignore','true');
+      if(id.indexOf('rem-')===0 && /^(service|template)_[A-Za-z0-9]+$/i.test(el.value.trim()))el.value='';
+    });
+  }
+  function injectRepeatUI(){
+    const lab=document.querySelector('label[for="rem-note"]'); if(!lab||$('rem-repeat'))return;
+    const row=document.createElement('div'); row.className='rem-repeat-row';
+    row.innerHTML='<label><input type="checkbox" id="rem-repeat" checked> 🔁 Repeat every <input type="number" id="rem-repeat-h" min="0.5" max="168" step="0.5" value="4"> hours until I press “Done”</label>'
+      +'<button type="button" class="purchase-mini-btn" id="rem-notify">🔔 Turn on pop-up alerts</button>';
+    lab.parentNode.insertBefore(row,lab);
+    $('rem-notify').addEventListener('click',async()=>{try{await Notification.requestPermission();}catch(e){}updateNotifyBtn();});
+    updateNotifyBtn();
+  }
+  function updateNotifyBtn(){
+    const b=$('rem-notify'); if(!b)return;
+    if(!('Notification' in window)){b.style.display='none';return;}
+    const p=Notification.permission;
+    b.textContent=p==='granted'?'🔔 Pop-up alerts are ON':(p==='denied'?'🔕 Alerts blocked in browser settings':'🔔 Turn on pop-up alerts');
+    b.disabled=p!=='default';
+  }
+
+  // 1) new reminders remember the repeat setting
+  if(typeof remAdd==='function'){
+    const origAdd=remAdd;
+    window.remAdd=function(r){
+      try{ const on=$('rem-repeat'); if(on&&on.checked){ r.repeatHours=Math.max(0.5,Math.min(168,parseFloat(($('rem-repeat-h')||{}).value)||4)); r.repeatCount=0; } }catch(e){}
+      return origAdd.call(this,r);
+    };
+  }
+  // 2) after every check, start the next cycle for repeating reminders that were fully sent
+  let repBusy=false;
+  async function repeatPass(){
+    if(repBusy||typeof reminders==='undefined')return; repBusy=true;
+    try{
+      const now=Date.now();
+      for(const r of reminders.slice()){
+        const h=Number(r.repeatHours); if(!h||h<=0)continue;
+        if(!r.dueAt||r.dueAt>now)continue;
+        const ch=r.channels||{};
+        const emailOk=!ch.email||r.emailSent;
+        // WhatsApp needs a tap: wait for it for up to 30 minutes, then move on so the email keeps repeating
+        const grace=Math.min(30*60000,h*1800000);
+        const waOk=!ch.whatsapp||r.waSent||r.waDismissed||(now-r.dueAt>grace);
+        if(!emailOk||!waOk)continue;
+        await remPatch(r.id,{dueAt:now+h*3600000,repeatCount:(r.repeatCount||0)+1,lastSentAt:now,emailSent:false,emailSentAt:null,emailClaim:null,emailError:null,waSent:false,waSentAt:null,waDismissed:false});
+      }
+    }catch(e){console.warn('repeat:',e);}
+    finally{repBusy=false;}
+  }
+  if(typeof remTick==='function'){
+    const origTick=remTick;
+    window.remTick=async function(){ const r=await origTick.apply(this,arguments); await repeatPass(); return r; };
+  }
+  // 3) "Done — remove" button + repeat label on every reminder row
+  if(typeof renderReminders==='function'){
+    const origRender=renderReminders;
+    window.renderReminders=function(){
+      const out=origRender.apply(this,arguments);
+      try{
+        document.querySelectorAll('#rem-list tr[data-remid]').forEach(tr=>{
+          const r=reminders.find(x=>x.id===tr.dataset.remid); if(!r)return;
+          const tds=tr.querySelectorAll('td'); if(tds.length<5)return;
+          if(r.repeatHours&&!tds[3].querySelector('.rem-rep-tag'))
+            tds[3].insertAdjacentHTML('beforeend','<div><span class="rem-rep-tag">🔁 every '+E(r.repeatHours)+' h'+(r.repeatCount?' · repeated '+E(r.repeatCount)+'×':'')+'</span></div>');
+          const last=tds[tds.length-1];
+          if(!last.querySelector('.rem-done'))last.insertAdjacentHTML('beforeend','<div style="margin-top:6px"><button type="button" class="rem-done" data-rem-done="'+A(r.id)+'">✔ Done — remove</button></div>');
+        });
+      }catch(e){console.warn(e);}
+      return out;
+    };
+  }
+  document.addEventListener('click',async e=>{
+    const b=e.target.closest&&e.target.closest('[data-rem-done]'); if(!b)return;
+    b.disabled=true;
+    const ok=await remRemove(b.dataset.remDone);
+    toast(ok?'Reminder removed — work marked as done':'Could not remove the reminder. Check the Firestore rules.');
+    if(!ok)b.disabled=false;
+  });
+  // 4) sound + pop-up when a WhatsApp reminder becomes due (WhatsApp itself still needs one tap)
+  const alerted=new Set();
+  function beep(){
+    try{const C=window.AudioContext||window.webkitAudioContext;const ctx=new C();if(ctx.resume)ctx.resume();
+      const o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=880;o.connect(g);g.connect(ctx.destination);
+      g.gain.setValueAtTime(0.001,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.25,ctx.currentTime+0.03);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.7);
+      o.start();o.stop(ctx.currentTime+0.75);}catch(e){}
+  }
+  function alertDue(){
+    const ids=[...document.querySelectorAll('#rem-banner [data-rem-wa]')].map(b=>b.dataset.remWa);
+    [...alerted].forEach(id=>{if(ids.indexOf(id)<0)alerted.delete(id);});
+    const fresh=ids.filter(id=>!alerted.has(id)); if(!fresh.length)return;
+    fresh.forEach(id=>alerted.add(id)); beep();
+    if('Notification' in window&&Notification.permission==='granted'){
+      fresh.forEach(id=>{const r=reminders.find(x=>x.id===id);try{new Notification('⏰ Reminder due',{body:(r?r.title:'Reminder')+' — open the website and tap “Send on WhatsApp”'});}catch(e){}});
+    }
+  }
+  if(typeof remRenderBanner==='function'){
+    const origBanner=remRenderBanner;
+    window.remRenderBanner=function(){const r=origBanner.apply(this,arguments);try{alertDue();}catch(e){}return r;};
+  }
+
+  /* =====================================================================
+     PART 2 — DAILY WORK page
+     ===================================================================== */
+  let recs=[], mode='cloud', started=false, onlyMine=false, qtext='';
+  const readLocal=()=>{try{return JSON.parse(localStorage.getItem('ptDailyWork')||'[]')||[];}catch(e){return [];}};
+  const writeLocal=()=>{try{localStorage.setItem('ptDailyWork',JSON.stringify(recs));}catch(e){}};
+  function start(){
+    if(started)return; started=true;
+    const local=()=>{mode='local';recs=readLocal();renderList();};
+    try{
+      db.collection('dailyWork').onSnapshot(s=>{if(mode==='local')return;mode='cloud';recs=s.docs.map(d=>({id:d.id,...d.data()}));renderList();},err=>{console.warn('dailyWork:',err);local();});
+    }catch(e){local();}
+  }
+  async function save(rec){
+    if(mode==='cloud'){try{const ref=await db.collection('dailyWork').add(rec);return ref.id;}catch(e){console.warn(e);mode='local';recs=readLocal();toast('Saved on this device only. Add the "dailyWork" Firestore rule so the whole team can see it.');}}
+    rec.id='l'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);recs.push(rec);writeLocal();renderList();return rec.id;
+  }
+  async function patch(id,p){
+    if(mode==='cloud'){try{await db.collection('dailyWork').doc(id).update(p);return true;}catch(e){console.warn(e);return false;}}
+    const r=recs.find(x=>x.id===id);if(!r)return false;Object.assign(r,p);writeLocal();renderList();return true;
+  }
+  const canEdit=r=>(typeof isAdmin!=='undefined'&&isAdmin)||mode==='local'||(typeof currentUserUid!=='undefined'&&r.ownerUid===currentUserUid);
+
+  const STATUS={completed:['Completed','status-done'],inprogress:['In progress','status-inprogress'],blocked:['Blocked','status-blocked']};
+  const todayS=()=>{try{return todayStr();}catch(e){return new Date().toISOString().slice(0,10);}};
+  const fmtDate=d=>{try{return formatDate(d);}catch(e){return d;}};
+
+  function senderEmail(){
+    const own=(typeof currentUserEmail!=='undefined')?currentUserEmail:'';
+    if(typeof isAdmin!=='undefined'&&!isAdmin&&validEmail(own))return own;
+    const f=($('purchase-email-from')?.value||'').trim(); if(validEmail(f))return f;
+    if(validEmail(own))return own;
+    return COMPANY_EMAIL;
+  }
+  function reportText(r){
+    const lines=String(r.work).split(/\r?\n/).map(x=>x.replace(/^[\s•\-\*\u2022]+/,'').trim()).filter(Boolean);
+    let t='DAILY WORK REPORT\n\nName: '+r.memberName+'\nDate: '+r.date+'\nProject / module: '+(r.project||'—')+'\nStatus: '+(STATUS[r.status]?STATUS[r.status][0]:r.status)+'\nHours worked: '+(r.hours||'—')+'\n\nWork done:\n'+lines.map((l,i)=>(i+1)+'. '+l).join('\n')+'\n';
+    if(r.blockers)t+='\nProblems / blockers:\n'+r.blockers+'\n';
+    if(r.plan)t+='\nPlan for tomorrow:\n'+r.plan+'\n';
+    return t+'\n— Protthapan Technologies, Daily Work';
+  }
+  function reportHtml(r){
+    const lines=String(r.work).split(/\r?\n/).map(x=>x.replace(/^[\s•\-\*\u2022]+/,'').trim()).filter(Boolean);
+    const td='padding:8px 12px;border:1px solid #D5E2F0;font:14px Arial,sans-serif;color:#14263D;vertical-align:top;';
+    const row=(k,v)=>'<tr><td style="'+td+'background:#F1F5FA;width:150px;font-weight:700">'+k+'</td><td style="'+td+'">'+v+'</td></tr>';
+    return '<div style="max-width:640px;font:14px/1.6 Arial,sans-serif;color:#14263D">'
+      +'<h2 style="margin:0 0 12px;color:#0B3B82">Daily Work Report</h2>'
+      +'<table cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:100%">'
+      +row('Name',E(r.memberName))+row('Date',E(r.date))+row('Project / module',E(r.project||'—'))
+      +row('Status',E(STATUS[r.status]?STATUS[r.status][0]:r.status))+row('Hours worked',E(r.hours||'—'))
+      +row('Work done','<ol style="margin:0;padding-left:18px">'+lines.map(l=>'<li>'+E(l)+'</li>').join('')+'</ol>')
+      +(r.blockers?row('Problems / blockers',E(r.blockers).replace(/\n/g,'<br>')):'')
+      +(r.plan?row('Plan for tomorrow',E(r.plan).replace(/\n/g,'<br>')):'')
+      +'</table><p style="color:#7A8CA3;font-size:12px;margin-top:14px">Sent from the Protthapan Technologies workspace.</p></div>';
+  }
+  async function sendReport(r){
+    const from=senderEmail(), subject='Daily Work Report — '+r.memberName+' — '+r.date;
+    const text=reportText(r), html=reportHtml(r), ok=[], fail=[];
+    for(const to of (r.recipients||[COMPANY_EMAIL])){
+      try{ await sendEmailCore({to,from,fromName:r.memberName,subject,message:text,html}); ok.push(to); }
+      catch(e){ fail.push({to,err:e&&e.message==='NO_SERVICE'?'Email service not set up':(e&&e.message)||'error'}); }
+    }
+    return {ok,fail};
+  }
+  function msg(t,cls){const m=$('dw-msg');if(m){m.textContent=t||'';m.className=cls||'';}}
+
+  function renderMemberSelect(){
+    const sel=$('dw-member'); if(!sel)return;
+    const keep=sel.value; sel.innerHTML='';
+    if(isAdmin){
+      sel.innerHTML='<option value="">Admin</option>'+members.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(m=>'<option value="'+A(m.id)+'">'+E(m.name)+'</option>').join('');
+      sel.disabled=false; if(keep)sel.value=keep;
+    } else {
+      const o=document.createElement('option'); o.value=currentMemberId||''; o.textContent=currentName||'My account'; sel.appendChild(o); sel.disabled=true;
+    }
+  }
+  function fillProjects(){
+    const dl=$('dw-projects'); if(!dl)return;
+    dl.innerHTML=(typeof projects!=='undefined'?projects:[]).map(p=>'<option value="'+A(p.name)+'">').join('');
+  }
+  async function submit(){
+    msg('');
+    const g=id=>($(id)?.value||'').trim();
+    const date=g('dw-date')||todayS(), work=g('dw-work');
+    if(work.length<3){msg('Write what you worked on today.','err');return;}
+    const extraRaw=g('dw-extra'); const extra=extraRaw?extraRaw.split(/[,;\s]+/).filter(Boolean):[];
+    const bad=extra.find(x=>!validEmail(x)); if(bad){msg('“'+bad+'” is not a valid email address.','err');return;}
+    const recipients=[COMPANY_EMAIL].concat(extra.filter(x=>x.toLowerCase()!==COMPANY_EMAIL)).filter((x,i,a)=>a.findIndex(y=>y.toLowerCase()===x.toLowerCase())===i).slice(0,4);
+    const sel=$('dw-member'); const mId=isAdmin?sel.value:(currentMemberId||'');
+    const mem=members.find(m=>m.id===mId);
+    const memberName=isAdmin?(mem?mem.name:'Admin'):(currentName||(mem&&mem.name)||'Team member');
+    const rec={date,memberId:mId,memberName,project:g('dw-project'),hours:g('dw-hours'),status:$('dw-status').value,work,blockers:g('dw-block'),plan:g('dw-plan'),
+      recipients,emailed:false,emailError:'',createdAt:Date.now(),ownerUid:(typeof currentUserUid!=='undefined'&&currentUserUid)||''};
+    const btn=$('dw-submit'); btn.disabled=true; const old=btn.textContent; btn.textContent='Saving & sending…'; btn.classList.add('pt-spin');
+    try{
+      const id=await save(rec);                       // 1) save first, so the work is never lost
+      const res=await sendReport(rec);                // 2) then email it
+      await patch(id,{emailed:res.fail.length===0,emailedTo:res.ok,emailError:res.fail.map(f=>f.to+': '+f.err).join(' | '),emailedAt:res.ok.length?Date.now():null});
+      if(!res.fail.length)msg('✓ Saved and emailed to '+res.ok.join(', ')+'.','ok');
+      else if(res.fail.some(f=>/not set up/i.test(f.err)))msg('Saved ✓ — but the email service is not connected. Open Inventory → “Email sending setup”, add your EmailJS keys, then press “Resend” in the list below.','err');
+      else msg('Saved ✓ — but some emails failed: '+res.fail.map(f=>f.to+' ('+f.err+')').join(', ')+'. Use “Resend” below.','err');
+      ['dw-work','dw-block','dw-plan','dw-hours'].forEach(i=>{$(i).value='';});
+    }catch(e){console.error(e);msg('Could not save: '+(e.message||e),'err');}
+    finally{btn.disabled=false;btn.classList.remove('pt-spin');btn.textContent=old;}
+  }
+  async function resend(id){
+    const r=recs.find(x=>x.id===id); if(!r)return;
+    toast('Sending…'); const res=await sendReport(r);
+    await patch(id,{emailed:res.fail.length===0,emailedTo:res.ok,emailError:res.fail.map(f=>f.to+': '+f.err).join(' | '),emailedAt:res.ok.length?Date.now():null});
+    toast(res.fail.length?('Some emails failed: '+res.fail[0].err):'✓ Report emailed again');
+  }
+
+  function renderList(){
+    const el=$('dw-list'); if(!el)return;
+    const today=todayS();
+    const todayRecs=recs.filter(r=>r.date===today);
+    const names=new Set(todayRecs.map(r=>(r.memberName||'').toLowerCase()));
+    const t=$('dw-today');
+    if(t&&typeof members!=='undefined'&&members.length){
+      const missing=members.filter(m=>!names.has((m.name||'').toLowerCase())).map(m=>m.name);
+      t.innerHTML='📅 Reported today: <strong>'+(members.length-missing.length)+' / '+members.length+'</strong> members'+(missing.length?' · <span style="color:#8A5A00">Not yet: '+E(missing.join(', '))+'</span>':' · 🎉 everyone has reported');
+    }
+    let list=recs.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    if(onlyMine)list=list.filter(r=>r.ownerUid===currentUserUid);
+    const q=qtext.trim().toLowerCase();
+    if(q)list=list.filter(r=>[r.memberName,r.project,r.work,r.date,r.status].join(' ').toLowerCase().includes(q));
+    if(!list.length){el.innerHTML='<div class="empty">'+(recs.length?'No entries match this filter.':'No daily work added yet. Be the first!')+'</div>';return;}
+    el.innerHTML='<table><tr><th>Date</th><th>Member</th><th>Project</th><th>Work done</th><th>Hours</th><th>Status</th><th>Emailed</th></tr>'
+      +list.slice(0,150).map(r=>{
+        const st=STATUS[r.status]||[r.status,'pill-neutral'];
+        const emailCell=r.emailed?'<span class="dw-email-ok">✓ Sent</span><div class="stock-sub">'+E((r.emailedTo||r.recipients||[]).join(', '))+'</div>'
+          :'<span class="dw-email-bad">⚠ Not sent</span>'+(r.emailError?'<div class="stock-sub">'+E(r.emailError)+'</div>':'')+(canEdit(r)?'<div><button type="button" class="dw-resend" data-dw-resend="'+A(r.id)+'">↻ Resend</button></div>':'');
+        return '<tr data-docid="'+A(r.id)+'"><td class="task-date">'+E(fmtDate(r.date))+'</td><td><span class="member-tag">'+E(r.memberName||'')+'</span></td><td>'+E(r.project||'—')+'</td>'
+          +'<td><div class="dw-work" title="Click to expand">'+E(r.work)+'</div>'+(r.blockers?'<div class="stock-sub"><b>Blockers:</b> '+E(r.blockers)+'</div>':'')+'</td>'
+          +'<td>'+E(r.hours||'—')+'</td><td><span class="status-pill '+st[1]+'">'+E(st[0])+'</span></td><td>'+emailCell+'</td></tr>';
+      }).join('')+'</table>';
+  }
+
+  function onShow(){
+    const d=$('dw-date'); if(d&&!d.value)d.value=todayS();
+    renderMemberSelect(); fillProjects(); renderList();
+  }
+
+  function inject(){
+    // sidebar item (before Logout)
+    const nav=document.querySelector('.sidebar'), logout=$('admin-toggle');
+    if(nav&&!document.querySelector('.nav-item[data-view="dailywork"]')){
+      const n=document.createElement('div'); n.className='nav-item'; n.dataset.view='dailywork'; n.textContent='Daily Work';
+      nav.insertBefore(n,logout||null);
+    }
+    // the page
+    const main=document.querySelector('.main');
+    if(main&&!$('view-dailywork')){
+      const v=document.createElement('div'); v.id='view-dailywork'; v.style.display='none';
+      v.innerHTML='<h1>Daily Work</h1>'
+        +'<p class="subtitle">Write what you worked on today. It is saved here and <strong>emailed automatically to '+COMPANY_EMAIL+'</strong>.</p>'
+        +'<div class="panel"><h2>Today’s work report</h2>'
+        +'<div class="row-3"><div><label for="dw-member">Team member</label><select id="dw-member"></select></div>'
+        +'<div><label for="dw-date">Date</label><input type="date" id="dw-date"></div>'
+        +'<div><label for="dw-status">Status</label><select id="dw-status"><option value="completed">Completed</option><option value="inprogress">In progress</option><option value="blocked">Blocked</option></select></div></div>'
+        +'<div class="row-2"><div><label for="dw-project">Project / module</label><input type="text" id="dw-project" list="dw-projects" autocomplete="off" placeholder="e.g. Drone X"><datalist id="dw-projects"></datalist></div>'
+        +'<div><label for="dw-hours">Hours worked (optional)</label><input type="number" id="dw-hours" min="0" max="24" step="0.25" placeholder="e.g. 7.5"></div></div>'
+        +'<label for="dw-work">Work done today <span style="text-transform:none;font-weight:400">(one task per line)</span></label>'
+        +'<textarea id="dw-work" style="min-height:130px" placeholder="Assembled the quadcopter frame&#10;Tested all four motors&#10;Updated the material list"></textarea>'
+        +'<div class="row-2"><div><label for="dw-block">Problems / blockers (optional)</label><textarea id="dw-block" placeholder="Anything that stopped or slowed your work…"></textarea></div>'
+        +'<div><label for="dw-plan">Plan for tomorrow (optional)</label><textarea id="dw-plan" placeholder="What will you work on next?"></textarea></div></div>'
+        +'<div class="dw-to"><div class="dw-to-title">📧 THIS REPORT IS SENT TO</div>'
+        +'<span class="dw-chip">'+COMPANY_EMAIL+' <small>(always)</small></span>'
+        +'<label for="dw-extra">Add one more email (optional)</label><input type="email" id="dw-extra" autocomplete="off" placeholder="Type another email address if you want a copy sent there"></div>'
+        +'<button class="btn" id="dw-submit">Save &amp; send report</button><span id="dw-msg"></span></div>'
+        +'<div class="panel"><h2>Daily work history <span style="color:var(--ink-soft);font-weight:400">— everyone’s reports</span></h2>'
+        +'<div class="dw-today" id="dw-today"></div>'
+        +'<div class="filter-bar"><select id="dw-filter"><option value="all">Everyone’s work</option><option value="mine">Only my work</option></select><input type="text" id="dw-search" placeholder="Search name, project or work…" style="max-width:280px"></div>'
+        +'<div id="dw-list"><div class="empty">No daily work added yet.</div></div></div>';
+      main.appendChild(v);
+      $('dw-submit').addEventListener('click',submit);
+      $('dw-filter').addEventListener('change',e=>{onlyMine=e.target.value==='mine';renderList();});
+      $('dw-search').addEventListener('input',e=>{qtext=e.target.value;renderList();});
+      v.addEventListener('click',e=>{
+        const rs=e.target.closest('[data-dw-resend]'); if(rs){resend(rs.dataset.dwResend);return;}
+        const w=e.target.closest('.dw-work'); if(w)w.classList.toggle('open');
+      });
+    }
+    // open the page from the menu
+    if(typeof switchView==='function'){
+      const origSwitch=switchView;
+      window.switchView=function(view){const r=origSwitch.apply(this,arguments);if(view==='dailywork'){try{onShow();}catch(e){console.warn(e);}}return r;};
+    }
+    // tick-and-clear support for this list
+    if(typeof PT_LISTS!=='undefined'&&!PT_LISTS.some(c=>c.el==='dw-list')){
+      PT_LISTS.push({el:'dw-list',coll:'dailyWork',row:'tr[data-docid]',arr:()=>recs,own:r=>(typeof isAdmin!=='undefined'&&isAdmin)||r.ownerUid===currentUserUid});
+    }
+    if(typeof ptClearSelected==='function'){
+      const origClear=ptClearSelected;
+      window.ptClearSelected=async function(k){
+        if(k==='dw-list'&&mode==='local'){
+          const set=ptSel[k]; if(!set||!set.size)return;
+          if(!confirm('Clear '+set.size+' selected entr'+(set.size===1?'y':'ies')+'? This cannot be undone.'))return;
+          const n=set.size; recs=recs.filter(r=>!set.has(r.id)); writeLocal(); set.clear(); renderList(); toast('Cleared '+n+' item'+(n===1?'':'s')); return;
+        }
+        return origClear.apply(this,arguments);
+      };
+    }
+  }
+
+  fixAutofill(); injectRepeatUI(); inject();
+  setTimeout(fixAutofill,1200); setTimeout(fixAutofill,4000);
+  const wait=setInterval(()=>{ try{ if(typeof auth!=='undefined'&&auth&&auth.currentUser&&typeof db!=='undefined'&&db){clearInterval(wait);start();fixAutofill();} }catch(e){} },700);
+})();
+</script>
+
+
 
 </body>
 
