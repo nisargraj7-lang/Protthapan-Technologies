@@ -2100,6 +2100,11 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
 .pd-manual-note{font-size:12px;color:#71847b;margin:0 0 8px}
 @media(max-width:560px){.pd-linkgrid{grid-template-columns:1fr}.pd-row{grid-template-columns:1fr 64px 24px}.pd-row>div:first-child,.pd-row input[data-proj-id]{grid-column:1/-1}.pd-row-head{display:none}}
 </style>
+
+
+  /* Purchase email editor: allow up to 2 MiB worth of characters */
+  #purchase-preview { min-height: 320px; max-height: 70vh; overflow-y: auto; }
+  #purchase-message-count { border-radius: 0 0 10px 10px; }
 </head>
 
 <body class="locked">
@@ -2364,7 +2369,8 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
             </div>
             <div class="email-preview">
               <div class="email-preview-head"><span id="pd-preview-title">✏️ Email message (auto-generated, you can still edit)</span> <button type="button" class="purchase-mini-btn" id="purchase-reset-draft">↺ Reset to auto draft</button></div>
-              <textarea id="purchase-preview" placeholder="Type your message to the Purchase Department..."></textarea>
+              <textarea id="purchase-preview" maxlength="2097152" placeholder="Type your message to the Purchase Department..." oninput="updatePurchaseMessageCount()"></textarea>
+              <div id="purchase-message-count" style="padding:6px 13px;font-size:11px;color:#71847b;text-align:right;background:#fff;border-top:1px solid #e5edf5;">0 / 2,097,152 characters (up to about 2 MB)</div>
             </div>
             <div style="margin-top:10px;"><button type="button" class="purchase-mini-btn" id="purchase-save-contact">💾 Save sender / receiver</button><span style="font-size:11px;color:#71847b;margin-left:10px;">Email passwords are never stored in this page.</span></div>
             <details class="email-setup" id="email-setup">
@@ -3913,6 +3919,11 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
 <tr><td>Designation: ${e(t.filledDesignation)}</td><td>Designation: ${e(t.approvedDesignation)}</td></tr>
 <tr class="sign"><td>Signature &amp; Stamp:</td><td>Signature &amp; Stamp:</td></tr></table>
 <div class="notes"><b>Notes:</b><ul><li>Hand written forms will not be accepted</li><li>Each pass is valid for one time entry / exit valid for one day</li></ul></div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  if (typeof updatePurchaseMessageCount === 'function') updatePurchaseMessageCount();
+});
+</script>
 </body></html>`;
     }
     function printPass(tripId, kind) {
@@ -4991,6 +5002,13 @@ function savePurchasePrefs(quiet){
       renderPurchaseRequest();
     }
     function removePurchaseItem(id){if(id.indexOf('lnk-')===0)purchaseLinkItems=purchaseLinkItems.filter(x=>x.id!==id);else{delete purchaseSelection[id];delete purchasePrices[id];delete purchaseProjects[id];}renderPurchaseCatalog();renderPurchaseRequest();}
+    function updatePurchaseMessageCount(){
+      const field=document.getElementById('purchase-preview');
+      const counter=document.getElementById('purchase-message-count');
+      if(!field||!counter)return;
+      counter.textContent=field.value.length.toLocaleString()+' / 2,097,152 characters (up to about 2 MB)';
+      counter.style.color=field.value.length>=2097152?'#b42318':'#71847b';
+    }
     function purchaseMessage(){const t=document.getElementById('purchase-preview');return (purchaseMsgEdited&&t)?t.value:purchaseDraft();}
     function purchaseDraft(){
       const items=purchaseItems(); const requester=(document.getElementById('purchase-requester')?.value||currentName||'Team member').trim(); const project=(document.getElementById('purchase-project')?.value||'').trim(); const note=(document.getElementById('purchase-note')?.value||'').trim();
