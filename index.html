@@ -2617,20 +2617,13 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
             <div><label for="ps-projname">Project name</label><input type="text" id="ps-projname"
                 placeholder="Shown on the pass"></div>
           </div>
-          <div class="row-3" style="margin-top:14px;">
-            <div><label for="ps-main">Company name: main contractor</label><input type="text" id="ps-main"></div>
-            <div><label for="ps-sub">Company name: subcontractor</label><input type="text" id="ps-sub"></div>
-            <div><label for="ps-trans">Transporter company name</label><input type="text" id="ps-trans"></div>
+          <div class="row-2" style="margin-top:14px;">
+            <div><label for="ps-custodian">Custodian Name</label><input type="text" id="ps-custodian" placeholder="Enter custodian's full name"></div>
+            <div><label for="ps-id-proof">Custodian's ID proof</label><input type="text" id="ps-id-proof" placeholder="ID type and/or ID number"></div>
           </div>
-          <div class="row-3" style="margin-top:14px;">
-            <div><label for="ps-plot">Plot #</label><input type="text" id="ps-plot"></div>
-            <div><label for="ps-driver">Driver's name</label><input type="text" id="ps-driver"></div>
-            <div><label for="ps-vehicle">Vehicle plate #</label><input type="text" id="ps-vehicle"></div>
-          </div>
-          <div class="row-3" style="margin-top:14px;">
-            <div><label for="ps-invoice">Delivery note / invoice #</label><input type="text" id="ps-invoice"></div>
-            <div><label for="ps-from">Destination from</label><input type="text" id="ps-from"></div>
-            <div><label for="ps-to">Destination to</label><input type="text" id="ps-to"></div>
+          <div class="row-2" style="margin-top:14px;">
+            <div><label for="ps-purpose">Purpose of the trip</label><input type="text" id="ps-purpose" placeholder="Reason for exit / material movement"></div>
+            <div><label for="ps-return-date">Expected date of return</label><input type="date" id="ps-return-date"></div>
           </div>
 
           <label style="margin-top:20px;">Items we are carrying (description · quantity · remarks)</label>
@@ -3654,15 +3647,14 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
           refNo, date,
           projectId: proj ? proj.id : null,
           projectName: projName,
-          mainContractor: v('ps-main'), subContractor: v('ps-sub'), transporter: v('ps-trans'),
-          plot: v('ps-plot'), driver: v('ps-driver'), vehicle: v('ps-vehicle'),
-          invoice: v('ps-invoice'), from: v('ps-from'), to: v('ps-to'),
+          custodianName: v('ps-custodian'), custodianIdProof: v('ps-id-proof'),
+          tripPurpose: v('ps-purpose'), expectedReturnDate: v('ps-return-date'),
           filledName: v('ps-filled-name'), filledDesignation: v('ps-filled-des'),
           approvedName: v('ps-appr-name'), approvedDesignation: v('ps-appr-des'),
           items, createdBy: currentName, closedDate: null, timestamp: Date.now()
         });
-        liveSync('Out Passes', SHEET_HEAD.out, items.map(it => [refNo, date, projName, v('ps-from'), v('ps-to'), v('ps-vehicle'), v('ps-driver'), it.desc, it.qty, it.remarks]));
-        ['ps-projname', 'ps-main', 'ps-sub', 'ps-trans', 'ps-plot', 'ps-driver', 'ps-vehicle', 'ps-invoice', 'ps-from', 'ps-to',
+        liveSync('Out Passes', SHEET_HEAD.out, items.map(it => [refNo, date, projName, v('ps-custodian'), v('ps-purpose'), v('ps-return-date'), v('ps-id-proof'), it.desc, it.qty, it.remarks]));
+        ['ps-projname', 'ps-custodian', 'ps-id-proof', 'ps-purpose', 'ps-return-date',
           'ps-filled-name', 'ps-filled-des', 'ps-appr-name', 'ps-appr-des'].forEach(id => {document.getElementById(id).value = '';});
         document.getElementById('ps-project').value = '';
         psDraftItems = [{id: newId(), desc: '', qty: '', remarks: ''}];
@@ -3795,10 +3787,11 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
       };
       let h = '<div class="proj-body">';
       h += '<div class="trip-info">'
-        + ic('Date of exit', formatDate(t.date)) + ic('Project', t.projectName) + ic('Plot #', t.plot)
-        + ic('Main contractor', t.mainContractor) + ic('Subcontractor', t.subContractor) + ic('Transporter', t.transporter)
-        + ic("Driver's name", t.driver) + ic('Vehicle plate #', t.vehicle) + ic('Delivery note / invoice #', t.invoice)
-        + ic('Destination from', t.from) + ic('Destination to', t.to)
+        + ic('Date of exit', formatDate(t.date)) + ic('Linked project', t.projectName)
+        + ic('Custodian Name', t.custodianName || t.driver)
+        + ic("Custodian's ID proof", t.custodianIdProof || t.invoice)
+        + ic('Purpose of the trip', t.tripPurpose || t.from)
+        + ic('Expected date of return', t.expectedReturnDate || t.to)
         + ic('Back on', t.closedDate ? formatDate(t.closedDate) : 'Not closed yet')
         + '</div>';
       h += '<div class="sub-section-title">ITEMS &amp; RETURN CHECK</div>';
@@ -3847,7 +3840,7 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
         return `<div class="proj-card ${open ? 'open' : ''}" data-docid="${t.id}">
           <div class="proj-head" onclick="toggleTrip('${t.id}')">
             <span class="proj-chevron">▶</span>
-            <span class="proj-title">${escapeHtml(t.refNo)} <span style="color:var(--ink-soft); font-weight:400;">· ${formatDate(t.date)}${t.to ? ' · to ' + escapeHtml(t.to) : ''}</span></span>
+            <span class="proj-title">${escapeHtml(t.refNo)} <span style="color:var(--ink-soft); font-weight:400;">· ${formatDate(t.date)}${(t.expectedReturnDate || t.to) ? ' · return ' + escapeHtml(t.expectedReturnDate || t.to) : ''}</span></span>
             ${t.projectName ? `<span class="member-tag">${escapeHtml(t.projectName)}</span>` : ''}
             <span style="font-size:12.5px; color:var(--ink-soft);">${st.safe}/${st.total} back</span>
             <span class="status-pill ${st.cls}">${st.label}</span>
@@ -3906,10 +3899,9 @@ th{background:#EEF2EE;}
 <div class="top"><div><div class="org">PROTTHAPAN TECHNOLOGIES</div><h1>ENTRY / EXIT PASS FOR MATERIAL OR EQUIPMENT</h1><div>(CONSTRUCTION GATE)</div></div>
 <div class="ref"><b>Ref: ${e(t.refNo)}</b><br>${isIn ? 'IN PASS (return)' : 'OUT PASS'}</div></div>
 <div class="checks"><span class="cb">${isIn ? '&#10004;' : ''}</span>ENTRY <span class="cb">${!isIn ? '&#10004;' : ''}</span>EXIT</div>
-<table><tr>${cell('Date of Entry / Exit:', formatDate(date))}</tr></table>
-<table><tr>${cell('Company Name: Main Contractor', t.mainContractor)}${cell('Company Name: Subcontractor', t.subContractor)}${cell('Transporter Company Name', t.transporter)}</tr></table>
-<table><tr>${cell('Plot #:', t.plot)}${cell('Project Name:', t.projectName)}${cell("Driver's Name:", t.driver)}</tr></table>
-<table><tr>${cell('Delivery Note / Invoice # (for entry):', t.invoice)}${cell('Vehicle Plate #:', t.vehicle)}${cell('Destination From:', from)}${cell('Destination To:', to)}</tr></table>
+<table><tr>${cell('Date of Entry / Exit:', formatDate(date))}${cell('Project Name:', t.projectName)}</tr></table>
+<table><tr>${cell('Custodian Name:', t.custodianName || t.driver)}${cell("Custodian's ID proof:", t.custodianIdProof || t.invoice)}</tr></table>
+<table><tr>${cell('Purpose of the trip:', t.tripPurpose || t.from)}${cell('Expected date of return:', t.expectedReturnDate || t.to)}</tr></table>
 <table><tr><th style="width:36px;">No.</th><th>Description of Material / Equipment</th><th style="width:90px;">Quantity</th><th style="width:30%;">Remarks</th></tr>
 ${rows.map((r, i) => `<tr><td>${r.desc ? i + 1 : '&nbsp;'}</td><td>${e(r.desc)}</td><td>${e(r.qty)}</td><td>${e(r.remarks)}</td></tr>`).join('')}
 </table>
