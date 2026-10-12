@@ -6303,9 +6303,12 @@ input.bk-num{text-align:right!important}
 #order-panel .purchase-mini-btn:hover,#pd-bulk-tools .purchase-mini-btn:hover{background:#EEF5FF!important;border-color:#1769D2!important}
 #order-panel .ord-btns .purchase-mini-btn[data-orddel]{color:#C43D52!important;border-color:#E9C3C9!important}
 #pd-bulk-tools .bk-actions .bk-primary{background:linear-gradient(135deg,#1769D2,#0B3B82)!important;color:#fff!important;border-color:transparent!important}
+#pd-bulk-tools .bk-actions label.purchase-mini-btn{margin:0!important;font-size:13px!important}
+#pd-bulk-tools .bk-msg{line-height:1.5}
 .ord-head,.ord-meta,.ord-foot{color:#14263D}
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script id="pt-orders-script">
 (function(){
   'use strict';
@@ -6360,7 +6363,7 @@ input.bk-num{text-align:right!important}
     return 'pending';
   }
   function buildOrder(src,via){
-    const items=(src.items||[]).map(x=>({id:newId(),name:String(x.name||'Item').slice(0,200),price:num(x.price),qty:Math.max(1,Number(x.qty)||1),link:safeUrl(x.link||x.url),project:String(x.project||x.proj||'').slice(0,120),status:'pending',statusAt:null}));
+    const items=(src.items||[]).map(x=>{const raw=String(x.status||'pending').toLowerCase().trim();const status=({pending:'pending','to order':'pending','ordered':'pending',ontheway:'ontheway','on the way':'ontheway','in transit':'ontheway',received:'received',delivered:'received',cancelled:'cancelled',canceled:'cancelled'})[raw]||'pending';return {id:newId(),name:String(x.name||'Item').slice(0,200),price:num(x.price),qty:Math.max(1,Number(x.qty)||1),link:safeUrl(x.link||x.url),project:String(x.project||x.proj||src.project||'').slice(0,120),status,statusAt:status==='received'?Date.now():null};});
     const now=Date.now(),d=new Date(now),p=n=>String(n).padStart(2,'0');
     return {
       orderNo:'ORD-'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'-'+(Math.floor(Math.random()*900)+100),
@@ -6499,8 +6502,68 @@ input.bk-num{text-align:right!important}
     updateCount();
     bkMsg('✓ Pasted '+rows.length+' row'+(rows.length===1?'':'s')+'. Check the sheet, then choose what to do with it below.');
   }
+  function normHead(v){return String(v||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'');}
+  function workbookRowsToItems(rows){
+    if(!rows||!rows.length)return [];
+    const aliases={name:['name','product','productname','item','itemname','description','title','linkorproductname','productlink'],link:['link','url','producturl','productlink','website','itemlink'],price:['price','cost','rate','unitprice','amount','priceinr','rateinr'],qty:['qty','quantity','quantityordered','orderqty','count','units'],status:['status','orderstatus','delivery status','deliverystatus'],project:['project','projectname','purpose','department']};
+    const first=(rows[0]||[]).map(normHead);
+    const headerScore=first.filter(h=>Object.values(aliases).flat().includes(h)).length;
+    const hasHeader=headerScore>=2;
+    const headers=hasHeader?first:null, data=hasHeader?rows.slice(1):rows;
+    const findCol=(key)=>{if(!headers)return -1;for(const a of aliases[key]){const ix=headers.indexOf(normHead(a));if(ix>=0)return ix;}return -1;};
+    const ci={name:findCol('name'),link:findCol('link'),price:findCol('price'),qty:findCol('qty'),status:findCol('status'),project:findCol('project')};
+    // When there are no headers, accept the common format: Link/Product name, Price, Qty.
+    if(!hasHeader){ci.name=0;ci.price=1;ci.qty=2;ci.link=-1;ci.status=-1;ci.project=-1;}
+    const get=(r,k,def='')=>ci[k]>=0?String(r[ci[k]]??'').trim():def;
+    return data.map(r=>{
+      if(!Array.isArray(r))return null;
+      const rawName=get(r,'name'); const rawLink=get(r,'link');
+      if(!rawName&&!rawLink)return null;
+      const parsed=parseItem(rawName||rawLink,get(r,'price','0'),get(r,'qty','1'));
+      const separate=String(rawLink||'').trim();
+      if(separate){const candidate=/^https?:\/\//i.test(separate)?separate:('https://'+separate);if(/^https?:\/\/\S+$/i.test(candidate))parsed.link=candidate;}
+      parsed.name=rawName||parsed.name||guessName(parsed.link);
+      parsed.status=get(r,'status','pending')||'pending'; parsed.project=get(r,'project','');
+      return parsed;
+    }).filter(x=>x&&x.name&&x.name.trim());
+  }
+  async function importWorkbook(file){
+    if(!file)return;
+    const status=$('bk-msg'); if(status){status.className='bk-msg';status.textContent='Reading '+file.name+'…';}
+    try{
+      let rows=[];
+      const ext=(file.name.split('.').pop()||'').toLowerCase();
+      if(!window.XLSX)throw new Error('The spreadsheet reader could not load. Check your internet connection and try again. You can still type or paste products manually into the grid.');
+      const buf=await file.arrayBuffer();
+      const wb=XLSX.read(buf,{type:'array',cellDates:true});
+      // Import the first worksheet containing actual data; this avoids silently
+      // importing an empty cover/instructions sheet when the workbook has one.
+      let chosenSheet=null;
+      for(const sheetName of (wb.SheetNames||[])){
+        const candidate=wb.Sheets[sheetName];
+        const candidateRows=XLSX.utils.sheet_to_json(candidate,{header:1,defval:'',raw:false});
+        if(candidateRows.some(r=>Array.isArray(r)&&r.some(c=>String(c??'').trim()!==''))){chosenSheet=candidate;rows=candidateRows;break;}
+      }
+      if(!chosenSheet)throw new Error('The uploaded spreadsheet is empty. Add product rows and upload it again.');
+      const items=workbookRowsToItems(rows);
+      if(!items.length)throw new Error('No products found. Include columns such as Product/Link, Price and Qty.');
+      // Show imported rows in the editable grid and persist them as one order-tracker order.
+      const b=body(); b.innerHTML='';
+      items.forEach((it,i)=>{b.insertAdjacentHTML('beforeend',rowHtml(i+1));const tr=b.rows[i];tr.querySelector('[data-c="0"]').value=it.link?(it.name+' | '+it.link):it.name;tr.querySelector('[data-c="1"]').value=String(it.price||0);tr.querySelector('[data-c="2"]').value=String(it.qty||1);});
+      addRows(Math.max(2,8-items.length)); updateCount();
+      const projEl=$('purchase-project'); const project=projEl?projEl.value.trim():'';
+      const ord=buildOrder({items,project},'excel-upload');
+      const ok=await save(ord);
+      if(!ok)throw new Error('The products were read, but could not be saved to the order tracker.');
+      bkMsg('✓ Automatically imported '+items.length+' products from '+file.name+' and saved them to Order tracker as '+ord.orderNo+'. Manual typing and paste are still available. Update each item status in the tracker.');
+      toast('Imported '+items.length+' products into Order tracker');
+      const p=$('order-panel'); if(p&&p.scrollIntoView)p.scrollIntoView({behavior:'smooth',block:'start'});
+    }catch(err){console.error('Excel import failed:',err);bkMsg(err.message||'Could not read this file.',true);}
+    finally{const f=$('bk-file');if(f)f.value='';}
+  }
   function sheetEvents(){
     const b=body(); if(!b)return;
+    const upload=$('bk-file'); if(upload)upload.addEventListener('change',e=>importWorkbook(e.target.files&&e.target.files[0]));
     b.addEventListener('paste',handlePaste);
     b.addEventListener('input',()=>{updateCount();});
     b.addEventListener('click',e=>{const x=e.target.closest('.bk-x'); if(!x)return; x.closest('tr').querySelectorAll('.bk-in').forEach(i=>i.value='');updateCount();});
@@ -6569,10 +6632,10 @@ input.bk-num{text-align:right!important}
     if(tools){
       const d=document.createElement('div'); d.id='pd-bulk-tools'; d.style.display='none';
       d.innerHTML='<div class="bk-box"><div class="bk-title">📊 BULK ORDER — PASTE FROM EXCEL / GOOGLE SHEETS</div>'
-        +'<div class="bk-help">Copy your rows from Excel or Google Sheets (3 columns: <b>Link or product name</b> · <b>Price</b> · <b>Quantity</b>), click the first cell below and press <kbd>Ctrl</kbd> + <kbd>V</kbd>. All rows fill in automatically. You can also type or edit any cell.</div>'
+        +'<div class="bk-help">Upload an .xlsx, .xls, or .csv file and every product row will be imported and saved to the Order tracker automatically. You can also add products manually by typing in the grid or pasting rows from Excel/Google Sheets (Link or product name · Price · Quantity) and pressing <kbd>Ctrl</kbd> + <kbd>V</kbd>. Both methods remain available. Imported columns for product/name, link, price, quantity, status, and project are used when present; new items default to Pending. Review the editable grid, then use “Save to order list” for manual/pasted rows.</div>'
         +'<div class="bk-wrap"><table class="bk-table"><colgroup><col style="width:30px"><col class="c-link"><col class="c-price"><col class="c-qty"><col style="width:30px"></colgroup><thead><tr><th>#</th><th>Link / Product name</th><th>Price (₹)</th><th>Qty</th><th></th></tr></thead><tbody id="bk-body"></tbody></table></div>'
         +'<div class="bk-bar"><button type="button" class="purchase-mini-btn" id="bk-more">+ 5 rows</button><button type="button" class="purchase-mini-btn" id="bk-clear">Clear sheet</button><span class="bk-count" id="bk-count">Sheet is empty</span></div>'
-        +'<div class="bk-actions"><button type="button" class="purchase-mini-btn bk-primary" id="bk-email">✉ Add to email request</button><button type="button" class="purchase-mini-btn" id="bk-save">📋 Save to order list (no email)</button></div>'
+        +'<div class="bk-actions"><label class="purchase-mini-btn" for="bk-file" style="display:inline-flex;align-items:center;gap:7px;cursor:pointer;">📤 Upload Excel / CSV</label><input id="bk-file" type="file" accept=".xlsx,.xls,.csv,.ods" style="display:none"><button type="button" class="purchase-mini-btn bk-primary" id="bk-email">✉ Add to email request</button><button type="button" class="purchase-mini-btn" id="bk-save">📋 Save to order list (no email)</button></div>'
         +'<div class="bk-msg" id="bk-msg"></div></div>';
       tools.parentNode.insertBefore(d,tools.nextSibling);
       addRows(8); sheetEvents();
