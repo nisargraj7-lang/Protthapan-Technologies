@@ -6311,6 +6311,93 @@ function stockBar(r){
   };
 })();
 </script>
+ <style id="pt-attach-style">
+.att-box{margin-top:12px;border:1px dashed #B8CDE5;border-radius:12px;padding:12px;background:#F8FBFF}
+.att-box.drag{background:#EAF3FF;border-color:#1769D2}
+.att-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.att-top .att-add{border:1px solid #C9DCEE;background:#fff;color:#1257AE;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer;font-size:13px}
+.att-top .att-add:hover{background:#EEF5FF;border-color:#1769D2}
+.att-hint{font-size:11.5px;color:#60738A}
+.att-list{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.att-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid #D5E2F0;border-radius:10px;background:#fff;font-size:13px;color:#14263D}
+.att-item .att-name{flex:1;word-break:break-all;font-weight:600}
+.att-item .att-size{color:#60738A;font-size:12px;white-space:nowrap}
+.att-item button{border:0;background:transparent;color:#C43D52;cursor:pointer;font-size:14px}
+.att-msg{font-size:12px;margin-top:8px;color:#C43D52;min-height:14px}
+</style>
+<script id="pt-attach-script">
+(function(){
+  'use strict';
+  if(window.__ptAttach)return; window.__ptAttach=true;
+  const MAX_FILES=5;
+  const MAX_TOTAL=2*1024*1024;          // 2 MB total. Raise this if your EmailJS plan allows more.
+  let files=[], pending=null;
+  const $=id=>document.getElementById(id);
+  const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const fmt=b=>b<1024?b+' B':b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(2)+' MB';
+  const total=()=>files.reduce((a,f)=>a+f.size,0);
+
+  function msg(t){const m=$('att-msg');if(m)m.textContent=t||'';}
+  function render(){
+    const l=$('att-list'); if(!l)return;
+    l.innerHTML=files.map((f,i)=>'<div class="att-item"><span>📎</span><span class="att-name">'+esc(f.name)+'</span><span class="att-size">'+fmt(f.size)+'</span><button type="button" data-att-rm="'+i+'" title="Remove">✕</button></div>').join('');
+    const h=$('att-hint'); if(h)h.textContent=files.length?(files.length+' file'+(files.length===1?'':'s')+' · '+fmt(total())+' of '+fmt(MAX_TOTAL)):'Images, ZIP, Excel, PDF, any file · up to '+MAX_FILES+' files · '+fmt(MAX_TOTAL)+' total';
+  }
+  function addFiles(list){
+    msg('');
+    [...list].forEach(f=>{
+      if(files.length>=MAX_FILES){msg('You can attach up to '+MAX_FILES+' files.');return;}
+      if(total()+f.size>MAX_TOTAL){msg('“'+f.name+'” is too big. Total limit is '+fmt(MAX_TOTAL)+'.');return;}
+      if(files.some(x=>x.name===f.name&&x.size===f.size))return;
+      files.push(f);
+    });
+    render();
+  }
+  function inject(){
+    const actions=document.querySelector('.purchase-actions');
+    if(!actions||$('att-box'))return;
+    const box=document.createElement('div'); box.className='att-box'; box.id='att-box';
+    box.innerHTML='<div class="att-top"><button type="button" class="att-add" id="att-add">📎 Attach files</button><span class="att-hint" id="att-hint"></span></div><input type="file" id="att-input" multiple style="display:none"><div class="att-list" id="att-list"></div><div class="att-msg" id="att-msg"></div>';
+    actions.parentNode.insertBefore(box,actions);
+    $('att-add').addEventListener('click',()=>$('att-input').click());
+    $('att-input').addEventListener('change',e=>{addFiles(e.target.files);e.target.value='';});
+    box.addEventListener('click',e=>{const b=e.target.closest('[data-att-rm]');if(b){files.splice(Number(b.dataset.attRm),1);msg('');render();}});
+    ['dragenter','dragover'].forEach(ev=>box.addEventListener(ev,e=>{e.preventDefault();box.classList.add('drag');}));
+    ['dragleave','drop'].forEach(ev=>box.addEventListener(ev,e=>{e.preventDefault();box.classList.remove('drag');}));
+    box.addEventListener('drop',e=>{if(e.dataTransfer&&e.dataTransfer.files)addFiles(e.dataTransfer.files);});
+    render();
+  }
+
+  // When files are attached, send the EmailJS request as a file upload (attached to the first email only)
+  const origFetch=window.fetch.bind(window);
+  window.fetch=function(url,opts){
+    if(pending&&pending.length&&typeof url==='string'&&url.indexOf('api.emailjs.com/api/v1.0/email/send')>-1&&url.indexOf('send-form')<0&&opts&&typeof opts.body==='string'){
+      try{
+        const j=JSON.parse(opts.body), fd=new FormData();
+        fd.append('service_id',j.service_id); fd.append('template_id',j.template_id); fd.append('user_id',j.user_id);
+        Object.keys(j.template_params||{}).forEach(k=>fd.append(k,j.template_params[k]));
+        pending.forEach((f,i)=>fd.append('file'+(i+1),f,f.name));
+        pending=null;
+        return origFetch('https://api.emailjs.com/api/v1.0/email/send-form',{method:'POST',body:fd});
+      }catch(e){}
+    }
+    return origFetch(url,opts);
+  };
+
+  const prev=window.sendEmailCore;
+  if(typeof prev==='function'){
+    window.sendEmailCore=async function(o){
+      if(files.length&&o&&Array.isArray(o.items)){           // only the Purchase Desk email carries attachments
+        pending=files.slice();
+        try{const r=await prev.apply(this,arguments);files=[];render();return r;}
+        finally{pending=null;}
+      }
+      return prev.apply(this,arguments);
+    };
+  }
+  inject(); setTimeout(inject,1500);
+})();
+</script> 
   <!-- =====================================================================
      ORDER TRACKER + BULK EXCEL-SHEET ORDER  (add-on for Protthapan index.html)
      HOW TO ADD: open your index.html, scroll to the very bottom, and paste this
