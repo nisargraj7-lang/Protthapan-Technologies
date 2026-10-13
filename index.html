@@ -6233,6 +6233,84 @@ function stockBar(r){
       document.getElementById('lock-user')?.focus();
     }
   </script>
+  <script id="pt-bigmail-script">
+(function(){
+  'use strict';
+  if(window.__ptBigMail||typeof sendEmailCore!=='function')return; window.__ptBigMail=true;
+
+  const prev=window.sendEmailCore;
+  const LIMIT=38000;
+  const bytes=s=>new TextEncoder().encode(String(s||'')).length;
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+  function splitText(text,max){
+    const out=[];let cur='';
+    const push=()=>{if(cur){out.push(cur);cur='';}};
+    String(text).split('\n').forEach(line=>{
+      while(bytes(line)>max){push();const n=Math.floor(max/4);out.push(line.slice(0,n));line=line.slice(n);}
+      const add=(cur?'\n':'')+line;
+      if(bytes(cur+add)>max){push();cur=line;}else cur+=add;
+    });
+    push();
+    return out.length?out:[''];
+  }
+
+  async function sendOne(o,subject,text,html){
+    const c=emailJsCfg();
+    const sentByTxt=o.from?('Sent by: '+(o.fromName||o.from)+' <'+o.from+'>\n\n'):'';
+    const sentByHtml=o.from?('<div style="font-family:Arial,sans-serif;font-size:12px;color:#667;margin-bottom:12px">Sent by: '+escapeHtml(o.fromName||o.from)+' &lt;'+escapeHtml(o.from)+'&gt;</div>'):'';
+    const body=sentByTxt+text;
+    const bodyHtml=sentByHtml+(html||('<div style="white-space:pre-wrap">'+escapeHtml(text).replace(/\n/g,'<br>')+'</div>'));
+    if(emailJsReady()){
+      const res=await fetch('https://api.emailjs.com/api/v1.0/email/send',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({service_id:c.service,template_id:c.template,user_id:c.key,template_params:{to_email:o.to,from_email:o.from,reply_to:o.from,from_name:o.fromName||o.from,subject:subject,message:body,message_html:bodyHtml}})});
+      if(!res.ok){const t=await res.text().catch(()=>'');throw new Error(t||('Email service error '+res.status));}
+      return;
+    }
+    let res;
+    try{res=await fetch('/api/send-purchase-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:o.to,from:o.from,requester:o.fromName,subject:subject,message:body,html:bodyHtml,items:o.items||[]})});}
+    catch(e){throw new Error('NO_SERVICE');}
+    if(!res.ok)throw new Error('NO_SERVICE');
+  }
+
+  window.sendEmailCore=async function(o){
+    const sentBy=o.from?(o.from.length+(o.fromName||'').length+60):0;
+    const total=bytes(o.message)+bytes(o.html||o.message)+sentBy*2+2000;
+    if(total<=LIMIT)return prev.apply(this,arguments);
+
+    const val=id=>(document.getElementById(id)?.value||'').trim();
+    const hasTable=!!(o.html&&/<table/i.test(o.html)&&Array.isArray(o.items)&&o.items.length);
+
+    if(hasTable){
+      const build=sub=>pdBuildHtml(sub,o.fromName||val('purchase-requester')||'Team member',val('purchase-project'),val('purchase-note'));
+      const chunks=[];let cur=[];
+      o.items.forEach(it=>{
+        const test=cur.concat([it]);
+        if(cur.length&&(bytes(build(test))*2+4000)>LIMIT){chunks.push(cur);cur=[it];}else cur=test;
+      });
+      if(cur.length)chunks.push(cur);
+      for(let i=0;i<chunks.length;i++){
+        const subj=o.subject+(chunks.length>1?' (Part '+(i+1)+' of '+chunks.length+')':'');
+        const txt='Purchase request'+(chunks.length>1?' — Part '+(i+1)+' of '+chunks.length:'')+'\n\n'
+          +chunks[i].map((x,n)=>(n+1)+'. '+x.name+' | Qty: '+x.qty+(x.price?' | Price: '+x.price:'')+(x.link?' | '+x.link:'')).join('\n');
+        await sendOne(o,subj,txt,build(chunks[i]));
+        if(i<chunks.length-1)await sleep(1200);
+      }
+      try{showToast('Sent as '+chunks.length+' emails (each with its table)');}catch(e){}
+      return;
+    }
+
+    const parts=splitText(o.message,12000);
+    for(let i=0;i<parts.length;i++){
+      const subj=o.subject+' (Part '+(i+1)+' of '+parts.length+')';
+      const txt=(parts.length>1?('[Part '+(i+1)+' of '+parts.length+']\n\n'):'')+parts[i];
+      await sendOne(o,subj,txt,null);
+      if(i<parts.length-1)await sleep(1200);
+    }
+    try{showToast('Long message sent as '+parts.length+' emails');}catch(e){}
+  };
+})();
+</script>
   <!-- =====================================================================
      ORDER TRACKER + BULK EXCEL-SHEET ORDER  (add-on for Protthapan index.html)
      HOW TO ADD: open your index.html, scroll to the very bottom, and paste this
