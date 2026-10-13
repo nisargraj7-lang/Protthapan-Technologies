@@ -6311,6 +6311,151 @@ function stockBar(r){
   };
 })();
 </script>
+  <style id="pt-invcopy-style">
+.ic-row{margin-top:14px}
+.ic-pdf{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:1px solid #D5E2F0;border-radius:10px;background:#fff;font-size:13px;color:#14263D}
+.ic-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.ic-thumb{width:100%;height:140px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid #D5E2F0;background:#F4F8FF}
+.ic-pdfbox{height:140px;border-radius:8px;border:1px solid #D5E2F0;background:#F4F8FF;display:flex;align-items:center;justify-content:center;font-size:44px;cursor:pointer}
+.ic-line{font-size:12px;color:#60738A;margin-top:3px}
+.ic-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.ic-btns .btn-sm{margin:0!important}
+</style>
+<script id="pt-invcopy-script">
+(function(){
+  'use strict';
+  if(window.__ptInvCopy)return; window.__ptInvCopy=true;
+  const $=id=>document.getElementById(id);
+  const E=s=>escapeHtml(s), A=s=>escapeAttr(s);
+  const toast=m=>{try{showToast(m);}catch(e){console.log(m);}};
+  const MAX_CHARS=880000;            // Firestore documents are limited to 1 MB
+  const OK=/^data:(image\/(jpeg|png|webp)|application\/pdf);base64,/;
+  const isPdf=f=>!!f&&(f.type==='application/pdf'||/\.pdf$/i.test(f.name||''));
+  const fmtSize=b=>b<1024?b+' B':b<1048576?(b/1024).toFixed(0)+' KB':(b/1048576).toFixed(2)+' MB';
+  function setStatus(t,err){const s=$('invs-status');if(s){s.textContent=t||'';s.style.color=err?'var(--danger)':'var(--ink-soft)';}}
+
+  function readDataUrl(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(new Error('Could not read the file.'));r.readAsDataURL(file);});}
+  async function imageToDataUrl(file){
+    const im=await loadImg(file);
+    for(const s of [2000,1600,1300,1000,800,600]) for(const q of [0.8,0.65,0.5]){
+      const d=drawScaled(im,s).toDataURL('image/jpeg',q);
+      if(d.length<=MAX_CHARS)return d;
+    }
+    throw new Error('This image is too large to store.');
+  }
+  function toBlob(dataUrl){
+    const parts=dataUrl.split(','), mime=(parts[0].match(/data:([^;]+)/)||[])[1]||'application/octet-stream';
+    const bin=atob(parts[1]), u=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+    return new Blob([u],{type:mime});
+  }
+
+  /* ---------- UI: file types, vendor/amount fields, Save copy button ---------- */
+  function inject(){
+    const panel=$('invoice-panel'); if(!panel||$('invs-save-copy'))return;
+    const fi=$('invs-file'); if(fi)fi.accept='image/*,application/pdf';
+    const prev=$('invs-preview');
+    if(prev){
+      const row=document.createElement('div'); row.className='row-2 ic-row';
+      row.innerHTML='<div><label for="invs-vendor">Vendor / supplier (optional)</label><input type="text" id="invs-vendor" placeholder="e.g. Robu.in" autocomplete="off"></div>'
+        +'<div><label for="invs-amount">Total amount (optional)</label><input type="text" id="invs-amount" placeholder="e.g. 12500" autocomplete="off"></div>';
+      prev.parentNode.insertBefore(row,prev);
+    }
+    const scan=$('invs-scan');
+    if(scan){
+      const b=document.createElement('button'); b.type='button'; b.className='btn btn-sm btn-ghost'; b.id='invs-save-copy'; b.textContent='💾 Save invoice copy';
+      b.addEventListener('click',saveCopy);
+      scan.parentNode.insertBefore(b,scan.nextSibling);
+    }
+    const note=panel.querySelector('.progress-note');
+    if(note)note.insertAdjacentHTML('afterend','<div class="progress-note"><strong>Soft copy:</strong> “Save invoice copy” stores the image or PDF without changing stock. Images are compressed automatically; PDFs must be under about 650 KB.</div>');
+  }
+
+  /* ---------- PDF-aware preview / scan ---------- */
+  const origPreview=window.invPreview;
+  window.invPreview=async function(file){
+    if(isPdf(file)){
+      invDraft.file=file; invDraft.rows=[]; invDraft.scanned=false; invDraft.thumb='';
+      try{renderInvReview();}catch(e){}
+      $('invs-preview').innerHTML='<div class="ic-pdf">📄 <strong>'+E(file.name)+'</strong> · '+fmtSize(file.size)+'</div>';
+      setStatus('PDF selected. It cannot be read automatically — press “Save invoice copy” to store it.');
+      return;
+    }
+    return origPreview.apply(this,arguments);
+  };
+  const origScan=window.invScan;
+  window.invScan=function(){
+    if(isPdf(invDraft.file)){setStatus('Automatic reading works on photos/screenshots only. Use “Save invoice copy” for PDFs.',true);return;}
+    return origScan.apply(this,arguments);
+  };
+
+  /* ---------- Save the soft copy ---------- */
+  async function saveCopy(){
+    const file=invDraft.file;
+    if(!file){setStatus('Choose an invoice file first.',true);return;}
+    if(typeof requireMember==='function'&&!requireMember('invoice'))return;
+    if(!db){setStatus('Firebase is not configured.',true);return;}
+    const btn=$('invs-save-copy'); btn.disabled=true; setStatus('Saving…');
+    try{
+      let data,mime;
+      if(isPdf(file)){
+        data=(await readDataUrl(file)).replace(/^data:[^;,]*;/,'data:application/pdf;'); mime='application/pdf';
+        if(data.length>MAX_CHARS)throw new Error('This PDF is too big ('+fmtSize(file.size)+'). Maximum is about 650 KB — compress it, or upload a photo/screenshot instead.');
+      } else { data=await imageToDataUrl(file); mime='image/jpeg'; }
+      const buyerId=isAdmin?($('inv-buyer').value||null):currentMemberId;
+      const buyer=members.find(m=>m.id===buyerId);
+      await db.collection('invoices').add({
+        image:data, mime, fileName:file.name,
+        invoiceNo:($('invs-no').value||'').trim(), date:$('invs-date').value||todayStr(),
+        vendor:($('invs-vendor').value||'').trim(), amount:($('invs-amount').value||'').trim(),
+        buyerId:buyerId||null, buyerName:buyer?buyer.name:currentName,
+        items:[], copyOnly:true, ownerUid:currentUserUid, timestamp:Date.now()
+      });
+      invDraft={thumb:'',rows:[],file:null,scanned:false};
+      ['invs-file','invs-no','invs-vendor','invs-amount'].forEach(id=>{const e=$(id);if(e)e.value='';});
+      $('invs-preview').innerHTML=''; try{renderInvReview();}catch(e){}
+      setStatus('✓ Invoice copy saved. See “Uploaded invoices” below.');
+      toast('Invoice copy saved');
+    }catch(e){
+      console.error(e); setStatus(e.message||'Could not save. Check the Firestore rule for "invoices".',true);
+    }
+    btn.disabled=false;
+  }
+
+  /* ---------- Uploaded invoices list (images + PDFs) ---------- */
+  window.renderInvoiceList=function(){
+    const el=$('invoice-list'); if(!el)return;
+    if(!invoices.length){el.innerHTML='<div class="empty">No invoices uploaded yet.</div>';return;}
+    el.innerHTML='<div class="ic-grid">'+invoices.slice().sort((a,b)=>(b.timestamp||0)-(a.timestamp||0)).map(x=>{
+      const ok=OK.test(x.image||''), pdf=/^data:application\/pdf/.test(x.image||''), mine=isAdmin||x.ownerUid===currentUserUid;
+      const media=!ok?'':(pdf?'<div class="ic-pdfbox" onclick="invView(\''+A(x.id)+'\')">📄</div>':'<img class="ic-thumb" alt="Invoice" src="'+A(x.image)+'" onclick="invView(\''+A(x.id)+'\')">');
+      return '<div class="sub-card" data-docid="'+A(x.id)+'">'+media
+        +'<div class="sub-name" style="margin-top:8px;">'+E(x.invoiceNo||x.fileName||'Invoice')+'</div>'
+        +'<div class="ic-line">'+(x.date?E(formatDate(x.date)):'')+(x.vendor?' · '+E(x.vendor):'')+(x.amount?' · ₹'+E(x.amount):'')+'</div>'
+        +'<div class="ic-line">'+((x.items||[]).length?(x.items.length+' item(s) added to stock · '):'Soft copy · ')+E(x.buyerName||'')+'</div>'
+        +'<div class="ic-btns"><button type="button" class="btn btn-sm btn-ghost" onclick="invView(\''+A(x.id)+'\')">View</button>'
+        +'<button type="button" class="btn btn-sm btn-ghost" onclick="invDownload(\''+A(x.id)+'\')">Download</button>'
+        +(mine?'<button type="button" class="mini-remove" onclick="invDelete(\''+A(x.id)+'\')">Delete</button>':'')+'</div></div>';
+    }).join('')+'</div>';
+  };
+  window.invView=function(id){
+    const x=invoices.find(v=>v.id===id); if(!x||!OK.test(x.image||''))return;
+    const url=URL.createObjectURL(toBlob(x.image));
+    if(!window.open(url,'_blank')){toast('Please allow pop-ups to view the invoice');}
+    setTimeout(()=>URL.revokeObjectURL(url),120000);
+  };
+  window.invDownload=function(id){
+    const x=invoices.find(v=>v.id===id); if(!x||!OK.test(x.image||''))return;
+    const blob=toBlob(x.image), ext=blob.type==='application/pdf'?'pdf':(blob.type==='image/png'?'png':(blob.type==='image/webp'?'webp':'jpg'));
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download=String(x.invoiceNo||'invoice').replace(/[^\w.-]+/g,'_')+'-'+(x.date||'')+'.'+ext;
+    document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
+  };
+
+  inject();
+  try{renderInvoiceList();}catch(e){}
+})();
+</script>
   <!-- =====================================================================
      ORDER TRACKER + BULK EXCEL-SHEET ORDER  (add-on for Protthapan index.html)
      HOW TO ADD: open your index.html, scroll to the very bottom, and paste this
