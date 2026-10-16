@@ -3651,7 +3651,12 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
           tripPurpose: v('ps-purpose'), expectedReturnDate: v('ps-return-date'),
           filledName: v('ps-filled-name'), filledDesignation: v('ps-filled-des'),
           approvedName: v('ps-appr-name'), approvedDesignation: v('ps-appr-des'),
-          items, createdBy: currentName, closedDate: null, timestamp: Date.now()
+          items,
+          createdBy: currentName,
+          createdByUid: (auth && auth.currentUser) ? auth.currentUser.uid : currentUserUid,
+          ownerUid: isAdmin ? null : ((auth && auth.currentUser) ? auth.currentUser.uid : currentUserUid),
+          closedDate: null,
+          timestamp: Date.now()
         });
         liveSync('Out Passes', SHEET_HEAD.out, items.map(it => [refNo, date, projName, v('ps-custodian'), v('ps-purpose'), v('ps-return-date'), v('ps-id-proof'), it.desc, it.qty, it.remarks]));
         ['ps-projname', 'ps-custodian', 'ps-id-proof', 'ps-purpose', 'ps-return-date',
@@ -3661,8 +3666,10 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
         renderDraftItems();
         showToast('Out pass ' + refNo + ' created');
       } catch (e) {
-        console.log('[createTrip] FAILED:', e);
-        errEl.textContent = 'Could not save. Check your Firebase setup.';
+        console.error('[createTrip] FAILED:', e);
+        errEl.textContent = (e && e.code === 'permission-denied')
+          ? 'Permission denied by Firestore. Publish the updated passes rule, then try again.'
+          : 'Could not save the out pass: ' + ((e && e.message) || 'Check Firebase setup.');
       }
     }
 
@@ -5756,7 +5763,7 @@ function stockBar(r){
       if(!requireMember('blog'))return;const title=document.getElementById('blog-title').value.trim(),authorId=isAdmin?document.getElementById('blog-author').value:currentMemberId,date=document.getElementById('blog-date').value||todayStr(),summary=document.getElementById('blog-summary').value.trim(),err=document.getElementById('blog-error');err.textContent='';if(!title||!summary){err.textContent='Project title and summary are required.';return;}const a=members.find(m=>m.id===authorId);try{await db.collection('blogPosts').add({title,summary,date,authorId,authorName:a?.name||currentName,timestamp:Date.now(),ownerUid:isAdmin?null:currentUserUid});['blog-title','blog-summary'].forEach(id=>document.getElementById(id).value='');showToast('Post published');}catch(e){err.textContent='Could not save. Check Firestore rules.';}
     }
     async function createTrip(){
-      if(!requireMember('pass'))return;const err=document.getElementById('ps-error');err.textContent='';const items=psDraftItems.filter(it=>it.desc.trim()&&Number(it.qty)>0).map(it=>({id:newId(),desc:it.desc.trim(),qty:Number(it.qty),remarks:(it.remarks||'').trim(),returnedQty:null,reason:''}));if(!items.length){err.textContent='Add at least one item.';return;}const v=id=>document.getElementById(id).value.trim(),date=document.getElementById('ps-date').value||todayStr(),proj=projects.find(p=>p.id===document.getElementById('ps-project').value),projName=v('ps-projname')||(proj?.name||''),refNo='OUT-'+date.replace(/-/g,'')+'-'+(Math.floor(Math.random()*900)+100);try{await db.collection('passes').add({refNo,date,projectId:proj?.id||null,projectName:projName,mainContractor:v('ps-main'),subContractor:v('ps-sub'),transporter:v('ps-trans'),plot:v('ps-plot'),driver:v('ps-driver'),vehicle:v('ps-vehicle'),invoice:v('ps-invoice'),from:v('ps-from'),to:v('ps-to'),filledName:v('ps-filled-name')||currentName,filledDesignation:v('ps-filled-des'),approvedName:v('ps-appr-name'),approvedDesignation:v('ps-appr-des'),items,createdBy:currentName,createdByUid:currentUserUid,ownerUid:isAdmin?null:currentUserUid,closedDate:null,timestamp:Date.now()});psDraftItems=[{id:newId(),desc:'',qty:'',remarks:''}];renderDraftItems();showToast('Out pass '+refNo+' created');}catch(e){err.textContent='Could not save. Check Firestore rules.';}
+      if(!requireMember('pass'))return;const err=document.getElementById('ps-error');err.textContent='';const items=psDraftItems.filter(it=>it.desc.trim()&&Number(it.qty)>0).map(it=>({id:newId(),desc:it.desc.trim(),qty:Number(it.qty),remarks:(it.remarks||'').trim(),returnedQty:null,reason:''}));if(!items.length){err.textContent='Add at least one item.';return;}const v=id=>document.getElementById(id).value.trim(),date=document.getElementById('ps-date').value||todayStr(),proj=projects.find(p=>p.id===document.getElementById('ps-project').value),projName=v('ps-projname')||(proj?.name||''),refNo='OUT-'+date.replace(/-/g,'')+'-'+(Math.floor(Math.random()*900)+100);try{const authenticatedUid=(auth&&auth.currentUser)?auth.currentUser.uid:currentUserUid;if(!authenticatedUid){err.textContent='Your Firebase session is not signed in. Please log in again.';return;}await db.collection('passes').add({refNo,date,projectId:proj?.id||null,projectName:projName,mainContractor:v('ps-main'),subContractor:v('ps-sub'),transporter:v('ps-trans'),plot:v('ps-plot'),driver:v('ps-driver'),vehicle:v('ps-vehicle'),invoice:v('ps-invoice'),from:v('ps-from'),to:v('ps-to'),filledName:v('ps-filled-name')||currentName,filledDesignation:v('ps-filled-des'),approvedName:v('ps-appr-name'),approvedDesignation:v('ps-appr-des'),items,createdBy:currentName,createdByUid:authenticatedUid,ownerUid:isAdmin?null:authenticatedUid,closedDate:null,timestamp:Date.now()});psDraftItems=[{id:newId(),desc:'',qty:'',remarks:''}];renderDraftItems();showToast('Out pass '+refNo+' created');}catch(e){console.error('[createTrip] FAILED:',e);err.textContent=(e&&e.code==='permission-denied')?'Permission denied by Firestore. Publish the updated passes rule, then try again.':'Could not save the out pass: '+((e&&e.message)||'Check Firebase setup.');}
     }
 
     async function addProject(status,nameId,ownerId,descId,errId){
