@@ -976,6 +976,11 @@
       color: var(--ink-soft);
     }
 
+    /* Entry and exit dates appear side by side on the In / Out Pass form. */
+    .ps-date-row { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px 16px; }
+    @media (max-width:1000px) { .ps-date-row { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width:520px) { .ps-date-row { grid-template-columns:1fr; } }
+
     /* ======= In / Out Pass ======= */
     .ps-item-row {
       display: grid;
@@ -2607,8 +2612,9 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
 
         <div class="panel">
           <h2>New trip / out pass</h2>
-          <div class="row-3">
+          <div class="ps-date-row">
             <div><label for="ps-date">Date of exit</label><input type="date" id="ps-date"></div>
+            <div><label for="ps-entry-date">Date of entry</label><input type="date" id="ps-entry-date"></div>
             <div><label for="ps-project">Link to ongoing project (optional)</label>
               <select id="ps-project">
                 <option value="">No linked project</option>
@@ -3639,12 +3645,13 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
       if (!db) {errEl.textContent = 'Firebase not configured yet.'; return;}
       const v = id => document.getElementById(id).value.trim();
       const date = document.getElementById('ps-date').value || todayStr();
+      const entryDate = document.getElementById('ps-entry-date').value || '';
       const proj = projects.find(p => p.id === document.getElementById('ps-project').value);
       const projName = v('ps-projname') || (proj ? proj.name : '');
       const refNo = 'OUT-' + date.replace(/-/g, '') + '-' + (Math.floor(Math.random() * 900) + 100);
       try {
         await db.collection('passes').add({
-          refNo, date,
+          refNo, date, entryDate,
           projectId: proj ? proj.id : null,
           projectName: projName,
           custodianName: v('ps-custodian'), custodianIdProof: v('ps-id-proof'),
@@ -3662,6 +3669,7 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
         ['ps-projname', 'ps-custodian', 'ps-id-proof', 'ps-purpose', 'ps-return-date',
           'ps-filled-name', 'ps-filled-des', 'ps-appr-name', 'ps-appr-des'].forEach(id => {document.getElementById(id).value = '';});
         document.getElementById('ps-project').value = '';
+        document.getElementById('ps-entry-date').value = todayStr();
         psDraftItems = [{id: newId(), desc: '', qty: '', remarks: ''}];
         renderDraftItems();
         showToast('Out pass ' + refNo + ' created');
@@ -3794,7 +3802,7 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
       };
       let h = '<div class="proj-body">';
       h += '<div class="trip-info">'
-        + ic('Date of exit', formatDate(t.date)) + ic('Linked project', t.projectName)
+        + ic('Date of exit', formatDate(t.date)) + ic('Date of entry', t.entryDate ? formatDate(t.entryDate) : 'Not specified') + ic('Linked project', t.projectName)
         + ic('Custodian Name', t.custodianName || t.driver)
         + ic("Custodian's ID proof", t.custodianIdProof || t.invoice)
         + ic('Purpose of the trip', t.tripPurpose || t.from)
@@ -3908,7 +3916,7 @@ th{background:#EEF2EE;}
 <div class="checks"><span class="cb">${isIn ? '&#10004;' : ''}</span>ENTRY <span class="cb">${!isIn ? '&#10004;' : ''}</span>EXIT</div>
 <table><tr>${cell('Date of Entry / Exit:', formatDate(date))}${cell('Project Name:', t.projectName)}</tr></table>
 <table><tr>${cell('Custodian Name:', t.custodianName || t.driver)}${cell("Custodian's ID proof:", t.custodianIdProof || t.invoice)}</tr></table>
-<table><tr>${cell('Purpose of the trip:', t.tripPurpose || t.from)}${cell('Expected date of return:', t.expectedReturnDate || t.to)}</tr></table>
+<table><tr>${cell('Date of exit:', formatDate(t.date))}${cell('Date of entry:', t.entryDate ? formatDate(t.entryDate) : 'Not specified')} </tr><tr>${cell('Purpose of the trip:', t.tripPurpose || t.from)}${cell('Expected date of return:', t.expectedReturnDate || t.to)}</tr></table>
 <table><tr><th style="width:36px;">No.</th><th>Description of Material / Equipment</th><th style="width:90px;">Quantity</th><th style="width:30%;">Remarks</th></tr>
 ${rows.map((r, i) => `<tr><td>${r.desc ? i + 1 : '&nbsp;'}</td><td>${e(r.desc)}</td><td>${e(r.qty)}</td><td>${e(r.remarks)}</td></tr>`).join('')}
 </table>
@@ -5137,6 +5145,7 @@ async function sendPurchaseEmail(){
       document.getElementById('up2-date').value = todayStr();
       document.getElementById('blog-date').value = todayStr();
       document.getElementById('ps-date').value = todayStr();
+      document.getElementById('ps-entry-date').value = todayStr();
       document.getElementById('att-month').value = localDate().slice(0, 7);
       try {
         const wo = localStorage.getItem('ptAttWeekoff');
@@ -5776,6 +5785,7 @@ function stockBar(r){
       // Optional/missing elements safely return an empty string.
       const v=id=>{const el=document.getElementById(id);return el && el.value!=null ? String(el.value).trim() : '';};
       const date=v('ps-date')||todayStr();
+      const entryDate=v('ps-entry-date');
       const proj=projects.find(p=>p.id===v('ps-project'));
       const projName=v('ps-projname')||(proj&&proj.name)||'';
       const refNo='OUT-'+date.replace(/-/g,'')+'-'+(Math.floor(Math.random()*900)+100);
@@ -5783,7 +5793,7 @@ function stockBar(r){
         const authenticatedUid=(auth&&auth.currentUser)?auth.currentUser.uid:currentUserUid;
         if(!authenticatedUid){err.textContent='Your Firebase session is not signed in. Please log in again.';return;}
         await db.collection('passes').add({
-          refNo,date,projectId:proj?proj.id:null,projectName:projName,
+          refNo,date,entryDate,projectId:proj?proj.id:null,projectName:projName,
           custodianName:v('ps-custodian'),custodianIdProof:v('ps-id-proof'),
           tripPurpose:v('ps-purpose'),expectedReturnDate:v('ps-return-date'),
           filledName:v('ps-filled-name')||currentName,filledDesignation:v('ps-filled-des'),
@@ -5794,6 +5804,7 @@ function stockBar(r){
         liveSync('Out Passes',SHEET_HEAD.out,items.map(it=>[refNo,date,projName,v('ps-custodian'),v('ps-purpose'),v('ps-return-date'),v('ps-id-proof'),it.desc,it.qty,it.remarks]));
         ['ps-projname','ps-custodian','ps-id-proof','ps-purpose','ps-return-date','ps-filled-name','ps-filled-des','ps-appr-name','ps-appr-des'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
         const projectEl=document.getElementById('ps-project');if(projectEl)projectEl.value='';
+        const entryDateEl=document.getElementById('ps-entry-date');if(entryDateEl)entryDateEl.value=todayStr();
         psDraftItems=[{id:newId(),desc:'',qty:'',remarks:''}];renderDraftItems();
         showToast('Out pass '+refNo+' created');
       }catch(e){
