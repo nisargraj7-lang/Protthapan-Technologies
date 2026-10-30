@@ -980,6 +980,13 @@
     .ps-date-row { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px 16px; }
     @media (max-width:1000px) { .ps-date-row { grid-template-columns:repeat(2,minmax(0,1fr)); } }
     @media (max-width:520px) { .ps-date-row { grid-template-columns:1fr; } }
+    .ps-kind-picker{display:flex;gap:12px;margin:0 0 18px;flex-wrap:wrap}
+    .ps-kind-option{flex:1;min-width:180px;border:2px solid var(--line);border-radius:13px;padding:14px 18px;background:var(--card);color:var(--ink);font-weight:800;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease;text-align:center}
+    .ps-kind-option:hover{transform:translateY(-2px);border-color:var(--blue);box-shadow:0 8px 20px rgba(35,105,210,.14)}
+    .ps-kind-option.active{border-color:var(--blue);background:rgba(35,105,210,.09);box-shadow:inset 0 0 0 1px var(--blue)}
+    .ps-damage-field{margin-top:14px}
+    .ps-damage-field textarea{width:100%;min-height:76px;resize:vertical}
+
 
     /* ======= In / Out Pass ======= */
     .ps-item-row {
@@ -2611,7 +2618,12 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
           automatically for printing.</p>
 
         <div class="panel">
-          <h2>New trip / out pass</h2>
+          <h2>New trip / in-out pass</h2>
+          <div class="ps-kind-picker" role="group" aria-label="Select pass type">
+            <button type="button" class="ps-kind-option active" id="ps-kind-out" onclick="setPassType('out')" aria-pressed="true">↗ OUT PASS <span style="display:block;font-size:12px;font-weight:500;margin-top:4px;">Taking equipment outside</span></button>
+            <button type="button" class="ps-kind-option" id="ps-kind-in" onclick="setPassType('in')" aria-pressed="false">↙ IN PASS <span style="display:block;font-size:12px;font-weight:500;margin-top:4px;">Bringing equipment inside</span></button>
+          </div>
+          <input type="hidden" id="ps-pass-type" value="out">
           <div class="ps-date-row">
             <div><label for="ps-date">Date of exit</label><input type="date" id="ps-date"></div>
             <div><label for="ps-entry-date">Date of entry</label><input type="date" id="ps-entry-date"></div>
@@ -2632,6 +2644,7 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
             <div><label for="ps-return-date">Expected date of return</label><input type="date" id="ps-return-date"></div>
           </div>
 
+          <div class="ps-damage-field"><label for="ps-drone-damage">Drone damage / damaged parts (optional)</label><textarea id="ps-drone-damage" placeholder="Mention damaged drone parts, for example: front-left propeller cracked, landing gear damaged, camera mount broken..."></textarea></div>
           <label style="margin-top:20px;">Items we are carrying (description · quantity · remarks)</label>
           <div id="ps-items"></div>
           <div class="ps-actions">
@@ -3597,6 +3610,18 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
     }
 
     // ---- In / Out Pass ----
+    function setPassType(kind) {
+      const type = kind === 'in' ? 'in' : 'out';
+      const field = document.getElementById('ps-pass-type');
+      if (field) field.value = type;
+      const out = document.getElementById('ps-kind-out');
+      const inside = document.getElementById('ps-kind-in');
+      if (out) { out.classList.toggle('active', type === 'out'); out.setAttribute('aria-pressed', String(type === 'out')); }
+      if (inside) { inside.classList.toggle('active', type === 'in'); inside.setAttribute('aria-pressed', String(type === 'in')); }
+      const submit = document.getElementById('ps-submit');
+      if (submit) submit.textContent = type === 'in' ? 'Create in pass' : 'Create out pass';
+    }
+    window.setPassType = setPassType;
     function renderDraftItems() {
       const el = document.getElementById('ps-items');
       if (!el) return;
@@ -3648,10 +3673,12 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
       const entryDate = document.getElementById('ps-entry-date').value || '';
       const proj = projects.find(p => p.id === document.getElementById('ps-project').value);
       const projName = v('ps-projname') || (proj ? proj.name : '');
-      const refNo = 'OUT-' + date.replace(/-/g, '') + '-' + (Math.floor(Math.random() * 900) + 100);
+      const passType = (document.getElementById('ps-pass-type')?.value === 'in') ? 'in' : 'out';
+      const droneDamage = v('ps-drone-damage');
+      const refNo = (passType === 'in' ? 'IN-' : 'OUT-') + (passType === 'in' && entryDate ? entryDate : date).replace(/-/g, '') + '-' + (Math.floor(Math.random() * 900) + 100);
       try {
         await db.collection('passes').add({
-          refNo, date, entryDate,
+          refNo, date, entryDate, passType, droneDamage,
           projectId: proj ? proj.id : null,
           projectName: projName,
           custodianName: v('ps-custodian'), custodianIdProof: v('ps-id-proof'),
@@ -3666,13 +3693,13 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
           timestamp: Date.now()
         });
         liveSync('Out Passes', SHEET_HEAD.out, items.map(it => [refNo, date, projName, v('ps-custodian'), v('ps-purpose'), v('ps-return-date'), v('ps-id-proof'), it.desc, it.qty, it.remarks]));
-        ['ps-projname', 'ps-custodian', 'ps-id-proof', 'ps-purpose', 'ps-return-date',
+        ['ps-projname', 'ps-custodian', 'ps-id-proof', 'ps-purpose', 'ps-return-date', 'ps-drone-damage',
           'ps-filled-name', 'ps-filled-des', 'ps-appr-name', 'ps-appr-des'].forEach(id => {document.getElementById(id).value = '';});
         document.getElementById('ps-project').value = '';
         document.getElementById('ps-entry-date').value = todayStr();
         psDraftItems = [{id: newId(), desc: '', qty: '', remarks: ''}];
         renderDraftItems();
-        showToast('Out pass ' + refNo + ' created');
+        showToast((passType === 'in' ? 'In pass ' : 'Out pass ') + refNo + ' created');
       } catch (e) {
         console.error('[createTrip] FAILED:', e);
         errEl.textContent = (e && e.code === 'permission-denied')
@@ -3807,6 +3834,7 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
         + ic("Custodian's ID proof", t.custodianIdProof || t.invoice)
         + ic('Purpose of the trip', t.tripPurpose || t.from)
         + ic('Expected date of return', t.expectedReturnDate || t.to)
+        + ic('Drone damage / damaged parts', t.droneDamage)
         + ic('Back on', t.closedDate ? formatDate(t.closedDate) : 'Not closed yet')
         + '</div>';
       h += '<div class="sub-section-title">ITEMS &amp; RETURN CHECK</div>';
@@ -3872,7 +3900,7 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
       const items = t.items || [];
       const rows = [];
       const notBack = [];
-      if (!isIn) {
+      if (!isIn || t.passType === 'in') {
         items.forEach(it => rows.push({desc: it.desc, qty: fmtNum(it.qty), remarks: it.remarks || ''}));
       } else {
         items.forEach(it => {
@@ -3886,7 +3914,7 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
         });
       }
       while (rows.length < 5) rows.push({desc: '', qty: '', remarks: ''});
-      const date = isIn ? (t.closedDate || todayStr()) : t.date;
+      const date = isIn ? (t.entryDate || t.closedDate || todayStr()) : t.date;
       const from = isIn ? t.to : t.from;
       const to = isIn ? t.from : t.to;
       const cell = (label, v) => `<td><span class="lbl">${label}</span><div class="val">${e(v)}</div></td>`;
@@ -3917,6 +3945,7 @@ th{background:#EEF2EE;}
 <table><tr>${cell('Date of Entry / Exit:', formatDate(date))}${cell('Project Name:', t.projectName)}</tr></table>
 <table><tr>${cell('Custodian Name:', t.custodianName || t.driver)}${cell("Custodian's ID proof:", t.custodianIdProof || t.invoice)}</tr></table>
 <table><tr>${cell('Date of exit:', formatDate(t.date))}${cell('Date of entry:', t.entryDate ? formatDate(t.entryDate) : 'Not specified')} </tr><tr>${cell('Purpose of the trip:', t.tripPurpose || t.from)}${cell('Expected date of return:', t.expectedReturnDate || t.to)}</tr></table>
+${t.droneDamage ? `<table><tr>${cell('Drone damage / damaged parts:', t.droneDamage)}</tr></table>` : ''}
 <table><tr><th style="width:36px;">No.</th><th>Description of Material / Equipment</th><th style="width:90px;">Quantity</th><th style="width:30%;">Remarks</th></tr>
 ${rows.map((r, i) => `<tr><td>${r.desc ? i + 1 : '&nbsp;'}</td><td>${e(r.desc)}</td><td>${e(r.qty)}</td><td>${e(r.remarks)}</td></tr>`).join('')}
 </table>
@@ -3933,7 +3962,7 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
     function printPass(tripId, kind) {
       const t = trips.find(x => x.id === tripId);
       if (!t) return;
-      if (kind === 'in' && !(t.items || []).some(it => it.returnedQty != null)) {
+      if (kind === 'in' && t.passType !== 'in' && !(t.items || []).some(it => it.returnedQty != null)) {
         showToast('Do the return check first, then print the in pass');
         return;
       }
@@ -5788,12 +5817,14 @@ function stockBar(r){
       const entryDate=v('ps-entry-date');
       const proj=projects.find(p=>p.id===v('ps-project'));
       const projName=v('ps-projname')||(proj&&proj.name)||'';
-      const refNo='OUT-'+date.replace(/-/g,'')+'-'+(Math.floor(Math.random()*900)+100);
+      const passType=v('ps-pass-type')==='in'?'in':'out';
+      const droneDamage=v('ps-drone-damage');
+      const refNo=(passType==='in'?'IN-':'OUT-')+(passType==='in'&&entryDate?entryDate:date).replace(/-/g,'')+'-'+(Math.floor(Math.random()*900)+100);
       try{
         const authenticatedUid=(auth&&auth.currentUser)?auth.currentUser.uid:currentUserUid;
         if(!authenticatedUid){err.textContent='Your Firebase session is not signed in. Please log in again.';return;}
         await db.collection('passes').add({
-          refNo,date,entryDate,projectId:proj?proj.id:null,projectName:projName,
+          refNo,date,entryDate,passType,droneDamage,projectId:proj?proj.id:null,projectName:projName,
           custodianName:v('ps-custodian'),custodianIdProof:v('ps-id-proof'),
           tripPurpose:v('ps-purpose'),expectedReturnDate:v('ps-return-date'),
           filledName:v('ps-filled-name')||currentName,filledDesignation:v('ps-filled-des'),
@@ -5802,11 +5833,11 @@ function stockBar(r){
           ownerUid:isAdmin?null:authenticatedUid,closedDate:null,timestamp:Date.now()
         });
         liveSync('Out Passes',SHEET_HEAD.out,items.map(it=>[refNo,date,projName,v('ps-custodian'),v('ps-purpose'),v('ps-return-date'),v('ps-id-proof'),it.desc,it.qty,it.remarks]));
-        ['ps-projname','ps-custodian','ps-id-proof','ps-purpose','ps-return-date','ps-filled-name','ps-filled-des','ps-appr-name','ps-appr-des'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+        ['ps-projname','ps-custodian','ps-id-proof','ps-purpose','ps-return-date','ps-drone-damage','ps-filled-name','ps-filled-des','ps-appr-name','ps-appr-des'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
         const projectEl=document.getElementById('ps-project');if(projectEl)projectEl.value='';
         const entryDateEl=document.getElementById('ps-entry-date');if(entryDateEl)entryDateEl.value=todayStr();
         psDraftItems=[{id:newId(),desc:'',qty:'',remarks:''}];renderDraftItems();
-        showToast('Out pass '+refNo+' created');
+        showToast((passType==='in'?'In pass ':'Out pass ')+refNo+' created');
       }catch(e){
         console.error('[createTrip] FAILED:',e);
         err.textContent=(e&&e.code==='permission-denied')
