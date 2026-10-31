@@ -3839,9 +3839,16 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
       try {await db.collection('passes').doc(id).delete();} catch (e) {showToast('Could not delete trip');}
     }
     function toggleTrip(id) {
-      openTripId = openTripId === id ? null : id;
+      // Keep this handler explicitly available to the inline trip-card controls.
+      // Re-rendering the list preserves the selected trip and expands its details.
+      const target = String(id || '');
+      if (!target) return;
+      openTripId = openTripId === target ? null : target;
       renderPassList();
     }
+    // Explicit globals are important because trip cards are rendered dynamically
+    // after Firebase loads and use inline click/print controls.
+    window.toggleTrip = toggleTrip;
     function tripBody(t) {
       const items = t.items || [];
       const ic = (l, v) => `<div><span>${l}</span>${escapeHtml(v || '—')}</div>`;
@@ -3902,7 +3909,7 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
         const st = tripState(t);
         const open = t.id === openTripId;
         return `<div class="proj-card ${open ? 'open' : ''}" data-docid="${t.id}">
-          <div class="proj-head" onclick="toggleTrip('${t.id}')">
+          <div class="proj-head" onclick="window.toggleTrip('${t.id}')">
             <span class="proj-chevron">▶</span>
             <span class="proj-title">${escapeHtml(t.refNo)} <span style="color:var(--ink-soft); font-weight:400;">· ${formatDate(t.date)}${(t.expectedReturnDate || t.to) ? ' · return ' + escapeHtml(t.expectedReturnDate || t.to) : ''}</span></span>
             ${t.projectName ? `<span class="member-tag">${escapeHtml(t.projectName)}</span>` : ''}
@@ -4000,6 +4007,10 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       w.focus();
       setTimeout(() => w.print(), 400);
     }
+    window.printPass = printPass;
+    window.saveReturnCheck = saveReturnCheck;
+    window.markAllReturned = markAllReturned;
+    window.deleteTrip = deleteTrip;
 
     // ---- Attendance (Daily Log page): check-in / check-out, today board, monthly report ----
     // One record per member per day, stored in "attendance" with the id  memberId_YYYY-MM-DD.
