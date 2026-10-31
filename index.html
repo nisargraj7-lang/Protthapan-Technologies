@@ -2622,7 +2622,6 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
           <div class="ps-kind-picker" role="group" aria-label="Select pass type">
             <button type="button" class="ps-kind-option active" id="ps-kind-out" onclick="setPassType('out')" aria-pressed="true">↗ OUT PASS <span style="display:block;font-size:12px;font-weight:500;margin-top:4px;">Taking equipment outside</span></button>
             <button type="button" class="ps-kind-option" id="ps-kind-in" onclick="setPassType('in')" aria-pressed="false">↙ IN PASS <span style="display:block;font-size:12px;font-weight:500;margin-top:4px;">Bringing equipment inside</span></button>
-            <button type="button" class="ps-kind-option" id="ps-kind-repair" onclick="setPassType('repair')" aria-pressed="false">🛠 DRONE FOR REPAIR <span style="display:block;font-size:12px;font-weight:500;margin-top:4px;">Client submitted a drone for repair</span></button>
           </div>
           <input type="hidden" id="ps-pass-type" value="out">
           <div class="ps-date-row">
@@ -2646,23 +2645,6 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
           </div>
 
           <div class="ps-damage-field"><label for="ps-drone-damage">Drone damage / damaged parts (optional)</label><textarea id="ps-drone-damage" placeholder="Mention damaged drone parts, for example: front-left propeller cracked, landing gear damaged, camera mount broken..."></textarea></div>
-          <div id="ps-repair-fields" class="panel" style="display:none;margin-top:14px;padding:14px;border:1px dashed var(--blue);">
-            <h3 style="margin:0 0 12px;color:var(--ink);">Client drone repair intake</h3>
-            <div class="row-2">
-              <div><label for="ps-repair-client">Client / company name</label><input type="text" id="ps-repair-client" placeholder="Name of client who submitted the drone"></div>
-              <div><label for="ps-repair-contact">Client contact number / email</label><input type="text" id="ps-repair-contact" placeholder="Phone number or email (optional)"></div>
-            </div>
-            <div class="row-2" style="margin-top:12px;">
-              <div><label for="ps-repair-model">Drone make / model</label><input type="text" id="ps-repair-model" placeholder="e.g. DJI Mavic 3 / custom FPV"></div>
-              <div><label for="ps-repair-serial">Drone serial number / asset ID</label><input type="text" id="ps-repair-serial" placeholder="Serial number or asset ID"></div>
-            </div>
-            <div class="row-2" style="margin-top:12px;">
-              <div><label for="ps-repair-received">Date received for repair</label><input type="date" id="ps-repair-received"></div>
-              <div><label for="ps-repair-status">Repair status</label><select id="ps-repair-status"><option value="under-repair">Under repair</option><option value="inspection">Received — inspection pending</option><option value="waiting-parts">Waiting for parts</option><option value="repair-complete">Repair completed</option></select></div>
-            </div>
-            <div style="margin-top:12px;"><label for="ps-repair-issue">Reported issue / repair required</label><textarea id="ps-repair-issue" style="width:100%;min-height:76px;" placeholder="Describe the fault reported by the client and the repair required..."></textarea></div>
-            <div style="margin-top:12px;"><label for="ps-repair-condition">Condition / accessories received</label><textarea id="ps-repair-condition" style="width:100%;min-height:64px;" placeholder="Mention visible condition, battery, controller, propellers, charger or other accessories received..."></textarea></div>
-          </div>
           <label style="margin-top:20px;">Items we are carrying (description · quantity · remarks)</label>
           <div id="ps-items"></div>
           <div class="ps-actions">
@@ -3629,19 +3611,15 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
 
     // ---- In / Out Pass ----
     function setPassType(kind) {
-      const type = ['in','repair'].includes(kind) ? kind : 'out';
+      const type = kind === 'in' ? 'in' : 'out';
       const field = document.getElementById('ps-pass-type');
       if (field) field.value = type;
-      ['out','in','repair'].forEach(k => {
-        const btn=document.getElementById('ps-kind-'+k);
-        if(btn){btn.classList.toggle('active',type===k);btn.setAttribute('aria-pressed',String(type===k));}
-      });
-      const repairFields=document.getElementById('ps-repair-fields');
-      if(repairFields)repairFields.style.display=type==='repair'?'block':'none';
+      const out = document.getElementById('ps-kind-out');
+      const inside = document.getElementById('ps-kind-in');
+      if (out) { out.classList.toggle('active', type === 'out'); out.setAttribute('aria-pressed', String(type === 'out')); }
+      if (inside) { inside.classList.toggle('active', type === 'in'); inside.setAttribute('aria-pressed', String(type === 'in')); }
       const submit = document.getElementById('ps-submit');
-      if (submit) submit.textContent = type === 'in' ? 'Create in pass' : type === 'repair' ? 'Register drone for repair' : 'Create out pass';
-      const heading=document.querySelector('#view-pass .panel h2');
-      if(heading)heading.textContent=type==='repair'?'New drone repair intake': 'New trip / in-out pass';
+      if (submit) submit.textContent = type === 'in' ? 'Create in pass' : 'Create out pass';
     }
     window.setPassType = setPassType;
     function renderDraftItems() {
@@ -3839,16 +3817,9 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
       try {await db.collection('passes').doc(id).delete();} catch (e) {showToast('Could not delete trip');}
     }
     function toggleTrip(id) {
-      // Keep this handler explicitly available to the inline trip-card controls.
-      // Re-rendering the list preserves the selected trip and expands its details.
-      const target = String(id || '');
-      if (!target) return;
-      openTripId = openTripId === target ? null : target;
+      openTripId = openTripId === id ? null : id;
       renderPassList();
     }
-    // Explicit globals are important because trip cards are rendered dynamically
-    // after Firebase loads and use inline click/print controls.
-    window.toggleTrip = toggleTrip;
     function tripBody(t) {
       const items = t.items || [];
       const ic = (l, v) => `<div><span>${l}</span>${escapeHtml(v || '—')}</div>`;
@@ -3864,9 +3835,8 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
         + ic('Purpose of the trip', t.tripPurpose || t.from)
         + ic('Expected date of return', t.expectedReturnDate || t.to)
         + ic('Drone damage / damaged parts', t.droneDamage)
-        + (t.passType==='repair' ? ic('Repair status', ({'under-repair':'UNDER REPAIR','inspection':'Inspection pending','waiting-parts':'Waiting for parts','repair-complete':'Repair completed'}[t.repairStatus]||'UNDER REPAIR')) + ic('Client / company',t.repairClient) + ic('Client contact',t.repairContact) + ic('Drone model',t.repairModel) + ic('Serial / asset ID',t.repairSerial) + ic('Reported repair issue',t.repairIssue) + ic('Received condition / accessories',t.repairCondition) : ic('Back on', t.closedDate ? formatDate(t.closedDate) : 'Not closed yet'))
+        + ic('Back on', t.closedDate ? formatDate(t.closedDate) : 'Not closed yet')
         + '</div>';
-      if(t.passType!=='repair'){
       h += '<div class="sub-section-title">ITEMS &amp; RETURN CHECK</div>';
       h += '<table><tr><th>#</th><th>Item</th><th>Carried</th><th>Came back</th><th>Status</th><th>Reason if not back</th></tr>';
       const vals = [];
@@ -3884,41 +3854,21 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
         </tr>`;
       });
       h += '</table>';
-      }
       h += `<div class="ps-actions">
-          ${t.passType==='repair' ? `<button class="btn btn-sm btn-ghost" onclick="printPass('${t.id}','repair')">Print repair intake</button>` : `<button class="btn btn-sm" onclick="saveReturnCheck('${t.id}')">Save return check</button><button class="btn btn-sm btn-ghost" onclick="markAllReturned('${t.id}')">Mark all as returned</button><button class="btn btn-sm btn-ghost" onclick="printPass('${t.id}','out')">Print out pass</button><button class="btn btn-sm btn-ghost" onclick="printPass('${t.id}','in')">Print in pass</button>`}
-          <button class="mini-remove" onclick="deleteTrip('${t.id}')">Delete record</button>
+          <button class="btn btn-sm" onclick="saveReturnCheck('${t.id}')">Save return check</button>
+          <button class="btn btn-sm btn-ghost" onclick="markAllReturned('${t.id}')">Mark all as returned</button>
+          <button class="btn btn-sm btn-ghost" onclick="printPass('${t.id}','out')">Print out pass</button>
+          <button class="btn btn-sm btn-ghost" onclick="printPass('${t.id}','in')">Print in pass</button>
+          <button class="mini-remove" onclick="deleteTrip('${t.id}')">Delete trip</button>
           <span id="ps-err-${t.id}" style="color:var(--danger); font-size:13px;"></span>
         </div>`;
-      if(t.passType!=='repair')h += `<div id="trip-sum-${t.id}">${tripSummaryHtml(vals)}</div>`;
+      h += `<div id="trip-sum-${t.id}">${tripSummaryHtml(vals)}</div>`;
       h += '</div>';
       return h;
     }
     function renderPassList() {
       const el = document.getElementById('pass-list');
       if (!el) return;
-      // Use one delegated listener on the stable list container. This is more
-      // reliable than inline onclick attributes on cards rebuilt after every render.
-      if (!el.__ptTripClickBound) {
-        el.__ptTripClickBound = true;
-        el.addEventListener('click', function (event) {
-          const head = event.target.closest('[data-trip-toggle]');
-          if (!head || !el.contains(head)) return;
-          // Do not collapse/expand the card when a real form control or action is clicked.
-          if (event.target.closest('button, input, select, textarea, a, label')) return;
-          event.preventDefault();
-          const tripId = head.getAttribute('data-trip-toggle');
-          if (tripId) toggleTrip(tripId);
-        });
-        el.addEventListener('keydown', function (event) {
-          if (event.key !== 'Enter' && event.key !== ' ') return;
-          const head = event.target.closest('[data-trip-toggle]');
-          if (!head || !el.contains(head)) return;
-          event.preventDefault();
-          const tripId = head.getAttribute('data-trip-toggle');
-          if (tripId) toggleTrip(tripId);
-        });
-      }
       const f = document.getElementById('pass-filter').value;
       let list = trips.slice().sort((a, b) => b.timestamp - a.timestamp);
       if (f) list = list.filter(t => tripState(t).key === f);
@@ -3931,12 +3881,12 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
         const st = tripState(t);
         const open = t.id === openTripId;
         return `<div class="proj-card ${open ? 'open' : ''}" data-docid="${t.id}">
-          <div class="proj-head" data-trip-toggle="${escapeAttr(t.id)}" role="button" tabindex="0" aria-expanded="${open ? 'true' : 'false'}" title="Click to open trip details and print pass">
+          <div class="proj-head" onclick="toggleTrip('${t.id}')">
             <span class="proj-chevron">▶</span>
             <span class="proj-title">${escapeHtml(t.refNo)} <span style="color:var(--ink-soft); font-weight:400;">· ${formatDate(t.date)}${(t.expectedReturnDate || t.to) ? ' · return ' + escapeHtml(t.expectedReturnDate || t.to) : ''}</span></span>
             ${t.projectName ? `<span class="member-tag">${escapeHtml(t.projectName)}</span>` : ''}
-            <span style="font-size:12.5px; color:var(--ink-soft);">${t.passType==='repair'?'Client: '+escapeHtml(t.repairClient||'—'):st.safe+'/'+st.total+' back'}</span>
-            <span class="status-pill ${st.cls}">${t.passType==='repair'?escapeHtml(({ 'under-repair':'UNDER REPAIR','inspection':'INSPECTION PENDING','waiting-parts':'WAITING FOR PARTS','repair-complete':'REPAIR COMPLETED'}[t.repairStatus]||'UNDER REPAIR')):st.label}</span>
+            <span style="font-size:12.5px; color:var(--ink-soft);">${st.safe}/${st.total} back</span>
+            <span class="status-pill ${st.cls}">${st.label}</span>
           </div>
           ${open ? tripBody(t) : ''}
         </div>`;
@@ -3945,14 +3895,8 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
 
     // Auto-generated printable pass (Out pass = EXIT, In pass = ENTRY)
     function passDocHtml(t, kind) {
-      const isRepair = kind === 'repair' || t.passType === 'repair';
       const isIn = kind === 'in';
       const e = escapeHtml;
-      if(isRepair){
-        const statusLabels={'under-repair':'UNDER REPAIR','inspection':'RECEIVED — INSPECTION PENDING','waiting-parts':'WAITING FOR PARTS','repair-complete':'REPAIR COMPLETED'};
-        const cell=(label,value)=>`<td><span class="lbl">${label}</span><div class="val">${e(value||'—')}</div></td>`;
-        return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${e(t.refNo)} - Drone Repair Intake</title><style>body{font-family:Arial,Helvetica,sans-serif;color:#1E2321;margin:24px;font-size:12px}h1{font-size:19px;margin:4px 0;color:#1D3A2D}.org{font-size:12px;color:#B98D3E;font-weight:bold;letter-spacing:.6px}.top{display:flex;justify-content:space-between;gap:16px;margin-bottom:14px}.ref{text-align:right}.status{display:inline-block;padding:7px 12px;background:#fff2d8;color:#805400;border:1px solid #e7c879;border-radius:8px;font-weight:bold;margin:8px 0}table{width:100%;border-collapse:collapse;margin:10px 0}td,th{border:1px solid #29513F;padding:9px;text-align:left;vertical-align:top}.lbl{display:block;color:#5B6360;font-size:10px;margin-bottom:4px}.val{min-height:18px;font-size:12px;white-space:pre-wrap}.sign td{height:48px}@media print{body{margin:10mm}}</style></head><body><div class="top"><div><div class="org">PROTTHAPAN TECHNOLOGIES</div><h1>DRONE REPAIR INTAKE FORM</h1><div>Client-submitted drone received for repair</div></div><div class="ref"><b>Ref: ${e(t.refNo)}</b><br>${e(formatDate(t.repairReceivedDate||t.date))}</div></div><div class="status">${e(statusLabels[t.repairStatus]||'UNDER REPAIR')}</div><table><tr>${cell('Client / Company:',t.repairClient)}${cell('Contact:',t.repairContact)}</tr><tr>${cell('Drone make / model:',t.repairModel)}${cell('Serial number / asset ID:',t.repairSerial)}</tr><tr>${cell('Date received:',formatDate(t.repairReceivedDate||t.date))}${cell('Repair status:',statusLabels[t.repairStatus]||'UNDER REPAIR')}</tr><tr>${cell('Reported issue / repair required:',t.repairIssue)}</tr><tr>${cell('Condition / accessories received:',t.repairCondition)}</tr><tr>${cell('Additional damage / damaged parts:',t.droneDamage)}</tr></table><table><tr><th>Received by</th><th>Checked / approved by</th></tr><tr><td>${e(t.filledName||'')}<br>${e(t.filledDesignation||'')}</td><td>${e(t.approvedName||'')}<br>${e(t.approvedDesignation||'')}</td></tr><tr class="sign"><td>Signature</td><td>Client signature / stamp</td></tr></table></body></html>`;
-      }
       const items = t.items || [];
       const rows = [];
       const notBack = [];
@@ -4029,10 +3973,6 @@ ${notBack.map(n => `<tr><td>${e(n.desc)}</td><td>${e(n.carried)}</td><td>${e(n.b
       w.focus();
       setTimeout(() => w.print(), 400);
     }
-    window.printPass = printPass;
-    window.saveReturnCheck = saveReturnCheck;
-    window.markAllReturned = markAllReturned;
-    window.deleteTrip = deleteTrip;
 
     // ---- Attendance (Daily Log page): check-in / check-out, today board, monthly report ----
     // One record per member per day, stored in "attendance" with the id  memberId_YYYY-MM-DD.
@@ -5234,7 +5174,6 @@ async function sendPurchaseEmail(){
       document.getElementById('up2-date').value = todayStr();
       document.getElementById('blog-date').value = todayStr();
       document.getElementById('ps-date').value = todayStr();
-      if(document.getElementById('ps-repair-received'))document.getElementById('ps-repair-received').value=todayStr();
       document.getElementById('ps-entry-date').value = todayStr();
       document.getElementById('att-month').value = localDate().slice(0, 7);
       try {
@@ -5370,7 +5309,6 @@ async function sendPurchaseEmail(){
       document.getElementById('ps-add-item').addEventListener('click', psDraftAdd);
       document.getElementById('ps-load').addEventListener('click', loadDraftFromProject);
       document.getElementById('ps-submit').addEventListener('click', createTrip);
-      setPassType('out');
       document.getElementById('pass-filter').addEventListener('change', renderPassList);
       document.getElementById('sh-save').addEventListener('click', saveSheetSettings);
       document.getElementById('sh-test').addEventListener('click', sendSheetTest);
@@ -5870,7 +5808,7 @@ function stockBar(r){
       const items=psDraftItems
         .filter(it=>it.desc && it.desc.trim() && Number(it.qty)>0)
         .map(it=>({id:newId(),desc:it.desc.trim(),qty:Number(it.qty),remarks:(it.remarks||'').trim(),returnedQty:null,reason:''}));
-      if(!items.length && document.getElementById('ps-pass-type')?.value!=='repair'){err.textContent='Add at least one item.';return;}
+      if(!items.length){err.textContent='Add at least one item.';return;}
       if(!db){err.textContent='Firebase is not configured.';return;}
       // Read only fields that actually exist in this version of the form.
       // Optional/missing elements safely return an empty string.
@@ -5879,20 +5817,14 @@ function stockBar(r){
       const entryDate=v('ps-entry-date');
       const proj=projects.find(p=>p.id===v('ps-project'));
       const projName=v('ps-projname')||(proj&&proj.name)||'';
-      const passType=['in','repair'].includes(v('ps-pass-type'))?v('ps-pass-type'):'out';
+      const passType=v('ps-pass-type')==='in'?'in':'out';
       const droneDamage=v('ps-drone-damage');
-      const passDate=passType==='repair'?(v('ps-repair-received')||date):(passType==='in'&&entryDate?entryDate:date);
-      const refPrefix=passType==='repair'?'REPAIR-':passType==='in'?'IN-':'OUT-';
-      const refNo=refPrefix+passDate.replace(/-/g,'')+'-'+(Math.floor(Math.random()*900)+100);
-      const repairData=passType==='repair'?{repairClient:v('ps-repair-client'),repairContact:v('ps-repair-contact'),repairModel:v('ps-repair-model'),repairSerial:v('ps-repair-serial'),repairReceivedDate:passDate,repairStatus:v('ps-repair-status')||'under-repair',repairIssue:v('ps-repair-issue'),repairCondition:v('ps-repair-condition')} : {};
-      if(passType==='repair'&&!repairData.repairClient){err.textContent='Enter the client / company name for this repair intake.';return;}
-      if(passType==='repair'&&!repairData.repairModel&&!repairData.repairSerial){err.textContent='Enter the drone model or serial number.';return;}
-      if(passType==='repair'&&!items.length){items.push({id:newId(),desc:repairData.repairModel||'Drone received for repair',qty:1,remarks:repairData.repairSerial||'Client repair intake',returnedQty:null,reason:''});}
+      const refNo=(passType==='in'?'IN-':'OUT-')+(passType==='in'&&entryDate?entryDate:date).replace(/-/g,'')+'-'+(Math.floor(Math.random()*900)+100);
       try{
         const authenticatedUid=(auth&&auth.currentUser)?auth.currentUser.uid:currentUserUid;
         if(!authenticatedUid){err.textContent='Your Firebase session is not signed in. Please log in again.';return;}
         await db.collection('passes').add({
-          refNo,date,entryDate,passType,droneDamage,...repairData,projectId:proj?proj.id:null,projectName:projName,
+          refNo,date,entryDate,passType,droneDamage,projectId:proj?proj.id:null,projectName:projName,
           custodianName:v('ps-custodian'),custodianIdProof:v('ps-id-proof'),
           tripPurpose:v('ps-purpose'),expectedReturnDate:v('ps-return-date'),
           filledName:v('ps-filled-name')||currentName,filledDesignation:v('ps-filled-des'),
@@ -5901,13 +5833,11 @@ function stockBar(r){
           ownerUid:isAdmin?null:authenticatedUid,closedDate:null,timestamp:Date.now()
         });
         liveSync('Out Passes',SHEET_HEAD.out,items.map(it=>[refNo,date,projName,v('ps-custodian'),v('ps-purpose'),v('ps-return-date'),v('ps-id-proof'),it.desc,it.qty,it.remarks]));
-        ['ps-projname','ps-custodian','ps-id-proof','ps-purpose','ps-return-date','ps-drone-damage','ps-repair-client','ps-repair-contact','ps-repair-model','ps-repair-serial','ps-repair-issue','ps-repair-condition','ps-filled-name','ps-filled-des','ps-appr-name','ps-appr-des'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+        ['ps-projname','ps-custodian','ps-id-proof','ps-purpose','ps-return-date','ps-drone-damage','ps-filled-name','ps-filled-des','ps-appr-name','ps-appr-des'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
         const projectEl=document.getElementById('ps-project');if(projectEl)projectEl.value='';
         const entryDateEl=document.getElementById('ps-entry-date');if(entryDateEl)entryDateEl.value=todayStr();
-        const repairDateEl=document.getElementById('ps-repair-received');if(repairDateEl)repairDateEl.value=todayStr();
-        setPassType('out');
         psDraftItems=[{id:newId(),desc:'',qty:'',remarks:''}];renderDraftItems();
-        showToast((passType==='repair'?'Repair intake ':passType==='in'?'In pass ':'Out pass ')+refNo+' created');
+        showToast((passType==='in'?'In pass ':'Out pass ')+refNo+' created');
       }catch(e){
         console.error('[createTrip] FAILED:',e);
         err.textContent=(e&&e.code==='permission-denied')
