@@ -3897,6 +3897,28 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
     function renderPassList() {
       const el = document.getElementById('pass-list');
       if (!el) return;
+      // Use one delegated listener on the stable list container. This is more
+      // reliable than inline onclick attributes on cards rebuilt after every render.
+      if (!el.__ptTripClickBound) {
+        el.__ptTripClickBound = true;
+        el.addEventListener('click', function (event) {
+          const head = event.target.closest('[data-trip-toggle]');
+          if (!head || !el.contains(head)) return;
+          // Do not collapse/expand the card when a real form control or action is clicked.
+          if (event.target.closest('button, input, select, textarea, a, label')) return;
+          event.preventDefault();
+          const tripId = head.getAttribute('data-trip-toggle');
+          if (tripId) toggleTrip(tripId);
+        });
+        el.addEventListener('keydown', function (event) {
+          if (event.key !== 'Enter' && event.key !== ' ') return;
+          const head = event.target.closest('[data-trip-toggle]');
+          if (!head || !el.contains(head)) return;
+          event.preventDefault();
+          const tripId = head.getAttribute('data-trip-toggle');
+          if (tripId) toggleTrip(tripId);
+        });
+      }
       const f = document.getElementById('pass-filter').value;
       let list = trips.slice().sort((a, b) => b.timestamp - a.timestamp);
       if (f) list = list.filter(t => tripState(t).key === f);
@@ -3909,7 +3931,7 @@ html.pt-dark img,html.pt-dark video,html.pt-dark #pt-confetti,html.pt-dark .pt-k
         const st = tripState(t);
         const open = t.id === openTripId;
         return `<div class="proj-card ${open ? 'open' : ''}" data-docid="${t.id}">
-          <div class="proj-head" onclick="window.toggleTrip('${t.id}')">
+          <div class="proj-head" data-trip-toggle="${escapeAttr(t.id)}" role="button" tabindex="0" aria-expanded="${open ? 'true' : 'false'}" title="Click to open trip details and print pass">
             <span class="proj-chevron">▶</span>
             <span class="proj-title">${escapeHtml(t.refNo)} <span style="color:var(--ink-soft); font-weight:400;">· ${formatDate(t.date)}${(t.expectedReturnDate || t.to) ? ' · return ' + escapeHtml(t.expectedReturnDate || t.to) : ''}</span></span>
             ${t.projectName ? `<span class="member-tag">${escapeHtml(t.projectName)}</span>` : ''}
